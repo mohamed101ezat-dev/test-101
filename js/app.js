@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='271';
+const APP_VER='272';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -615,7 +615,7 @@ function dupGroups(){const m=new Map(),pm=new Map(),out=[],seen=new Set();
 function mergeCust(keepId,loseId){if(keepId===loseId)return;const k=getC(keepId),l=getC(loseId);if(!k||!l)return;
   S.invoices.forEach(r=>{if(r.cid===loseId){r.cid=keepId;r.cname=k.name;put('invoices',r)}});
   k.open=rd2((k.open||0)+(l.open||0));if(!k.phone&&l.phone)k.phone=l.phone;if(!k.addr&&l.addr)k.addr=l.addr;if(!k.note&&l.note)k.note=l.note;if(!k.due&&l.due)k.due=l.due;if(l.pfr)k.pfr={...l.pfr,...(k.pfr||{})};
-  put('customers',k);del('customers',loseId);reflow(keepId)}
+  S.files.forEach(x=>{if(x.sid===loseId){x.sid=keepId;put('files',x)}});put('customers',k);del('customers',loseId);reflow(keepId)}
 $('cuDup').addEventListener('click',e=>{const b=e.target.closest('[data-mg]');if(!b)return;const keepId=b.dataset.mg,g=dupGroups().find(gr=>gr.some(c=>c.id===keepId));if(!g)return;if(!ok2(b))return;g.forEach(c=>{if(c.id!==keepId)mergeCust(keepId,c.id)});drawCusts();drawDash()});
 function drawCusts(){
   if(selC&&getC(selC)){$('cuMain').classList.add('hide');$('cuDet').classList.remove('hide');drawDet();return}
@@ -628,6 +628,9 @@ function drawCusts(){
   {const dg=dupGroups();$('cuDup').classList.toggle('hide',!dg.length);if(dg.length)$('cuDup').innerHTML='<div class="card" style="border-color:var(--danger)"><b>⚠️ في عملاء بنفس الاسم أو الرقم</b><div class="mute" style="margin:2px 0 6px">يمكن يكونوا اتكتبوا غلط مرتين. اضغط «خليه الأساسي» على اللي عايز تحتفظ بيه، والباقي هيندمج فيه.</div>'+dg.map(g=>'<div style="margin:8px 0 4px;padding-top:8px;border-top:1px solid var(--line)"><b>'+esc(g.lab||g[0].name)+'</b></div>'+g.map(c=>'<div class="ro" style="color:var(--ink)"><span>'+esc(cSub(c,2))+' · <b class="num">'+bal(c)+'</b></span><button type="button" class="alt" data-mg="'+esc(c.id)+'">خليه الأساسي</button></div>').join('')).join('')+'</div>'}
   $('cuList').innerHTML=l.map(c=>`<div class="rec cr2" data-open="${c.id}"${agStyle(c)}>${av(c.name)}<div style="flex:1;min-width:0"><div class="cn">${esc(c.name)}</div><div class="mute">${esc(cSub(c,2))}</div></div><span class="cb ${bcls(c)} num">${bal(c)}</span></div>`).join('')||`<p class="mute">${S.customers.length?'مفيش عملاء بالاسم أو الرقم ده. امسح البحث.':'لسه مفيش عملاء. اضغط «➕ عميل» أو احفظ فاتورة باسم جديد.'}</p>`}
 
+let cuFK='أخرى';const CUK=[['📄','عقد / اتفاق'],['📐','مقاسات'],['🧾','فاتورة قديمة'],['💳','شيك / إيصال'],['🖼','أخرى']];
+const cuFiles=c=>S.files.filter(f=>f.sid===c.id).sort((a,b)=>b.ts-a.ts);
+function cuFilesHtml(c){const l=cuFiles(c);return`<div class="card" id="cuFiles"><div class="ro" style="color:var(--ink)"><b>📎 الصور والمستندات</b><small class="mute">${l.length?l.length+' مستند':''}</small></div><div class="spc" style="margin-top:6px">${CUK.map(([i,k])=>`<button type="button" data-cfk="${k}">${i} ${k}</button>`).join('')}</div><div class="spth">${l.map((f,i)=>`<button type="button" class="spt" data-cfv="${i}"><img src="${f.d}" alt=""><small>${esc(f.title||f.kind||'')}</small></button>`).join('')}</div><input type="file" id="cuFI" accept="image/*" multiple class="vh"></div>`}
 /* كشف العميل: بحث (مبلغ / صنف / كود / مرتجع) + سطر الأصناف تحت كل فاتورة */
 function itemsTxt(r){return r.type==='pay'?(r.pfWhy||''):(r.rows||[]).map(x=>(x.rt?'↩ ':'')+String(x.n||'').trim()+(x.c?'×'+f(x.c):'')).filter(Boolean).join('، ')}
 function rowMatch(x,q){q=q.trim();if(!q)return true;const r=x.r,vals=[val(r),pd(r),x.run].filter(v=>v!=null&&!isNaN(+v)).map(v=>Math.abs(+v));
@@ -664,13 +667,15 @@ function drawDet(){const c=getC(selC),l=rowsOf(c);
    ${per==='c'?`<div class="g2"><div><label>من</label><input type="date" id="pf" value="${pF}"></div><div><label>إلى</label><input type="date" id="pt" value="${pT}"></div></div>`:''}
    ${(()=>{const q=sumOf(c);return`<div class="sumg"><div><label>الحساب أول الفترة</label><b class="num">${bsg(q.open)}</b></div><div><label>فواتير الفترة (${q.n})</label><b class="num">${f(q.inv)}</b></div><div><label>المدفوع في الفترة</label><b class="num">${f(q.pay)}</b></div><div><label>الحساب آخر الفترة</label><b class="num">${bsg(q.end)}</b></div></div>`})()}
    <input id="cdq" placeholder="ابحث: مبلغ أو صنف أو كود أو مرتجع" title="المبلغ ممكن تقريبي: 700 · 600-800 · 7000+" value="${esc(cdq)}" style="margin:6px 0 2px"><div id="cdTbl">${tblHtml(c)}</div></div>
+  ${cuFilesHtml(c)}
   <div class="ro" style="justify-content:flex-start;gap:14px"><button class="lnk" data-arch="1">${c.arch?'↩ إلغاء الأرشفة':'📦 أرشفة'}</button><button class="lnk" data-delc="1" style="color:var(--danger)">🗑️ حذف العميل</button></div><div class="info" id="dcMsg" style="color:var(--danger)"></div>`;pwMount('cu')}
 function stmtImg(){const c=getC(selC),l=rowsOf(c),ss=sumOf(c);const lab=per==='c'?(pF||'...')+' إلى '+(pT||'...'):per==='mo'?moLab():PL[per];
   const cv=sheet({wm:1,name:c.name,sub:'كشف حساب',date:dshort(Date.now()),meta:['الفترة: '+(per==='w'||per==='m'?'آخر ':'')+lab].concat(l.some(({r})=>hasRet(r))?['↩ = الفاتورة فيها مرتجع']:[]),
     tables:[{th:['التاريخ','الكود','القيمة','المدفوع','الحساب'],w:[.2,.3,.17,.17,.16],rows:l.map(({r,run})=>[dshort(r.ts),stTag(r),r.type==='pay'?'-':f(val(r)),f(pd(r)),f(run)])}],
     sum:[['الحساب أول الفترة',bsg(ss.open)],['فواتير الفترة ('+ss.n+')',f(ss.inv)],['المدفوع في الفترة',f(ss.pay)],['الحساب آخر الفترة',bsg(ss.end),1]]});
   showImg(cv,'كشف-'+sfn(c.name)+'.png','كشف حساب '+c.name,true,c.phone,null)}
-$('t-cu').addEventListener('click',e=>{const t=e.target,d=t.dataset;
+$('t-cu').addEventListener('click',e=>{const t=e.target,d=t.dataset;  {const fk=t.closest('[data-cfk]');if(fk){cuFK=fk.dataset.cfk;$('cuFI').value='';$('cuFI').click();return}const fv=t.closest('[data-cfv]');if(fv){const c=getC(selC);if(c)spView(cuFiles(c),+fv.dataset.cfv,CUK);return}}
+
   if(d.m){if(d.m==='add'){$('cuAdd').classList.toggle('hide');return}cuMode=d.m;cuSort=d.m==='all'||d.m==='arch'?'name':d.m==='idle'?'last':'bal';$('cuSort').value=cuSort;document.querySelectorAll('#cuMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===d.m));drawCusts();return}
   const op=t.closest('[data-open]');if(op){selC=op.dataset.open;delete PW.cu;per='all';cdq='';pMo=0;editOpen=false;cuEd=false;cuPm=false;drawCusts();window.scrollTo(0,0);return}
   if(d.tg){if(d.tg==='ed'){cuEd=!cuEd;$('cdEdit').classList.toggle('hide',!cuEd)}else{cuPm=!cuPm;delete PW.cu;drawDet();const i=document.querySelector('#cuDet [data-pw="cu"] .spa');if(i)i.focus()}return}
@@ -686,11 +691,11 @@ $('t-cu').addEventListener('click',e=>{const t=e.target,d=t.dataset;
   if(d.rem){openRem(getC(selC));return}
   if(d.stimg){stmtImg();return}
   if(d.arch){const c=getC(selC);if(!c)return;c.arch=c.arch?false:true;if(!c.arch)delete c.arch;put('customers',c);selC=null;drawCusts();toast(c.arch?'اتأرشف: مش هيظهر في القايمة':'رجع للقايمة');return}
-  if(d.delc){const c=getC(selC);if(ledger(c).length){$('dcMsg').textContent='العميل عنده فواتير. امسحها الأول أو سيبه.';return}
+  if(d.delc){const c=getC(selC);if(ledger(c).length){$('dcMsg').textContent='العميل عنده فواتير. امسحها الأول أو سيبه.';return}if(cuFiles(c).length){$('dcMsg').textContent='العميل عنده صور. امسحها الأول أو سيبه.';return}
     if(!ok2(t))return;del('customers',c.id);selC=null;drawCusts();return}
   if(d.pay){const c=getC(selC),r=c&&pwRecord('cu',c);if(!r){$('cdMsg').textContent='اكتب مبلغ الدفعة';return}
     S.invoices.push(r);put('invoices',r);lastSaved={id:r.id,at:Date.now(),dueBak:payDone(c,r)};delete PW.cu;cuPm=false;drawDet();showRec(r,false,'تم تسجيل الدفعة ✓')}});
-$('t-cu').addEventListener('change',e=>{if(e.target.id==='cuSort'){cuSort=e.target.value;drawCusts()}else if(e.target.dataset.f==='phone'){const c=getC(selC);if(c){e.target.value=normPhones(e.target.value);c.phone=e.target.value;DV++;touch('customers',c)}}else if(e.target.id==='cuIdle'){cuIdle=+e.target.value||60;drawCusts()}else if(e.target.id==='cdMo'){const v=e.target.value;if(v){const[y,m]=v.split('-').map(Number);pMo=new Date(y,m-1,1).getTime();drawDet()}}else if(e.target.id==='pf'){pF=e.target.value;drawDet()}else if(e.target.id==='pt'){pT=e.target.value;drawDet()}});
+$('t-cu').addEventListener('change',e=>{if(e.target.id==='cuFI'){const c=getC(selC),fs=[...e.target.files];if(!c||!fs.length)return;(async()=>{try{for(const file of fs){const d=await spShrink(file),o={id:uid(),sid:c.id,kind:cuFK,ts:Date.now(),d};S.files.push(o);put('files',o)}toast('✅ اتحفظ '+(fs.length>1?fs.length+' صور':'الصورة')+' (أبيض وأسود)');drawDet()}catch(er){toast('⚠️ معرفتش أحفظ الصورة')}})();return}if(e.target.id==='cuSort'){cuSort=e.target.value;drawCusts()}else if(e.target.dataset.f==='phone'){const c=getC(selC);if(c){e.target.value=normPhones(e.target.value);c.phone=e.target.value;DV++;touch('customers',c)}}else if(e.target.id==='cuIdle'){cuIdle=+e.target.value||60;drawCusts()}else if(e.target.id==='cdMo'){const v=e.target.value;if(v){const[y,m]=v.split('-').map(Number);pMo=new Date(y,m-1,1).getTime();drawDet()}}else if(e.target.id==='pf'){pF=e.target.value;drawDet()}else if(e.target.id==='pt'){pT=e.target.value;drawDet()}});
 $('cuDet').addEventListener('input',e=>{if(e.target.id!=='cdq')return;cdq=e.target.value;const c=getC(selC);if(c)$('cdTbl').innerHTML=tblHtml(c)});
 $('cuDet').addEventListener('input',e=>{const t=e.target,c=getC(selC);if(!c||!t.dataset.f)return;const k=t.dataset.f,v=k==='open'||k==='lim'?nv(t.value):t.value.trim(),mm=$('cdMsg');
   if(k==='name'){if(!v||S.customers.some(x=>x.id!==c.id&&nkey(x.name)===nkey(v))){if(mm)mm.textContent=!v?'الاسم لا يمكن أن يكون فاضي':'الاسم ده موجود قبل كده';return}if(mm)mm.textContent=''}
@@ -1849,7 +1854,7 @@ $('supStm').onclick=()=>{const s=spCur();if(!s)return;const g=spAge(s);if(!g.l.l
 const FDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,no)=>{const r=indexedDB.open('tabakha-files',1);r.onupgradeneeded=()=>{r.result.createObjectStore('f',{keyPath:'id'}).createIndex('sid','sid')};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
   const run=async(mode,fn)=>{const d=await open();return new Promise((ok,no)=>{const t=d.transaction('f',mode);let q;try{q=fn(t.objectStore('f'))}catch(e){no(e);return}t.oncomplete=()=>ok(q&&q.result);t.onerror=t.onabort=()=>no(t.error)})};
   return{all:()=>run('readonly',s=>s.getAll()),del:id=>run('readwrite',s=>s.delete(id))}})();
-let spFl=[],spPend=[],spFK2='فاتورة',spVl=[],spVi=0;
+let spFl=[],spPend=[],spFK2='فاتورة',spVl=[],spVi=0,spVK=null;const spAfter=()=>{if(selC&&getC(selC)&&!$('cuDet').classList.contains('hide'))drawDet()};
 const SPK=[['📄','فاتورة'],['🧾','كشف حساب'],['💵','إيصال دفع'],['📋','عرض سعر'],['🖼','أخرى']];
 /* رمادي + تمطيط التباين (الورقة تبقى بيضا والكتابة سودا) + JPEG لحد ما الحجم يبقى صغير */
 async function spShrink(file){const bmp=await createImageBitmap(file);let side=1400,q=.5,url='';
@@ -1876,20 +1881,20 @@ async function spMigFiles(){try{const old=await FDB.all();for(const r of old){if
 function spViewShow(){const fl=spVl[spVi],v=$('spView');if(!fl){v.classList.add('hide');return}
   $('svP').src=fl.d;v.querySelector('#svI').classList.remove('z');$('svT').value=fl.title||'';
   const p=fl.pid&&S.purchases.find(x=>x.id===fl.pid);$('svM').textContent=dshort(fl.ts)+(p?' · '+(p.type==='pay'?'دفعة ':'شراء ')+f(p.amt):'')+(spVl.length>1?' · '+(spVi+1)+'/'+spVl.length:'');
-  $('svK').innerHTML=SPK.map(([i,k])=>`<button type="button" data-sk="${k}"${k===fl.kind?' class="on"':''}>${i} ${k}</button>`).join('');$('svPrev').disabled=$('svNext').disabled=spVl.length<2;disarm($('svDel'));$('svDel').textContent='🗑️ حذف'}
-function spView(list,i){spVl=list;spVi=i;let v=$('spView');
+  $('svK').innerHTML=(spVK||SPK).map(([i,k])=>`<button type="button" data-sk="${k}"${k===fl.kind?' class="on"':''}>${i} ${k}</button>`).join('');$('svPrev').disabled=$('svNext').disabled=spVl.length<2;disarm($('svDel'));$('svDel').textContent='🗑️ حذف'}
+function spView(list,i,kinds){spVl=list;spVi=i;spVK=kinds||null;let v=$('spView');
   if(!v){v=document.createElement('div');v.id='spView';v.className='spv-ov hide';
     v.innerHTML='<div class="spv-top"><button type="button" class="alt" id="svX" aria-label="إغلاق">✕</button><div class="spv-tt"><input id="svT" placeholder="عنوان (اختياري)" aria-label="عنوان المستند" autocomplete="off"><small id="svM" class="mute"></small></div></div><div class="spc" id="svK" style="padding:0 8px"></div><div class="spv-img" id="svI"><img id="svP" alt=""></div><div class="spv-bot"><button type="button" class="alt" id="svPrev" aria-label="اللي قبله">›</button><button type="button" class="alt" id="svSh">📤 مشاركة</button><button type="button" class="alt b-red" id="svDel">🗑️ حذف</button><button type="button" class="alt" id="svNext" aria-label="اللي بعده">‹</button></div>';
     document.body.appendChild(v);
     $('svX').onclick=()=>v.classList.add('hide');
     $('svI').onclick=e=>{const c=$('svI'),im=$('svP');if(c.classList.contains('z')){c.classList.remove('z');return}const r=im.getBoundingClientRect(),fx=(e.clientX-r.left)/Math.max(1,r.width),fy=(e.clientY-r.top)/Math.max(1,r.height);c.classList.add('z');c.scrollLeft=Math.max(0,fx*im.offsetWidth-c.clientWidth/2);c.scrollTop=Math.max(0,fy*im.offsetHeight-c.clientHeight/2)};
     $('svPrev').onclick=()=>{spVi=(spVi-1+spVl.length)%spVl.length;spViewShow()};$('svNext').onclick=()=>{spVi=(spVi+1)%spVl.length;spViewShow()};
-    $('svT').onchange=()=>{const x=spVl[spVi];if(!x)return;x.title=$('svT').value.trim();if(!x.title)delete x.title;put('files',x);spFilesDraw()};
-    $('svK').onclick=e=>{const b=e.target.closest('[data-sk]'),x=spVl[spVi];if(!b||!x)return;x.kind=b.dataset.sk;put('files',x);spViewShow();spFilesDraw()};
+    $('svT').onchange=()=>{const x=spVl[spVi];if(!x)return;x.title=$('svT').value.trim();if(!x.title)delete x.title;put('files',x);spFilesDraw();spAfter()};
+    $('svK').onclick=e=>{const b=e.target.closest('[data-sk]'),x=spVl[spVi];if(!b||!x)return;x.kind=b.dataset.sk;put('files',x);spViewShow();spFilesDraw();spAfter()};
     $('svSh').onclick=async()=>{const x=spVl[spVi];if(!x)return;const s=spCur(),nm=((s&&s.name)||'مستند')+' - '+(x.title||x.kind||'صورة')+'.jpg',file=new File([dataBlob(x.d)],nm,{type:'image/jpeg'});
       try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:nm});return}}catch(e){if(e&&e.name==='AbortError')return}
       const a=document.createElement('a');a.href=x.d;a.download=nm;document.body.appendChild(a);a.click();a.remove()};
-    $('svDel').onclick=()=>{const x=spVl[spVi];if(!x||!ok2($('svDel')))return;del('files',x.id);spLoadF(x.sid);spVl=spVl.filter(y=>y.id!==x.id);spFilesDraw();drawSup();if(!spVl.length){v.classList.add('hide');return}spVi=Math.min(spVi,spVl.length-1);spViewShow()}}
+    $('svDel').onclick=()=>{const x=spVl[spVi];if(!x||!ok2($('svDel')))return;del('files',x.id);spLoadF(x.sid);spVl=spVl.filter(y=>y.id!==x.id);spFilesDraw();drawSup();spAfter();if(!spVl.length){v.classList.add('hide');return}spVi=Math.min(spVi,spVl.length-1);spViewShow()}}
   v.classList.remove('hide');spViewShow()}
 /* المواعيد: كل شراء لسه عليه فلوس وميعاده، ودوس على أي ميعاد تغيّره */
 function spSchedDraw(g){const now=Date.now(),l=g.l.filter(x=>x.type==='buy'&&g.rem[x.id]>0).sort((a,b)=>(a.due||9e15)-(b.due||9e15)||a.ts-b.ts).slice(0,5);

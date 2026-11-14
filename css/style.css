@@ -1361,3 +1361,7 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 
 /* v271: سطر تفاصيل العميل في القايمة سطر واحد */
 #cuList .cr2 .mute{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v272: شريط أدوات CutList بيلف بدل ما يتسحب، وزراير صغيرة مساحة لمسها أكبر */
+html #t-cl .tool{flex-wrap:wrap!important;overflow:visible!important;justify-content:center}
+#cimpOpen,#catMgrBtn,#moreBtn,#clear{min-height:32px}
