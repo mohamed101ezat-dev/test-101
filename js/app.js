@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='268';
+const APP_VER='269';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -28,7 +28,7 @@ function stamp(t){const d=new Date(t);let h=d.getHours();const ap=h>=12?'م':'ص
 const dshort=t=>{const d=new Date(t);return `${d.getFullYear()}/${two(d.getMonth()+1)}/${two(d.getDate())}`};
 function lget(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return[]}}
 /* ===== مكان الحفظ: الفواتير والعملاء والأصناف في IndexedDB (مساحة كبيرة)، والإعدادات الصغيرة في localStorage ===== */
-const BIG=['items','customers','invoices','cats','quotes','expenses','suppliers','purchases','stock'],BIGS=new Set(BIG),IDBN='tabakha-data';
+const BIG=['items','customers','invoices','cats','quotes','expenses','suppliers','purchases','stock','files'],BIGS=new Set(BIG),IDBN='tabakha-data';
 let dataMode='ls',dataReady=false,ddb=null,instOff=false,pend={},pendQ=false,lsWarned=0;
 const lsWarn=()=>{if(Date.now()-lsWarned>30000){lsWarned=Date.now();try{toast('⚠ الحفظ على الجهاز منفعش (المساحة اتملت). احفظ نسخة احتياطية حالاً.')}catch(_){}}};
 function lset(k,x){if(instOff)return;
@@ -56,7 +56,7 @@ const nkey=t=>nm(t).replace(/\s+/g,' ').trim();
 const findCust=n=>{const k=nkey(n);return k?S.customers.find(c=>nkey(c.name)===k)||null:null};
 const sfail=()=>{$('stor').textContent='تنبيه: الحفظ على السحابة منفعش، وبياناتك محفوظة على الجهاز ده.'};
 const sf=fn=>{try{const p=fn();if(p&&p.catch)p.catch(sfail)}catch(e){sfail()}};
-const S={items:[],customers:[],invoices:[],cats:[],quotes:[],expenses:[],suppliers:[],purchases:[],stock:[]};let db=null;
+const S={items:[],customers:[],invoices:[],cats:[],quotes:[],expenses:[],suppliers:[],purchases:[],stock:[],files:[]};let db=null;
 
 /* ---------- حساب العميل (يُحسب دائماً من السجل) ---------- */
 const val=r=>r.type==='pay'?0:rd2(r.total-r.prev),pd=r=>r.type==='pay'?r.amount:r.paid;
@@ -107,7 +107,7 @@ function fixDupCodes(){const seen=new Set(),fix=[];
   fix.forEach(([r,k])=>{const old=+r[k];r[k]=nextCode();r.oc=(r.oc||[]).concat(old);r.u=t;noteCode(r);pushDoc('invoices',r);msg.push(old+' ← '+r[k]+' ('+r.cname+')')});
   DV++;lset('invoices',S.invoices);setTimeout(()=>{try{toast('كود اتكرر على جهازين واتصلح: '+msg.join('، '))}catch(e){}},800);return fix.length}
 function syncNames(){const cm=new Map(S.customers.map(c=>[c.id,c])),l=S.invoices.filter(r=>{const c=cm.get(r.cid);return c&&c.name&&r.cname!==c.name});if(!l.length)return;DV++;const n=Date.now();l.forEach(r=>{r.cname=cm.get(r.cid).name;r.u=n;pushDoc('invoices',r)});lset('invoices',S.invoices)}
-function loadFrom(get){DV++;const A=k=>{const v=get(k);return Array.isArray(v)?v:[]};S.items=A('items');S.customers=A('customers');S.invoices=A('invoices');S.cats=A('cats').filter(c=>c&&c.id&&c.name);S.quotes=A('quotes').filter(q=>q&&q.id);S.expenses=A('expenses').filter(x=>x&&x.id);S.suppliers=A('suppliers').filter(x=>x&&x.id);S.purchases=A('purchases').filter(x=>x&&x.id);S.stock=A('stock').filter(x=>x&&x.id);dataReady=true;migrate()}
+function loadFrom(get){DV++;const A=k=>{const v=get(k);return Array.isArray(v)?v:[]};S.items=A('items');S.customers=A('customers');S.invoices=A('invoices');S.cats=A('cats').filter(c=>c&&c.id&&c.name);S.quotes=A('quotes').filter(q=>q&&q.id);S.expenses=A('expenses').filter(x=>x&&x.id);S.suppliers=A('suppliers').filter(x=>x&&x.id);S.purchases=A('purchases').filter(x=>x&&x.id);S.stock=A('stock').filter(x=>x&&x.id);S.files=A('files').filter(x=>x&&x.id);dataReady=true;migrate()}
 function loadLocal(){loadFrom(lget)}
 let migNote='';
 const lsBigBytes=()=>{let n=0;try{BIG.forEach(k=>{const v=localStorage.getItem(k);if(v)n+=v.length*2})}catch(e){}return n};
@@ -148,11 +148,11 @@ async function loadCloud(){const d=FBDB;
     const fullAt=+lsv('fullAt','0'),age=Date.now()-fullAt,full=!fullAt||age>FULL_MAX||(lsv('cntBad','')==='1'&&age>FULL_BAD);let cur={},at={};if(!full)try{cur=JSON.parse(lsv('syncCur','{}'))||{};at=JSON.parse(lsv('syncAt','{}'))||{}}catch(e){}const nc={...cur},na={...at},t0=Date.now();
     /* الهامش بيتقرا مرة واحدة بعد آخر تغيير بس، مش كل مزامنة، عشان رفع كبير ما يتقراش كل مرة */
     const rdc=async c=>{const m=cur[c]||0,r=(await tmo(d.collection(c).get(full?null:Math.max(0,(at[c]||0)>m+SYNC_LAP?m:m-SYNC_LAP)),15000)).docs||[];r.forEach(x=>{if(x.su>(nc[c]||0))nc[c]=x.su});na[c]=t0;return r.map(x=>x.data())};
-    try{await tmo(flushDel(d),20000)}catch(e){}const pdl=new Set(lget('pdel').map(x=>x.k+':'+x.id));const [ri0,rc0,rv0,rt0,rk0,rq0,rx0,rs0,rp0,ro0]=await Promise.all([rdc('items'),rdc('customers'),rdc('invoices'),rdc('deleted').catch(()=>[]),rdc('cats').catch(()=>[]),rdc('quotes').catch(()=>[]),rdc('expenses').catch(()=>[]),rdc('suppliers').catch(()=>[]),rdc('purchases').catch(()=>[]),rdc('stock').catch(()=>[])]);
+    try{await tmo(flushDel(d),20000)}catch(e){}const pdl=new Set(lget('pdel').map(x=>x.k+':'+x.id));const [ri0,rc0,rv0,rt0,rk0,rq0,rx0,rs0,rp0,ro0,rf0]=await Promise.all([rdc('items'),rdc('customers'),rdc('invoices'),rdc('deleted').catch(()=>[]),rdc('cats').catch(()=>[]),rdc('quotes').catch(()=>[]),rdc('expenses').catch(()=>[]),rdc('suppliers').catch(()=>[]),rdc('purchases').catch(()=>[]),rdc('stock').catch(()=>[]),rdc('files').catch(()=>[])]);
     const tmb=new Map(rt0.map(t=>[t.k+':'+t.tid,t.at||0])),dead=(k,x)=>{const t=tmb.get(k+':'+x.id);return t!==undefined&&(x.u||0)<=t};
     const fl=(k,a)=>a.filter(x=>!pdl.has(k+':'+x.id)&&!dead(k,x));
-    ['items','customers','invoices','cats','quotes','expenses','suppliers','purchases','stock'].forEach(k=>{const n=S[k].length;S[k]=S[k].filter(x=>!dead(k,x));if(S[k].length!==n){DV++;lset(k,S[k])}});
-    [['items',fl('items',ri0)],['customers',fl('customers',rc0)],['invoices',fl('invoices',rv0)],['cats',fl('cats',rk0)],['quotes',fl('quotes',rq0)],['expenses',fl('expenses',rx0)],['suppliers',fl('suppliers',rs0)],['purchases',fl('purchases',rp0)],['stock',fl('stock',ro0)]].forEach(([k,r])=>mergeK(k,r,full).up.forEach(o=>pupMark(k,o)));
+    ['items','customers','invoices','cats','quotes','expenses','suppliers','purchases','stock','files'].forEach(k=>{const n=S[k].length;S[k]=S[k].filter(x=>!dead(k,x));if(S[k].length!==n){DV++;lset(k,S[k])}});
+    [['items',fl('items',ri0)],['customers',fl('customers',rc0)],['invoices',fl('invoices',rv0)],['cats',fl('cats',rk0)],['quotes',fl('quotes',rq0)],['expenses',fl('expenses',rx0)],['suppliers',fl('suppliers',rs0)],['purchases',fl('purchases',rp0)],['stock',fl('stock',ro0)],['files',fl('files',rf0)]].forEach(([k,r])=>mergeK(k,r,full).up.forEach(o=>pupMark(k,o)));
     migrate(true);db=d;
     let pushOk=true;try{await tmo(pushPending(d),20000)}catch(e){pushOk=false}
     try{localStorage.setItem('syncCur',JSON.stringify(nc));localStorage.setItem('syncAt',JSON.stringify(na));if(full){localStorage.setItem('fullAt',String(Date.now()));localStorage.setItem('cntAt',String(Date.now()));localStorage.removeItem('cntBad')}}catch(e){}
@@ -1237,7 +1237,7 @@ async function deadIds(){const s=new Set(lget('pdel').map(x=>x.k+':'+x.id)),d=FB
   return s}
 async function restoreData(d){if(!d||!Array.isArray(d.customers)||!Array.isArray(d.invoices))throw new Error('bad');
   const dd=await deadIds(),fresh=!S.invoices.length&&!S.customers.length;
-  const up=[];[['items',Array.isArray(d.items)?d.items:[]],['customers',d.customers],['invoices',d.invoices],['cats',Array.isArray(d.cats)?d.cats:[]],['quotes',Array.isArray(d.quotes)?d.quotes:[]],['expenses',Array.isArray(d.expenses)?d.expenses:[]],['suppliers',Array.isArray(d.suppliers)?d.suppliers:[]],['purchases',Array.isArray(d.purchases)?d.purchases:[]],['stock',Array.isArray(d.stock)?d.stock:[]]].forEach(([k,r0])=>{const have=new Set(S[k].map(x=>x.id)),r=r0.filter(x=>have.has(x.id)||!dd.has(k+':'+x.id));r.forEach(x=>{if(!have.has(x.id))x.u=Date.now()});mergeK(k,r,false).took.forEach(o=>up.push([k,o]))});
+  const up=[];[['items',Array.isArray(d.items)?d.items:[]],['customers',d.customers],['invoices',d.invoices],['cats',Array.isArray(d.cats)?d.cats:[]],['quotes',Array.isArray(d.quotes)?d.quotes:[]],['expenses',Array.isArray(d.expenses)?d.expenses:[]],['suppliers',Array.isArray(d.suppliers)?d.suppliers:[]],['purchases',Array.isArray(d.purchases)?d.purchases:[]],['stock',Array.isArray(d.stock)?d.stock:[]],['files',Array.isArray(d.files)?d.files:[]]].forEach(([k,r0])=>{const have=new Set(S[k].map(x=>x.id)),r=r0.filter(x=>have.has(x.id)||!dd.has(k+':'+x.id));r.forEach(x=>{if(!have.has(x.id))x.u=Date.now()});mergeK(k,r,false).took.forEach(o=>up.push([k,o]))});
   migrate();up.forEach(([k,o])=>pushDoc(k,o));reflowAll();
   /* v189: برنامج لسه فاضي (موبايل جديد) = إعدادات النسخة كلها بترجع. لو عليه شغل، الناقص بس واللي متظبط على الجهاز بيفضل زي ما هو */
   let sn=0;try{if(d.settings&&typeof d.settings==='object')SET_K.forEach(k=>{if(typeof d.settings[k]==='string'&&d.settings[k]!==lsv(k,null)&&(fresh||lsv(k,null)===null)){localStorage.setItem(k,d.settings[k]);sn++}})}catch(e){}
@@ -1261,7 +1261,7 @@ async function gunzip(enc,data){if(enc!=='gz')return data;const b=atob(data),u=n
   return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text()}
 let cbBusy=false;
 async function cloudBackup(){if(!FBDB)throw new Error('offline');if(cbBusy)return false;cbBusy=true;
-  try{const day=dayKey(Date.now()),payload=JSON.stringify({app:'ElTabakha',v:1,at:Date.now(),items:S.items,customers:S.customers,invoices:S.invoices,cats:S.cats,quotes:S.quotes,expenses:S.expenses,suppliers:S.suppliers,purchases:S.purchases,stock:S.stock}),{enc,data}=await gzip(payload),CH=400000,parts=Math.max(1,Math.ceil(data.length/CH));
+  try{const day=dayKey(Date.now()),payload=JSON.stringify({app:'ElTabakha',v:1,at:Date.now(),items:S.items,customers:S.customers,invoices:S.invoices,cats:S.cats,quotes:S.quotes,expenses:S.expenses,suppliers:S.suppliers,purchases:S.purchases,stock:S.stock,files:S.files}),{enc,data}=await gzip(payload),CH=400000,parts=Math.max(1,Math.ceil(data.length/CH));
     for(let i=0;i<parts;i++)await tmo(FBDB.collection('backups_data').doc(day+'_'+i).set({day,i,parts,enc,data:data.slice(i*CH,(i+1)*CH)}),20000);
     await tmo(FBDB.collection('backups_meta').doc(day).set({id:day,day,at:Date.now(),parts,enc,size:payload.length,customers:S.customers.length,invoices:S.invoices.length,items:S.items.length}),15000);
     try{localStorage.setItem('cbDay',day);localStorage.setItem('cbAt',String(Date.now()))}catch(e){}bkInfo();bkBan();
@@ -1729,13 +1729,13 @@ function supTot(){return rd2(S.suppliers.reduce((a,s)=>a+supBal(s),0))}
 function supOv(){return rd2(S.suppliers.reduce((a,s)=>a+spAge(s).ov,0))}
 const spChips=(arr,on,att)=>arr.map(([v,t])=>`<button type="button" ${att}="${esc(String(v))}"${String(v)===String(on)?' class="on"':''}>${t}</button>`).join('');
 function supOpen(id){supCur=id;$('supHome').classList.toggle('hide',!!id);$('supOne').classList.toggle('hide',!id);$('supMsg').textContent='';$('spMsg').textContent='';
-  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;spFl.forEach(f=>URL.revokeObjectURL(f.url));spFl=[];spPend=[];$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
+  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;spFl=[];spPend=[];$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
   drawSup();window.scrollTo(0,0)}
 function spMonth(a){const d=new Date(a),x=new Date(d.getFullYear(),d.getMonth(),1).getTime();return[x,new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
 function drawSup(){const s=S.suppliers.find(x=>x.id===supCur);
   if(!s){if(supCur){supOpen(null);return}spHome();return}
   spOne(s)}
-function spHome(){const now=Date.now(),[a,b]=spMonth(now),pm=puIn(a,b),q=$('supQ').value.trim();
+let spMig=0;function spHome(){if(!spMig){spMig=1;spMigFiles().then(()=>{if(!supCur)drawSup()})}const now=Date.now(),[a,b]=spMonth(now),pm=puIn(a,b),q=$('supQ').value.trim();
   $('supTot').textContent=f(supTot());{const o=supOv();$('spkOv').textContent=f(o);$('spkOv').parentNode.classList.toggle('bad',o>0)}$('spkMo').textContent=f(pm.buy);$('spkPm').textContent=f(pm.pay);
   const info=S.suppliers.map(s=>({s,g:spAge(s)})),cats=SPC.filter(c=>S.suppliers.some(s=>s.cat===c[0]));
   $('supFil').innerHTML=spChips([['all','الكل'],['owe','عليّا فلوس'],['late','⏰ متأخر'],...cats.map(c=>[c[0],c[1]+' '+c[2]])],spFil,'data-sf');
@@ -1745,10 +1745,9 @@ function spHome(){const now=Date.now(),[a,b]=spMonth(now),pm=puIn(a,b),q=$('supQ
   l.sort((x,y)=>spSort==='name'?x.s.name.localeCompare(y.s.name,'ar'):spSort==='recent'?(y.g.last-x.g.last)||x.s.name.localeCompare(y.s.name,'ar'):(y.g.bal-x.g.bal)||x.s.name.localeCompare(y.s.name,'ar'));
   {const nx=$('spkNext'),od=info.filter(o=>o.g.ov>0).sort((x,y)=>y.g.ov-x.g.ov)[0],up=info.filter(o=>o.g.nx).sort((x,y)=>x.g.nx.ts-y.g.nx.ts)[0];
     if(od){nx.className='spdue bad';nx.textContent='⏰ متأخر: '+od.s.name+' · '+f(od.g.ov);nx.dataset.sup=od.s.id}else if(up){nx.className='spdue';nx.textContent='⏰ أقرب ميعاد: '+up.s.name+' · '+f(up.g.nx.amt)+' '+spIn(Math.ceil((up.g.nx.ts-now)/SPDAY));nx.dataset.sup=up.s.id}else nx.className='spdue hide'}
-  setTimeout(()=>S.suppliers.forEach(s=>FDB.n(s.id).then(n=>{const r=n&&$('supRows').querySelector('[data-sup="'+s.id+'"] .spd2');if(r&&!r.dataset.fc){r.dataset.fc=1;r.insertAdjacentHTML('beforeend',' · 📎 '+n)}}).catch(()=>{})),0);
   $('supRows').innerHTML=l.length?l.map(({s,g})=>{const w=waNum(s.phone),t=spTel(s.phone),dd=g.nx?Math.ceil((g.nx.ts-now)/SPDAY):0;
     const bd=g.ov>0?`<span class="tag dr">⏰ متأخر ${f(g.ov)}</span>`:g.nx&&dd<=7?`<span class="tag">⏰ ${spIn(dd)}</span>`:'';
-    return`<div class="sprow" data-sup="${esc(s.id)}"><span class="spi">${spIc(s)}</span><div class="spm"><div class="spn">${esc(s.name)}</div><div class="spd2">${g.l.length?'آخر حركة '+spAgo(g.last)+' · '+(g.l.length===1?'حركة':g.l.length===2?'حركتين':g.l.length<=10?g.l.length+' حركات':g.l.length+' حركة'):'لسه مفيش حركات'} ${bd}</div></div><div class="spv num ${g.bal>0?'dr':g.bal<0?'ok':'mu'}">${g.bal<0?'له '+f(-g.bal):f(g.bal)}</div><span class="spx">${t?`<a href="tel:${esc(t)}" aria-label="اتصل">📞</a>`:''}${w?`<a href="https://wa.me/${w}" target="_blank" rel="noopener" aria-label="واتساب"><i class="wai"></i></a>`:''}</span></div>`}).join(''):`<div class="card mute">${S.suppliers.length?'مفيش مورد بالشكل ده.':'لسه مفيش موردين. اكتب اسم مورد تحت.'}</div>`}
+    return`<div class="sprow" data-sup="${esc(s.id)}"><span class="spi">${spIc(s)}</span><div class="spm"><div class="spn">${esc(s.name)}</div><div class="spd2">${g.l.length?'آخر حركة '+spAgo(g.last)+' · '+(g.l.length===1?'حركة':g.l.length===2?'حركتين':g.l.length<=10?g.l.length+' حركات':g.l.length+' حركة'):'لسه مفيش حركات'}${S.files.some(q=>q.sid===s.id)?' · 📎 '+S.files.filter(q=>q.sid===s.id).length:''} ${bd}</div></div><div class="spv num ${g.bal>0?'dr':g.bal<0?'ok':'mu'}">${g.bal<0?'له '+f(-g.bal):f(g.bal)}</div><span class="spx">${t?`<a href="tel:${esc(t)}" aria-label="اتصل">📞</a>`:''}${w?`<a href="https://wa.me/${w}" target="_blank" rel="noopener" aria-label="واتساب"><i class="wai"></i></a>`:''}</span></div>`}).join(''):`<div class="card mute">${S.suppliers.length?'مفيش مورد بالشكل ده.':'لسه مفيش موردين. اكتب اسم مورد تحت.'}</div>`}
 function spOne(s){const now=Date.now(),g=spAge(s);
   $('supNm').textContent=s.name;$('supCatB').textContent=s.cat&&spCat(s.cat)?spCat(s.cat)[1]+' '+spCat(s.cat)[2]:'';
   $('supB').textContent=f(Math.abs(g.bal));$('supB').className='num '+(g.bal>0?'dr':g.bal<0?'ok':'');$('supBL').textContent=g.bal<0?'ليك عنده':'عليك';
@@ -1816,7 +1815,7 @@ $('spAdd').onclick=()=>{const s=S.suppliers.find(x=>x.id===supCur);if(!s)return;
     if(spDue==='paid')add.push({id:uid(),sid:s.id,ts,type:'pay',amt,how:'كاش',note:'سداد '+(o.note||'شراء'),pf:o.id});else if(spDue>0)o.due=ts+spDue*SPDAY}
   else o.how=spHow;
   add.forEach(x=>{S.purchases.push(x);put('purchases',x)});
-  if(spPend.length){const pend=spPend;spPend=[];$('spAttN').textContent='';(async()=>{try{for(const b of pend)await FDB.add({id:uid(),sid:s.id,pid:o.id,kind:buy?'فاتورة':'إيصال دفع',ts,blob:b});await spLoadF(s.id);if(supCur===s.id)drawSup()}catch(e){$('spMsg').textContent='⚠️ الحركة اتسجلت بس الصورة معرفتش أحفظها'}})()}
+  if(spPend.length){const pend=spPend;spPend=[];$('spAttN').textContent='';(async()=>{try{for(const d of pend){const fo={id:uid(),sid:s.id,pid:o.id,kind:buy?'فاتورة':'إيصال دفع',ts,d};S.files.push(fo);put('files',fo)}await spLoadF(s.id);if(supCur===s.id)drawSup()}catch(e){$('spMsg').textContent='⚠️ الحركة اتسجلت بس الصورة معرفتش أحفظها'}})()}
   $('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';spDay=0;drawSup();m.textContent=(buy?'✅ اتسجل الشراء':'✅ اتسجلت الدفعة')+(add.length>1?' واتدفع':'')+' · '+(supBal(s)<0?'ليك عنده ':'عليك ')+f(Math.abs(supBal(s)))};
 $('spMore').onclick=()=>{spAll=true;drawSup()};
 $('spList').onclick=e=>{const b=e.target.closest('[data-spd]');if(!b||!ok2(b))return;const x=S.purchases.find(y=>y.id===b.dataset.spd);if(!x)return;
@@ -1835,42 +1834,51 @@ $('supStm').onclick=()=>{const s=spCur();if(!s)return;const g=spAge(s);if(!g.l.l
   const cv=sheet({title:'كشف حساب',name:s.name,sub:'مورد · '+shopN(),date:stamp(Date.now()),tables:[{th:['اليوم','البيان','شراء','دفع','الرصيد'],w:[.16,.34,.17,.16,.17],rows}],
     sum:[['إجمالي المشتريات',f(g.buy)],['إجمالي المدفوع',f(g.pay)],...(g.ov>0?[['متأخر',f(g.ov)]]:[]),[g.bal<0?'ليك عنده':'الرصيد',f(Math.abs(g.bal)),1]]});
   showImg(cv,'كشف-'+s.name.replace(/\s+/g,'-')+'.png','كشف حساب '+s.name,false,s.phone||'',null)};
-/* صور ومستندات المورد: بتتحفظ في قاعدة IndexedDB لوحدها على الجهاز (مش بتتبعت للسحابة عشان حجمها) */
+/* صور ومستندات المورد: بتتصغّر لأبيض وأسود صغير (حوالي 50 كيلو) وبتتحفظ زي أي بيانات: على الجهاز وعلى السحابة (S.files) */
 const FDB=(()=>{let p=null;const open=()=>p||(p=new Promise((ok,no)=>{const r=indexedDB.open('tabakha-files',1);r.onupgradeneeded=()=>{r.result.createObjectStore('f',{keyPath:'id'}).createIndex('sid','sid')};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
   const run=async(mode,fn)=>{const d=await open();return new Promise((ok,no)=>{const t=d.transaction('f',mode);let q;try{q=fn(t.objectStore('f'))}catch(e){no(e);return}t.oncomplete=()=>ok(q&&q.result);t.onerror=t.onabort=()=>no(t.error)})};
-  return{add:o=>run('readwrite',s=>s.put(o)),del:id=>run('readwrite',s=>s.delete(id)),of:sid=>run('readonly',s=>s.index('sid').getAll(sid)),n:sid=>run('readonly',s=>s.index('sid').count(sid))}})();
+  return{all:()=>run('readonly',s=>s.getAll()),del:id=>run('readwrite',s=>s.delete(id))}})();
 let spFl=[],spPend=[],spFK2='فاتورة',spVl=[],spVi=0;
 const SPK=[['📄','فاتورة'],['🧾','كشف حساب'],['💵','إيصال دفع'],['📋','عرض سعر'],['🖼','أخرى']];
-async function spShrink(file){const bmp=await createImageBitmap(file),k=Math.min(1,1600/Math.max(bmp.width,bmp.height)),cv=document.createElement('canvas');cv.width=Math.round(bmp.width*k);cv.height=Math.round(bmp.height*k);
-  const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(bmp,0,0,cv.width,cv.height);if(bmp.close)bmp.close();return new Promise(r=>cv.toBlob(r,'image/jpeg',.78))}
-async function spLoadF(sid){let l=[];try{l=(await FDB.of(sid)).sort((a,b)=>b.ts-a.ts)}catch(e){}if(supCur!==sid)return;spFl.forEach(f=>URL.revokeObjectURL(f.url));spFl=l;spFl.forEach(f=>{f.url=URL.createObjectURL(f.blob)})}
+/* رمادي + تمطيط التباين (الورقة تبقى بيضا والكتابة سودا) + JPEG لحد ما الحجم يبقى صغير */
+async function spShrink(file){const bmp=await createImageBitmap(file);let side=1400,q=.5,url='';
+  for(let i=0;i<8;i++){const k=Math.min(1,side/Math.max(bmp.width,bmp.height)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(bmp.width*k));cv.height=Math.max(1,Math.round(bmp.height*k));const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(bmp,0,0,cv.width,cv.height);
+    const im=x.getImageData(0,0,cv.width,cv.height),d=im.data,h=new Uint32Array(256);for(let j=0;j<d.length;j+=4){const g=(d[j]*299+d[j+1]*587+d[j+2]*114)/1000|0;d[j]=g;h[g]++}
+    const n=d.length/4;let lo=0,hi=255,a=0;for(;lo<254;lo++){a+=h[lo];if(a>n*.01)break}a=0;for(;hi>lo+1;hi--){a+=h[hi];if(a>n*.02)break}const sc=255/Math.max(1,hi-lo);
+    for(let j=0;j<d.length;j+=4){const g=Math.max(0,Math.min(255,(d[j]-lo)*sc))|0;d[j]=d[j+1]=d[j+2]=g}x.putImageData(im,0,0);
+    url=cv.toDataURL('image/jpeg',q);if(url.length*.75<=60e3||i===7)break;if(q>.34)q-=.08;else side=Math.max(900,side*.88)}
+  if(bmp.close)bmp.close();return url}
+function spLoadF(sid){spFl=S.files.filter(f=>f.sid===sid).sort((a,b)=>b.ts-a.ts);return Promise.resolve()}
+const spKB=d=>Math.max(1,Math.round(d.length*.75/1024));
 function spFilesDraw(){$('spFK').innerHTML=SPK.map(([i,k])=>`<button type="button" data-fk="${k}">${i} ${k}</button>`).join('');$('spFN').textContent=spFl.length?spFl.length+' مستند':'';
-  $('spTh').innerHTML=spFl.map((f,i)=>`<button type="button" class="spt" data-fv="${i}"><img src="${f.url}" alt=""><small>${esc(f.title||f.kind||'')}</small></button>`).join('')}
+  $('spTh').innerHTML=spFl.map((f,i)=>`<button type="button" class="spt" data-fv="${i}"><img src="${f.d}" alt=""><small>${esc(f.title||f.kind||'')}</small></button>`).join('')}
 $('spFK').onclick=e=>{const b=e.target.closest('[data-fk]');if(!b)return;spFK2=b.dataset.fk;$('spFI').value='';$('spFI').click()};
 $('spFI').onchange=async()=>{const s=spCur(),fs=[...$('spFI').files],m=$('spMsg');if(!s||!fs.length)return;m.textContent='جاري الحفظ…';
-  try{for(const file of fs){const blob=await spShrink(file);await FDB.add({id:uid(),sid:s.id,kind:spFK2,ts:Date.now(),blob})}try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}await spLoadF(s.id);spFilesDraw();drawSup();m.textContent='✅ اتحفظ '+(fs.length>1?fs.length+' صور':'الصورة')}catch(err){m.textContent='⚠️ معرفتش أحفظ الصورة'}};
+  try{let kb=0;for(const file of fs){const d=await spShrink(file),o={id:uid(),sid:s.id,kind:spFK2,ts:Date.now(),d};kb+=spKB(d);S.files.push(o);put('files',o)}await spLoadF(s.id);drawSup();m.textContent='✅ اتحفظ '+(fs.length>1?fs.length+' صور':'الصورة')+' (أبيض وأسود · '+kb+' ك.ب)'}catch(err){m.textContent='⚠️ معرفتش أحفظ الصورة'}};
 $('spAtt').onclick=()=>{$('spEI').value='';$('spEI').click()};
 $('spEI').onchange=async()=>{const fs=[...$('spEI').files];try{for(const f of fs)spPend.push(await spShrink(f))}catch(e){$('spMsg').textContent='⚠️ معرفتش أقرا الصورة'}$('spAttN').textContent=spPend.length?'✅ '+spPend.length+' صورة هتتحفظ مع الحركة':''};
 $('spTh').onclick=e=>{const b=e.target.closest('[data-fv]');if(b)spView(spFl,+b.dataset.fv)};
+/* صور قديمة اتحفظت على الجهاز بس (نسخة 268): بتتنقل لنفس مكان باقي البيانات وبتتصغّر */
+async function spMigFiles(){try{const old=await FDB.all();for(const r of old){if(!S.suppliers.some(s=>s.id===r.sid)){await FDB.del(r.id);continue}
+    const d=await spShrink(new File([r.blob],'x.jpg',{type:r.blob.type||'image/jpeg'})),o={id:r.id,sid:r.sid,kind:r.kind,ts:r.ts,d};if(r.pid)o.pid=r.pid;if(r.title)o.title=r.title;S.files.push(o);put('files',o);await FDB.del(r.id)}}catch(e){}}
 /* شاشة عرض الصورة: تكبير بالضغط، تقليب، عنوان ونوع، مشاركة وحذف */
 function spViewShow(){const fl=spVl[spVi],v=$('spView');if(!fl){v.classList.add('hide');return}
-  $('svP').src=fl.url;v.querySelector('#svI').classList.remove('z');$('svT').value=fl.title||'';
+  $('svP').src=fl.d;v.querySelector('#svI').classList.remove('z');$('svT').value=fl.title||'';
   const p=fl.pid&&S.purchases.find(x=>x.id===fl.pid);$('svM').textContent=dshort(fl.ts)+(p?' · '+(p.type==='pay'?'دفعة ':'شراء ')+f(p.amt):'')+(spVl.length>1?' · '+(spVi+1)+'/'+spVl.length:'');
   $('svK').innerHTML=SPK.map(([i,k])=>`<button type="button" data-sk="${k}"${k===fl.kind?' class="on"':''}>${i} ${k}</button>`).join('');$('svPrev').disabled=$('svNext').disabled=spVl.length<2;disarm($('svDel'));$('svDel').textContent='🗑️ حذف'}
-const spSaveF=f=>{const{url,...r}=f;return FDB.add(r)};
 function spView(list,i){spVl=list;spVi=i;let v=$('spView');
   if(!v){v=document.createElement('div');v.id='spView';v.className='spv-ov hide';
     v.innerHTML='<div class="spv-top"><button type="button" class="alt" id="svX" aria-label="إغلاق">✕</button><div class="spv-tt"><input id="svT" placeholder="عنوان (اختياري)" aria-label="عنوان المستند" autocomplete="off"><small id="svM" class="mute"></small></div></div><div class="spc" id="svK" style="padding:0 8px"></div><div class="spv-img" id="svI"><img id="svP" alt=""></div><div class="spv-bot"><button type="button" class="alt" id="svPrev" aria-label="اللي قبله">›</button><button type="button" class="alt" id="svSh">📤 مشاركة</button><button type="button" class="alt b-red" id="svDel">🗑️ حذف</button><button type="button" class="alt" id="svNext" aria-label="اللي بعده">‹</button></div>';
     document.body.appendChild(v);
     $('svX').onclick=()=>v.classList.add('hide');
-    $('svI').onclick=()=>$('svI').classList.toggle('z');
+    $('svI').onclick=e=>{const c=$('svI'),im=$('svP');if(c.classList.contains('z')){c.classList.remove('z');return}const r=im.getBoundingClientRect(),fx=(e.clientX-r.left)/Math.max(1,r.width),fy=(e.clientY-r.top)/Math.max(1,r.height);c.classList.add('z');c.scrollLeft=Math.max(0,fx*im.offsetWidth-c.clientWidth/2);c.scrollTop=Math.max(0,fy*im.offsetHeight-c.clientHeight/2)};
     $('svPrev').onclick=()=>{spVi=(spVi-1+spVl.length)%spVl.length;spViewShow()};$('svNext').onclick=()=>{spVi=(spVi+1)%spVl.length;spViewShow()};
-    $('svT').onchange=async()=>{const f=spVl[spVi];if(!f)return;f.title=$('svT').value.trim();await spSaveF(f);spFilesDraw()};
-    $('svK').onclick=async e=>{const b=e.target.closest('[data-sk]'),f=spVl[spVi];if(!b||!f)return;f.kind=b.dataset.sk;await spSaveF(f);spViewShow();spFilesDraw()};
-    $('svSh').onclick=async()=>{const f=spVl[spVi];if(!f)return;const s=spCur(),nm=((s&&s.name)||'مستند')+' - '+(f.title||f.kind||'صورة')+'.jpg',file=new File([f.blob],nm,{type:'image/jpeg'});
+    $('svT').onchange=()=>{const x=spVl[spVi];if(!x)return;x.title=$('svT').value.trim();if(!x.title)delete x.title;put('files',x);spFilesDraw()};
+    $('svK').onclick=e=>{const b=e.target.closest('[data-sk]'),x=spVl[spVi];if(!b||!x)return;x.kind=b.dataset.sk;put('files',x);spViewShow();spFilesDraw()};
+    $('svSh').onclick=async()=>{const x=spVl[spVi];if(!x)return;const s=spCur(),nm=((s&&s.name)||'مستند')+' - '+(x.title||x.kind||'صورة')+'.jpg',file=new File([dataBlob(x.d)],nm,{type:'image/jpeg'});
       try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:nm});return}}catch(e){if(e&&e.name==='AbortError')return}
-      const a=document.createElement('a');a.href=f.url;a.download=nm;document.body.appendChild(a);a.click();a.remove()};
-    $('svDel').onclick=async()=>{const f=spVl[spVi];if(!f||!ok2($('svDel')))return;await FDB.del(f.id);await spLoadF(f.sid);spVl=spVl.filter(x=>x.id!==f.id).map(x=>spFl.find(y=>y.id===x.id)).filter(Boolean);spFilesDraw();drawSup();if(!spVl.length){v.classList.add('hide');return}spVi=Math.min(spVi,spVl.length-1);spViewShow()}}
+      const a=document.createElement('a');a.href=x.d;a.download=nm;document.body.appendChild(a);a.click();a.remove()};
+    $('svDel').onclick=()=>{const x=spVl[spVi];if(!x||!ok2($('svDel')))return;del('files',x.id);spLoadF(x.sid);spVl=spVl.filter(y=>y.id!==x.id);spFilesDraw();drawSup();if(!spVl.length){v.classList.add('hide');return}spVi=Math.min(spVi,spVl.length-1);spViewShow()}}
   v.classList.remove('hide');spViewShow()}
 /* المواعيد: كل شراء لسه عليه فلوس وميعاده، ودوس على أي ميعاد تغيّره */
 function spSchedDraw(g){const now=Date.now(),l=g.l.filter(x=>x.type==='buy'&&g.rem[x.id]>0).sort((a,b)=>(a.due||9e15)-(b.due||9e15)||a.ts-b.ts).slice(0,5);
@@ -2425,7 +2433,7 @@ async function guard(r,why){if(wkOn()){toast('مش مسموح في وضع الع
 /* ---------- نسخ تلقائية على الجهاز + مشاركة نسخة ---------- */
 const idb=()=>new Promise((res,rej)=>{const q=indexedDB.open('tabakha-bk',1);q.onupgradeneeded=()=>q.result.createObjectStore('snaps',{keyPath:'day'});q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)});
 const idbDo=async(mode,fn)=>{const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction('snaps',mode),r=fn(tx.objectStore('snaps'));tx.oncomplete=()=>{db.close();res(r&&r.result)};tx.onerror=()=>rej(tx.error)})};
-const bkData=()=>({app:'ElTabakha',v:1,at:Date.now(),items:S.items,customers:S.customers,invoices:S.invoices,cats:S.cats,quotes:S.quotes,expenses:S.expenses,suppliers:S.suppliers,purchases:S.purchases,stock:S.stock});
+const bkData=()=>({app:'ElTabakha',v:1,at:Date.now(),items:S.items,customers:S.customers,invoices:S.invoices,cats:S.cats,quotes:S.quotes,expenses:S.expenses,suppliers:S.suppliers,purchases:S.purchases,stock:S.stock,files:S.files});
 /* v189: ملف النسخة فيه كمان إعدادات المحل (الاسم واللوجو والتصميم والملاحظات وطرق الدفع والرسايل). النسخ اليومية على الجهاز من غيرها عشان المساحة */
 function bkFull(){const d=bkData();try{d.settings=setGet()}catch(e){}return d}
 async function snapMaybe(){if(!dataReady||!pget('snapOn',true)||!window.indexedDB||S.invoices.length+S.customers.length===0)return;const day=dayKey(Date.now());

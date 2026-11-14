@@ -1348,7 +1348,7 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 .spv-top>.alt{flex:none;width:36px;height:36px;padding:0}
 .spv-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .spv-tt input{height:30px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:0 2px}
-.spv-img{flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);touch-action:pan-x pan-y pinch-zoom}
+.spv-img{direction:ltr;flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);touch-action:pan-x pan-y pinch-zoom}
 .spv-img img{max-width:100%;max-height:100%;object-fit:contain;display:block}
 .spv-img.z{display:block}
 .spv-img.z img{max-width:none;max-height:none;width:260%}
