@@ -1287,17 +1287,17 @@ html[data-theme][data-pal] #rows .row:nth-child(even){background:color-mix(in sr
 #t-st button.del::after{content:"";position:absolute;inset:-8px -6px}
 
 /* v267: صفحة الموردين — كروت، شرايح جاهزة بدل الكتابة، كله بلون النظام وفي سطر واحد */
-.spc{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 6px;align-items:center}
-.spc>button{flex:none;height:28px;padding:0 10px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font-size:12px;font-weight:400;box-shadow:none;white-space:nowrap}
-.spc>button.on{background:var(--acc);border-color:var(--acc);color:var(--accInk,#fff)}
-.spc>small{flex:none}
-.spk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px 6px;margin-bottom:6px}
-.spk>div{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
-.spk small,.spst small,.spb small{font-size:10.5px;color:var(--mute);white-space:nowrap}
-.spk span{font-size:14px;color:var(--ink)}
-.spk>div.bad span{color:#b42318}
-.sprow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:5px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer}
-.sprow .spi{font-size:20px;line-height:1}
+:is(#t-st,#t-cu) .spc{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 6px;align-items:center}
+:is(#t-st,#t-cu) .spc>button{flex:none;height:28px;padding:0 10px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);font-size:12px;font-weight:400;box-shadow:none;white-space:nowrap}
+:is(#t-st,#t-cu) .spc>button.on{background:var(--acc);border-color:var(--acc);color:var(--accInk,#fff)}
+:is(#t-st,#t-cu) .spc>small{flex:none}
+:is(#t-st,#t-cu) .spk{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px 6px;margin-bottom:6px}
+:is(#t-st,#t-cu) .spk>div{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+:is(#t-st,#t-cu) .spk small,.spst small,.spb small{font-size:10.5px;color:var(--mute);white-space:nowrap}
+:is(#t-st,#t-cu) .spk span{font-size:14px;color:var(--ink)}
+:is(#t-st,#t-cu) .spk>div.bad span{color:#b42318}
+:is(#t-st,#t-cu) .sprow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:5px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer}
+:is(#t-st,#t-cu) .sprow .spi{font-size:20px;line-height:1}
 .spn,.spd2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .spn{font-size:14px;color:var(--ink)}
 .spd2{font-size:11px;color:var(--mute);margin-top:1px}
@@ -1325,7 +1325,7 @@ html[data-theme][data-pal] #rows .row:nth-child(even){background:color-mix(in sr
 .spbars small{font-size:10px;color:var(--mute)}
 .spit{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .spit.hide,.spbars.hide{display:none}
-html[data-theme="dark"] :is(.spv.dr,.spb .num.dr,.spk>div.bad span,.spdue.bad){color:#f87171}
+html[data-theme="dark"] :is(.spv.dr,.spb .num.dr,:is(#t-st,#t-cu) .spk>div.bad span,.spdue.bad){color:#f87171}
 html[data-theme="dark"] :is(.spv.ok,.spb .num.ok){color:#4ade80}
 #spList td.tn{max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #spList td.tn small{display:block;overflow:hidden;text-overflow:ellipsis;font-size:10.5px}
@@ -1363,5 +1363,4 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 #cuList .cr2 .mute{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* v272: شريط أدوات CutList بيلف بدل ما يتسحب، وزراير صغيرة مساحة لمسها أكبر */
-html #t-cl .tool{flex-wrap:wrap!important;overflow:visible!important;justify-content:center}
 #cimpOpen,#catMgrBtn,#moreBtn,#clear{min-height:32px}
