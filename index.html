@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=267">
+<link rel="stylesheet" href="css/style.css?v=268">
 
 
 
@@ -389,6 +389,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="stp hide" data-sp="sup"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🚚 الموردين</b></div>
 <div id="supHome">
 <div class="card spk"><div><small>عليك</small><span class="num" id="supTot"></span></div><div><small>متأخر</small><span class="num" id="spkOv"></span></div><div><small>اشتريت الشهر</small><span class="num" id="spkMo"></span></div><div><small>دفعت الشهر</small><span class="num" id="spkPm"></span></div></div>
+<div class="spdue hide" id="spkNext" role="button" tabindex="0" style="cursor:pointer"></div>
 <div class="ro" style="gap:6px;margin:0 0 6px"><input id="supQ" type="search" placeholder="🔍 دوّر على مورد" autocomplete="off" aria-label="بحث في الموردين" style="flex:1;height:34px"></div>
 <div class="spc" id="supFil"></div>
 <div class="spc" id="supSort"><button type="button" data-so="owed">الأكتر دين</button><button type="button" data-so="recent">الأحدث</button><button type="button" data-so="name">أ ← ي</button></div>
@@ -398,15 +399,19 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div id="supOne" class="hide">
 <div class="card spd"><div class="ro" style="color:var(--ink)"><button type="button" class="lnk" id="supBack">→ كل الموردين</button><span class="mute" id="supCatB"></span></div>
   <div class="sph"><span class="spn2" id="supNm"></span><span class="spb"><small id="supBL">عليك</small><span class="num" id="supB"></span></span></div>
-  <div class="spdue hide" id="supDue"></div>
+  <div class="spdue hide" id="supDue"></div><div class="spsc" id="supSched"></div>
   <div class="spact"><a class="alt hide" id="supCall">📞 اتصل</a><a class="alt wa hide" id="supWa" target="_blank" rel="noopener"><i class="wai"></i> واتساب</a><button type="button" class="alt" id="supStm">🧾 كشف حساب</button></div>
   <div class="spst" id="supStats"></div><div class="spbars" id="supBars"></div><div class="spit" id="supTop"></div></div>
+<div class="card" id="spFiles"><div class="ro" style="color:var(--ink)"><b>📎 الصور والمستندات</b><small class="mute" id="spFN"></small></div>
+  <div class="spc" id="spFK" style="margin-top:6px"></div><div class="spth" id="spTh"></div><input type="file" id="spFI" accept="image/*" multiple class="vh">
+  <small class="mute">دوس على نوع المستند وصوّره أو اختاره من المعرض. محفوظ على الجهاز ده بس (مش بيتنقل للسحابة).</small></div>
 <div class="card" id="spNew"><div class="spc" id="spTy"><button type="button" data-ty="buy">🛒 اشتريت</button><button type="button" data-ty="pay">💵 دفعت</button></div>
   <div class="rowc" style="margin:6px 0 4px"><input id="spAmt" inputmode="decimal" placeholder="المبلغ" autocomplete="off" aria-label="المبلغ"></div>
   <div class="spc" id="spQuick"></div>
   <div class="spc" id="spDays"></div><input type="date" id="spDate" class="hide" aria-label="التاريخ">
   <div class="spc" id="spDueRow"></div><div class="spc hide" id="spHowRow"></div>
   <div class="spc" id="spNotes"></div><input id="spNote" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة" style="margin-top:4px">
+  <div class="spc" style="margin:4px 0 0"><button type="button" id="spAtt">📎 صورة الفاتورة</button><small class="mute" id="spAttN"></small></div><input type="file" id="spEI" accept="image/*" multiple class="vh">
   <details class="spdt" id="spStk"><summary>📦 دخّل الأصناف دي في المخزون</summary><div class="ro" style="gap:6px;margin-top:6px"><select id="spIt" aria-label="الصنف" style="flex:2;min-width:0"></select><input id="spQty" inputmode="decimal" placeholder="الكمية" autocomplete="off" aria-label="الكمية" style="flex:1;min-width:0"></div></details>
   <button type="button" class="main" id="spAdd" style="width:100%;margin-top:8px">✅ حفظ</button><div class="info" id="spMsg"></div></div>
 <div class="card" style="padding:6px 8px"><table class="xl" id="spList"></table><button type="button" class="alt hide" id="spMore" style="width:100%;margin-top:6px">عرض كل الحركات</button></div>
@@ -538,10 +543,10 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=267"></script>
+<script src="js/app.js?v=268"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=267"></script>
-<script src="js/features.js?v=267"></script>
+<script src="js/cutlist.js?v=268"></script>
+<script src="js/features.js?v=268"></script>
 </body>
 </html>
 

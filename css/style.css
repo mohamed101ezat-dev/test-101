@@ -1330,3 +1330,28 @@ html[data-theme="dark"] :is(.spv.ok,.spb .num.ok){color:#4ade80}
 #spList td.tn{max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #spList td.tn small{display:block;overflow:hidden;text-overflow:ellipsis;font-size:10.5px}
 .spdt>summary{cursor:pointer;color:var(--ink);font-size:13px;padding:2px 0}
+
+/* v268: صور ومستندات المورد + جدول المواعيد */
+.spth{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0}
+.spth:empty{display:none}
+.spt{position:relative;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card);aspect-ratio:1;box-shadow:none;cursor:pointer}
+.spt img{width:100%;height:100%;object-fit:cover;display:block}
+.spt small{position:absolute;inset-inline:0;bottom:0;padding:2px 4px;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spsc{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}
+.spsc:empty{display:none}
+.spsr{display:grid;grid-template-columns:1.3fr 1fr 1.2fr auto;gap:6px;align-items:center;padding:5px 8px;border-radius:8px;background:var(--accLight);color:var(--ink);font-size:12px;cursor:pointer;white-space:nowrap}
+.spsr.bad{background:rgba(180,35,24,.12);color:#b42318}
+html[data-theme="dark"] .spsr.bad{color:#f87171}
+.spv-ov{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;gap:6px;padding:8px 0 10px;background:var(--bg);color:var(--ink)}
+.spv-ov.hide{display:none}
+.spv-top{display:flex;gap:6px;align-items:center;padding:0 8px}
+.spv-top>.alt{flex:none;width:36px;height:36px;padding:0}
+.spv-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.spv-tt input{height:30px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:0 2px}
+.spv-img{flex:1;min-height:0;overflow:auto;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.06);touch-action:pan-x pan-y pinch-zoom}
+.spv-img img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.spv-img.z{display:block}
+.spv-img.z img{max-width:none;max-height:none;width:260%}
+.spv-bot{display:flex;gap:6px;padding:0 8px}
+.spv-bot>.alt{flex:1;height:38px}
+.spv-bot>.alt:first-child,.spv-bot>.alt:last-child{flex:none;width:46px;font-size:20px}
