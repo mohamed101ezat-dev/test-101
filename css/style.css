@@ -1355,3 +1355,6 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 .spv-bot{display:flex;gap:6px;padding:0 8px}
 .spv-bot>.alt{flex:1;height:38px}
 .spv-bot>.alt:first-child,.spv-bot>.alt:last-child{flex:none;width:46px;font-size:20px}
+
+/* v270: عمود تعديل/حذف في سجل المورد */
+#spList td.nw{white-space:nowrap}

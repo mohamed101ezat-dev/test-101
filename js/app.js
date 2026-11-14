@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='269';
+const APP_VER='270';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1491,7 +1491,7 @@ $('themeChk').onchange=()=>setTheme($('themeChk').checked);
 (function(){let p='sage';try{p=localStorage.getItem('pal')||'sage'}catch(e){}setPal(p);
 document.querySelectorAll('#pals button,#palsCalm button').forEach(b=>b.onclick=()=>setPal(b.dataset.p));$('palCustom').value=getCC();$('palCustom').oninput=()=>{try{localStorage.setItem('cc',$('palCustom').value)}catch(e){}setPal('custom')};
 $('animChk').checked=pget('anim',animDef());$('animChk').onchange=()=>{pset('anim',$('animChk').checked);applyAnim()};applyAnim();perfWatch()})();
-[['editInv','editInv'],['dupInv','dupInv'],['repLastOn','repLastOn'],['dayCl','dayCl'],['weekCl','weekCl'],['monCl','monCl'],['bulkRemChk','bulkRem'],['trashOn','trashOn'],['bkAl','bkAl'],['snapOn','snapOn'],['autoBk','autoBk'],['logoOn','logoOn'],['fancyInv','fancyInv'],['pdfOn','pdfOn'],['ceilSz','ceilSz'],['nfRem','nfRem'],['nfStk','nfStk'],['rcOn','rcOn'],['qtOn','qtOn'],['remDays','remDays'],['remOld','remOld'],['remBal','remBal']].forEach(([id,k])=>{$(id).checked=pget(k,true);$(id).onchange=()=>{pset(k,$(id).checked);applyFeatures();drawCusts();if(k==='ceilSz')calc()}});
+[['editInv','editInv'],['dupInv','dupInv'],['repLastOn','repLastOn'],['dayCl','dayCl'],['weekCl','weekCl'],['monCl','monCl'],['bulkRemChk','bulkRem'],['trashOn','trashOn'],['bkAl','bkAl'],['snapOn','snapOn'],['autoBk','autoBk'],['logoOn','logoOn'],['fancyInv','fancyInv'],['pdfOn','pdfOn'],['ceilSz','ceilSz'],['nfRem','nfRem'],['nfStk','nfStk'],['nfSup','nfSup'],['rcOn','rcOn'],['qtOn','qtOn'],['remDays','remDays'],['remOld','remOld'],['remBal','remBal']].forEach(([id,k])=>{$(id).checked=pget(k,true);$(id).onchange=()=>{pset(k,$(id).checked);applyFeatures();drawCusts();if(k==='ceilSz')calc()}});
 /* متابعة الطلبيات: مفتوحة افتراضياً */
 $('ordOn').checked=ordOn();$('ordOn').onchange=()=>{pset('ordOn',$('ordOn').checked);drawDash();calc()};
 /* الإضافات ظاهرة دايماً: مقفولة افتراضياً لأنها مش في كل فاتورة */
@@ -1713,7 +1713,7 @@ $('exList').onclick=e=>{const b=e.target.closest('[data-exd]');if(!b||!ok2(b))re
 
 /* الموردين: S.suppliers {id,name,phone,cat,terms,note} · S.purchases {id,sid,ts,type:'buy'|'pay',amt,note,due?,how?,iid?,q?,sk?,pf?}. الرصيد = اللي عليك للمورد.
    الدفعات بتتوزّع على أقدم شراء الأول (FIFO) عشان نعرف أنهي فاتورة لسه مدفوعة جزء منها وأنهي متأخرة */
-let supCur=null,spSort='owed',spFil='all',spTy='buy',spDay=0,spDue=null,spHow='كاش',spAll=false,spNewCat='';
+let supCur=null,spSort='owed',spFil='all',spTy='buy',spDay=0,spDue=null,spHow='كاش',spAll=false,spNewCat='',spEid=null,spLF='all';
 const SPC=[['gl','🪟','زجاج'],['ac','🔩','إكسسوار'],['al','🧱','خامات'],['tr','🚚','نقل'],['mt','🛠','صيانة'],['ot','📦','أخرى']],SPDAY=864e5;
 const spCat=k=>SPC.find(c=>c[0]===k),spIc=s=>(spCat(s.cat)||[0,'🚚'])[1];
 const spAgo=t=>{const d=Math.floor((Date.now()-t)/SPDAY);return d<=0?'النهارده':d===1?'امبارح':d===2?'من يومين':d<=10?'من '+d+' أيام':'من '+d+' يوم'};
@@ -1729,7 +1729,7 @@ function supTot(){return rd2(S.suppliers.reduce((a,s)=>a+supBal(s),0))}
 function supOv(){return rd2(S.suppliers.reduce((a,s)=>a+spAge(s).ov,0))}
 const spChips=(arr,on,att)=>arr.map(([v,t])=>`<button type="button" ${att}="${esc(String(v))}"${String(v)===String(on)?' class="on"':''}>${t}</button>`).join('');
 function supOpen(id){supCur=id;$('supHome').classList.toggle('hide',!!id);$('supOne').classList.toggle('hide',!id);$('supMsg').textContent='';$('spMsg').textContent='';
-  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;spFl=[];spPend=[];$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
+  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;spFl=[];spPend=[];spEid=null;spLF='all';$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
   drawSup();window.scrollTo(0,0)}
 function spMonth(a){const d=new Date(a),x=new Date(d.getFullYear(),d.getMonth(),1).getTime();return[x,new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
 function drawSup(){const s=S.suppliers.find(x=>x.id===supCur);
@@ -1761,29 +1761,30 @@ function spOne(s){const now=Date.now(),g=spAge(s);
   const mx=Math.max(1,...bars.map(x=>x.v));$('supBars').classList.toggle('hide',!g.nb);
   $('supBars').innerHTML=bars.map(x=>`<div><i style="height:${Math.round(x.v/mx*100)}%"></i><small>${new Date(x.a).getMonth()+1}</small></div>`).join('');
   /* أكتر الأصناف اللي بتشتريها منه */
-  const it=new Map();g.l.forEach(x=>{if(x.type==='buy'&&x.iid){it.set(x.iid,(it.get(x.iid)||0)+(+x.q||0))}});const top=[...it.entries()].map(([i,q])=>({n:(S.items.find(y=>y.id===i)||{}).name,q})).filter(x=>x.n).sort((a,b)=>b.q-a.q).slice(0,4);
-  $('supTop').classList.toggle('hide',!top.length);$('supTop').innerHTML=top.length?'<small>بتشتري منه:</small> '+top.map(x=>`<span class="tag">${esc(x.n)} · ${f(x.q)}</span>`).join(' '):'';
+  const it=new Map();g.l.forEach(x=>{if(x.type==='buy'&&x.iid&&+x.q>0){const o=it.get(x.iid)||{q:0};o.q+=+x.q;o.p=(+x.amt||0)/x.q;it.set(x.iid,o)}});const top=[...it.entries()].map(([i,o])=>({n:(S.items.find(y=>y.id===i)||{}).name,q:o.q,p:o.p})).filter(x=>x.n).sort((a,b)=>b.q-a.q).slice(0,4);
+  $('supTop').classList.toggle('hide',!top.length);$('supTop').innerHTML=top.length?'<small>بتشتري منه:</small> '+top.map(x=>`<span class="tag">${esc(x.n)} · ${f(x.q)} · ≈${f(Math.round(x.p))}/وحدة</span>`).join(' '):'';
   spEntry(s,g);spLedger(s,g);spEditFill(s);spFilesDraw();spSchedDraw(g)}
 /* خانة التسجيل: أزرار جاهزة بدل الكتابة */
-function spEntry(s,g){const buy=spTy==='buy';$('spTy').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.ty===spTy));
+function spEntry(s,g){const buy=spTy==='buy';$('spEd').classList.toggle('hide',!spEid);$('spTy').classList.toggle('hide',!!spEid);$('spTy').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.ty===spTy));
   const q=[];if(!buy&&g.bal>0){q.push(['all','كله '+f(g.bal)]);if(g.bal>=2)q.push(['half','النص '+f(Math.ceil(g.bal/2))]);if(g.ov>0&&g.ov<g.bal)q.push(['ov','المتأخر '+f(g.ov)])}
   const seen=new Set();g.l.slice().reverse().forEach(x=>{if(x.type===spTy&&!seen.has(x.amt)&&seen.size<3){seen.add(x.amt);q.push(['v'+x.amt,f(x.amt)])}});
   [100,500,1000].forEach(n=>q.push(['+'+n,'+'+f(n)]));
   $('spQuick').innerHTML=q.map(([v,t])=>`<button type="button" data-q="${esc(v)}">${t}</button>`).join('');
   $('spDays').innerHTML=spChips([[0,'النهارده'],[1,'امبارح'],[2,'من يومين'],['x','📅 تاريخ تاني']],spDay,'data-dy');$('spDate').classList.toggle('hide',spDay!=='x');
   $('spDueRow').classList.toggle('hide',!buy);$('spHowRow').classList.toggle('hide',buy);
-  $('spDueRow').innerHTML='<small class="mute">السداد:</small>'+spChips([['','من غير ميعاد'],['paid','✅ اتدفع كله'],[7,'أسبوع'],[15,'15 يوم'],[30,'شهر'],[45,'45 يوم'],[60,'شهرين']],spDue===null?'':spDue,'data-du');
+  $('spDueRow').innerHTML='<small class="mute">السداد:</small>'+spChips([['','من غير ميعاد'],...(spEid?(spDue==='keep'?[['keep','📅 زي ما هو']]:[]):[['paid','✅ اتدفع كله']]),[7,'أسبوع'],[15,'15 يوم'],[30,'شهر'],[45,'45 يوم'],[60,'شهرين']],spDue===null?'':spDue,'data-du');
   $('spHowRow').innerHTML='<small class="mute">دفعت:</small>'+spChips(['كاش','فودافون كاش','انستا','تحويل بنكي','شيك'].map(x=>[x,x]),spHow,'data-hw');
   const notes=[];g.l.slice().reverse().forEach(x=>{if(x.note&&x.type===spTy&&!notes.includes(x.note)&&notes.length<5)notes.push(x.note)});
   $('spNotes').innerHTML=notes.map(n=>`<button type="button" data-nt="${esc(n)}">${esc(n)}</button>`).join('');
-  $('spStk').classList.toggle('hide',!buy);
+  $('spStk').classList.toggle('hide',!buy||!!spEid);
   const cur=$('spIt').value;$('spIt').innerHTML='<option value="">اختار الصنف</option>'+S.items.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(i=>`<option value="${esc(i.id)}">${esc(i.name)}${szOf(i)?' '+esc(szOf(i)):''}</option>`).join('');$('spIt').value=cur;
-  $('spAdd').textContent=buy?'✅ سجّل الشراء':'✅ سجّل الدفعة'}
-function spLedger(s,g){let run=0;const rows=g.l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse(),lim=spAll?rows.length:15;
+  $('spAdd').textContent=spEid?'💾 حفظ التعديل':buy?'✅ سجّل الشراء':'✅ سجّل الدفعة'}
+function spLedger(s,g){let run=0;const all=g.l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse(),rows=all.filter(o=>spLF==='buy'?!o.pay:spLF==='pay'?o.pay:spLF==='pic'?spFl.some(q=>q.pid===o.x.id):true),lim=spAll?rows.length:15;
+  $('spLF').classList.toggle('hide',all.length<4);$('spLF').innerHTML=spChips([['all','الكل'],['buy','🛒 شراء'],['pay','💵 دفع'],['pic','📎 بصور']],spLF,'data-lf');
   $('spList').innerHTML=rows.length?'<tr><th>اليوم</th><th>البيان</th><th>شراء</th><th>دفع</th><th>الرصيد</th><th></th></tr>'+rows.slice(0,lim).map(({x,v,pay,run})=>{
     let sub='';if(pay&&x.how)sub=x.how;else if(!pay){const r=g.rem[x.id];if(r===0)sub='✅ مدفوعة';else if(x.due)sub=(x.due<Date.now()?'⏰ متأخرة ':'⏰ ')+dshort(x.due).slice(5)+(r<v?' · باقي '+f(r):'');else if(r<v)sub='باقي '+f(r)}
     const fc=spFl.filter(q=>q.pid===x.id).length;
-    return`<tr><td class="num">${dshort(x.ts).slice(5)}${fc?`<small data-spf="${esc(x.id)}" style="cursor:pointer">📎${fc>1?fc:''}</small>`:''}</td><td class="tn">${esc(x.note||(pay?'دفعة':'شراء'))}${sub?`<small class="mute">${esc(sub)}</small>`:''}</td><td class="num">${pay?'':f(v)}</td><td class="num">${pay?f(v):''}</td><td class="num"><b>${f(run)}</b></td><td><button type="button" class="xd" data-spd="${esc(x.id)}" aria-label="حذف">×</button></td></tr>`}).join(''):'<tr><td class="tn mute">لسه مفيش حركات للمورد ده. سجّل أول شراء من فوق.</td></tr>';
+    return`<tr><td class="num">${dshort(x.ts).slice(5)}${fc?`<small data-spf="${esc(x.id)}" style="cursor:pointer">📎${fc>1?fc:''}</small>`:''}</td><td class="tn">${esc(x.note||(pay?'دفعة':'شراء'))}${sub?`<small class="mute">${esc(sub)}</small>`:''}</td><td class="num">${pay?'':f(v)}</td><td class="num">${pay?f(v):''}</td><td class="num"><b>${f(run)}</b></td><td class="nw"><button type="button" class="xd" data-spe="${esc(x.id)}" aria-label="تعديل">✏️</button><button type="button" class="xd" data-spd="${esc(x.id)}" aria-label="حذف">×</button></td></tr>`}).join(''):'<tr><td class="tn mute">'+(all.length?'مفيش حركات بالشكل ده.':'لسه مفيش حركات للمورد ده. سجّل أول شراء من فوق.')+'</td></tr>';
   $('spMore').classList.toggle('hide',rows.length<=15||spAll)}
 function spEditFill(s){const ae=document.activeElement;if(!($('supEdit').contains(ae)&&/INPUT/.test(ae.tagName))){$('supEN').value=s.name;$('supPh').value=s.phone||'';$('supENote').value=s.note||''}
   $('supEC').innerHTML=spChips([['','بدون'],...SPC.map(c=>[c[0],c[1]+' '+c[2]])],s.cat||'','data-ec');
@@ -1804,11 +1805,19 @@ $('spTy').onclick=e=>{const b=e.target.closest('[data-ty]');if(!b)return;spTy=b.
 $('spQuick').onclick=e=>{const b=e.target.closest('[data-q]');if(!b)return;const s=S.suppliers.find(x=>x.id===supCur),g=spAge(s),k=b.dataset.q,cur=nv($('spAmt').value);
   $('spAmt').value=k==='all'?g.bal:k==='half'?Math.ceil(g.bal/2):k==='ov'?g.ov:k[0]==='+'?rd2(cur+(+k.slice(1))):k.slice(1);fmtAll&&fmtAll();$('spAmt').focus()};
 $('spDays').onclick=e=>{const b=e.target.closest('[data-dy]');if(!b)return;spDay=b.dataset.dy==='x'?'x':+b.dataset.dy;if(spDay==='x'&&!$('spDate').value)$('spDate').value=dayKey(Date.now());drawSup()};
-$('spDueRow').onclick=e=>{const b=e.target.closest('[data-du]');if(!b)return;const v=b.dataset.du;spDue=v===''?null:v==='paid'?'paid':+v;drawSup()};
+$('spDueRow').onclick=e=>{const b=e.target.closest('[data-du]');if(!b)return;const v=b.dataset.du;spDue=v===''?null:v==='paid'?'paid':v==='keep'?'keep':+v;drawSup()};
 $('spHowRow').onclick=e=>{const b=e.target.closest('[data-hw]');if(b){spHow=b.dataset.hw;drawSup()}};
 $('spNotes').onclick=e=>{const b=e.target.closest('[data-nt]');if(b){$('spNote').value=b.dataset.nt}};
+function spStartEdit(id){const x=S.purchases.find(y=>y.id===id);if(!x)return;spEid=id;spTy=x.type;spDay='x';$('spDate').value=dayKey(x.ts);$('spAmt').value=x.amt;$('spNote').value=x.note||'';spHow=x.how||'كاش';
+  if(x.type==='buy'){const d=x.due?Math.round((x.due-x.ts)/SPDAY):0;spDue=[7,15,30,45,60].includes(d)?d:(x.due?'keep':null)}$('spMsg').textContent='';drawSup();$('spNew').scrollIntoView({block:'start'})}
+function spEditEnd(){spEid=null;spDay=0;const s=spCur();spDue=s&&s.terms>0?+s.terms:null;$('spAmt').value='';$('spNote').value='';drawSup()}
+$('spEdX').onclick=spEditEnd;
 $('spAdd').onclick=()=>{const s=S.suppliers.find(x=>x.id===supCur);if(!s)return;const amt=rd2(nv($('spAmt').value)),m=$('spMsg');if(!(amt>0)){m.textContent='اكتب المبلغ أو دوس على زرار جاهز';return}
   let ts=Date.now();if(spDay!==0){const dv=spDay==='x'?$('spDate').value:dayKey(Date.now()-spDay*SPDAY),dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(dv);if(!dm){m.textContent='اختار التاريخ';return}ts=dv===dayKey(Date.now())?Date.now():new Date(+dm[1],+dm[2]-1,+dm[3],12).getTime()}
+  if(spEid){const x=S.purchases.find(y=>y.id===spEid);if(!x){spEditEnd();return}const t2=dayKey(x.ts)===dayKey(ts)?x.ts:ts;x.ts=t2;x.amt=amt;x.note=$('spNote').value.trim();
+    if(x.type==='buy'){if(spDue!=='keep'){if(spDue>0)x.due=t2+spDue*SPDAY;else delete x.due}S.purchases.filter(y=>y.pf===x.id).forEach(y=>{y.amt=amt;y.ts=t2;put('purchases',y)})}else x.how=spHow;put('purchases',x);
+    if(spPend.length){const pend=spPend;spPend=[];$('spAttN').textContent='';for(const d of pend){const fo={id:uid(),sid:s.id,pid:x.id,kind:x.type==='buy'?'فاتورة':'إيصال دفع',ts:t2,d};S.files.push(fo);put('files',fo)}spLoadF(s.id)}
+    spEditEnd();$('spMsg').textContent='✅ اتعدّلت الحركة · '+(supBal(s)<0?'ليك عنده ':'عليك ')+f(Math.abs(supBal(s)));return}
   const buy=spTy==='buy',o={id:uid(),sid:s.id,ts,type:spTy,amt,note:$('spNote').value.trim()},add=[o];
   if(buy){const iid=$('spIt').value,q=rd2(nv($('spQty').value));
     if(iid&&q>0){const it=S.items.find(i=>i.id===iid)||{},st={id:uid(),iid,ts,q};S.stock.push(st);put('stock',st);o.iid=iid;o.q=q;o.sk=st.id;if(!o.note)o.note=(it.name||'صنف')+' × '+f(q)}
@@ -1818,7 +1827,8 @@ $('spAdd').onclick=()=>{const s=S.suppliers.find(x=>x.id===supCur);if(!s)return;
   if(spPend.length){const pend=spPend;spPend=[];$('spAttN').textContent='';(async()=>{try{for(const d of pend){const fo={id:uid(),sid:s.id,pid:o.id,kind:buy?'فاتورة':'إيصال دفع',ts,d};S.files.push(fo);put('files',fo)}await spLoadF(s.id);if(supCur===s.id)drawSup()}catch(e){$('spMsg').textContent='⚠️ الحركة اتسجلت بس الصورة معرفتش أحفظها'}})()}
   $('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';spDay=0;drawSup();m.textContent=(buy?'✅ اتسجل الشراء':'✅ اتسجلت الدفعة')+(add.length>1?' واتدفع':'')+' · '+(supBal(s)<0?'ليك عنده ':'عليك ')+f(Math.abs(supBal(s)))};
 $('spMore').onclick=()=>{spAll=true;drawSup()};
-$('spList').onclick=e=>{const b=e.target.closest('[data-spd]');if(!b||!ok2(b))return;const x=S.purchases.find(y=>y.id===b.dataset.spd);if(!x)return;
+$('spLF').onclick=e=>{const b=e.target.closest('[data-lf]');if(b){spLF=b.dataset.lf;spAll=false;drawSup()}};
+$('spList').onclick=e=>{const eb=e.target.closest('[data-spe]');if(eb){spStartEdit(eb.dataset.spe);return}const b=e.target.closest('[data-spd]');if(!b||!ok2(b))return;const x=S.purchases.find(y=>y.id===b.dataset.spd);if(!x)return;
   const rel=S.purchases.filter(y=>y.pf===x.id),sk=S.stock.filter(y=>y.id===x.sk);[x,...rel].forEach(y=>del('purchases',y.id));sk.forEach(y=>del('stock',y.id));drawSup();
   toast('اتمسحت الحركة'+(rel.length||sk.length?' ومعاها '+(rel.length?'السداد':'')+(rel.length&&sk.length?' و':'')+(sk.length?'المخزون':''):''),'تراجع',()=>{[x,...rel].forEach(y=>undel('purchases',y));sk.forEach(y=>undel('stock',y));drawSup()})};
 /* بيانات المورد */
@@ -1922,9 +1932,10 @@ $('stkLog').onclick=e=>{const b=e.target.closest('[data-skd]');if(!b||!ok2(b))re
 
 /* الإشعارات: رسالة فوق لو البرنامج قدامك، وإشعار من الموبايل لو في الخلفية، والضغط عليهم بيفتح الحاجة نفسها.
    nfSave بيسيب آخر تنبيهات في IndexedDB عشان sw.js يعرضها لوحده (periodicsync) والبرنامج مقفول */
-function nfGo(k){({rem:openRemL,stk:()=>{$('hdrSet').click();stGo('stk')}}[k]||(()=>{}))()}
+function nfGo(k){({sup:()=>{$('hdrSet').click();stGo('sup')},rem:openRemL,stk:()=>{$('hdrSet').click();stGo('stk')}}[k]||(()=>{}))()}
 function nfList(){const a=[];try{const n=remList().length;if(n&&pget('nfRem',true))a.push({k:'rem',m:'🔔 '+n+(n>1?' مديونين محتاجين':' مديون محتاج')+' تذكير'})}catch(e){}
-  try{const n=stkLow(stkAll());if(n&&pget('nfStk',true))a.push({k:'stk',m:'🧱 '+(n>1?n+' أصناف قربوا يخلصوا من المخزون':'صنف قرب يخلص من المخزون')})}catch(e){}return a}
+  try{const n=stkLow(stkAll());if(n&&pget('nfStk',true))a.push({k:'stk',m:'🧱 '+(n>1?n+' أصناف قربوا يخلصوا من المخزون':'صنف قرب يخلص من المخزون')})}catch(e){}
+  try{if(pget('nfSup',true)){const now=Date.now(),l=S.suppliers.map(s=>({s,g:spAge(s)})).filter(o=>o.g.ov>0||(o.g.nx&&o.g.nx.ts-now<=2*SPDAY)),ov=l.filter(o=>o.g.ov>0).length;if(l.length)a.push({k:'sup',m:'🚚 '+(ov?(ov>1?ov+' موردين ميعاد سدادهم عدّى':'مورد ميعاد سداده عدّى'):(l.length>1?l.length+' موردين ميعاد سدادهم قرب':'مورد ميعاد سداده قرب'))})}}catch(e){}return a}
 function nfState(){if(!('Notification' in window)||!('serviceWorker' in navigator))return'no';return Notification.permission==='denied'?'denied':Notification.permission==='granted'&&pget('nfOn',false)?'on':'off'}
 async function nfSys(a){if(nfState()!=='on')return;try{await(await navigator.serviceWorker.ready).showNotification('فواتير',{body:a.m,icon:'icon-192.png',badge:'icon-192.png',tag:a.k,lang:'ar',dir:'rtl',data:{go:a.k}})}catch(e){}}
 function nfSave(){if(ddb)kvPut({alertNow:nfState()==='on'?nfList():[]}).catch(()=>{})}
