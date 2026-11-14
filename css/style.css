@@ -1358,3 +1358,6 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 
 /* v270: عمود تعديل/حذف في سجل المورد */
 #spList td.nw{white-space:nowrap}
+
+/* v271: سطر تفاصيل العميل في القايمة سطر واحد */
+#cuList .cr2 .mute{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
