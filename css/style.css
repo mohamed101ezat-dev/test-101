@@ -1281,3 +1281,7 @@ html[data-theme="dark"][data-pal] #rowsHd,html[data-theme="dark"][data-pal] #row
 html[data-theme="dark"][data-pal] #rowsHd::before{background:transparent!important}
 html[data-theme][data-pal] #rows{border-radius:0 0 12px 12px;overflow:hidden;border-color:var(--acc);box-shadow:var(--soft)}
 html[data-theme][data-pal] #rows .row:nth-child(even){background:color-mix(in srgb,var(--acc) 6%,var(--card))}
+
+/* v266: زراير × الصغيرة (حذف) مساحة اللمس بتاعتها أكبر من شكلها من غير ما الشكل يكبر */
+#t-st button.del{position:relative}
+#t-st button.del::after{content:"";position:absolute;inset:-8px -6px}

@@ -122,7 +122,7 @@
       row('خلفية رخام','<input type="checkbox" data-b="marble"'+(cfg.marble?' checked':'')+'>');
     E('idSize').innerHTML=SIZES.map(([k,l,mn,mx,st])=>row(l,'<input type="range" data-n="'+k+'" min="'+mn+'" max="'+mx+'" step="'+st+'" value="'+cfg[k]+'"><span class="v">'+cfg[k]+'</span>')).join('')+'<div class="mute" style="margin-top:6px">عرض أكبر = خط أصغر على الورق، وعرض أقل = خط أكبر.</div>';
     E('idFont').innerHTML=row('نوع الخط','<select data-f="fam" style="flex:1.4"><option value="sans">عادي (Tahoma)</option><option value="naskh">نسخ</option><option value="serif">كلاسيك</option></select>')+
-      FONTS.map(([k,l,mn,mx])=>row(l,'<input type="range" data-n="'+k+'" min="'+mn+'" max="'+mx+'" value="'+cfg[k]+'"><span class="v">'+cfg[k]+'</span>')).join('')+row('كل نص الجدول بخط عريض','<input type="checkbox" data-b="bold"'+(cfg.bold?' checked':'')+'>');
+      FONTS.map(([k,l,mn,mx])=>row(l,'<input type="range" data-n="'+k+'" min="'+mn+'" max="'+mx+'" value="'+cfg[k]+'"><span class="v">'+cfg[k]+'</span>')).join('');
     E('idFont').querySelector('select').value=cfg.fam;
     const ck=(k,l)=>row(l,'<input type="checkbox" data-b="'+k+'"'+(cfg[k]?' checked':'')+'>'),
       NAMES={tables:'جدول البنود',summary:'ملخص الأصناف والإجماليات',notes:'الملاحظات'};
@@ -140,7 +140,6 @@
       row('خط الإجمالي والمتبقي (الافتراضي)','<input type="range" data-n="sumBig" min="8" max="28" value="'+cfg.sumBig+'"><span class="v">'+cfg.sumBig+'</span>')+
       '<div class="idr" style="margin-top:12px"><b>حجم كل مربع لوحده (0 = زي الافتراضي)</b></div>'+
       [['fTot','خط «الإجمالي»',0,40],['hTot','ارتفاع «الإجمالي»',0,90],['fPaid','خط «المدفوع»',0,40],['hPaid','ارتفاع «المدفوع»',0,90],['fRem','خط «المتبقي»',0,40],['hRem','ارتفاع «المتبقي»',0,90]].map(([k,l,mn,mx])=>row(l,'<input type="range" data-n="'+k+'" min="'+mn+'" max="'+mx+'" value="'+(cfg[k]||0)+'"><span class="v">'+(cfg[k]||0)+'</span>')).join('')+
-      row('«المدفوع» بخط عريض','<input type="checkbox" data-b="paidB"'+(cfg.paidB?' checked':'')+'>')+
       row('خط باقي صفوف الإجماليات','<input type="range" data-n="sum" min="7" max="22" value="'+cfg.sum+'"><span class="v">'+cfg.sum+'</span>')+
       row('مكان مربع الإجماليات','<select data-f="sumPos" style="flex:1.4"><option value="l">شمال</option><option value="c">في النص</option><option value="r">يمين</option></select>')+
       row('عرض المربع تلقائي (صغير على قد الأرقام)','<input type="checkbox" data-b="sumFit"'+(cfg.sumFit!==0?' checked':'')+'>')+'<div class="mute" style="margin-top:4px">لو قفلت «تلقائي» بيمشي على «عرض مربع الإجماليات» اللي فوق. لما ملخص الأصناف يكون جنبه، المربع بيفضل على الشمال.</div>';
@@ -195,12 +194,12 @@
     notes:{n:'الملاحظات',f:['fNote',6,34,'xs']},
     note:{n:'ملاحظة الفاتورة',f:['fNote',6,34,'xs'],c:[['ink','لون الكتابة (كل الفاتورة)']]},
     mainHead:{n:'عناوين الجدول',f:['th',7,22],c:[['head','الخلفية'],['hfg','الكتابة']]},
-    mainBody:{n:'بنود الجدول',f:['tbl',7,24],c:[['ink','الكتابة'],['grid','الخطوط'],['edge','الإطار']],b:['bold','خط عريض']},
+    mainBody:{n:'بنود الجدول',f:['tbl',7,24],c:[['ink','الكتابة'],['grid','الخطوط'],['edge','الإطار']]},
     itemsHead:{n:'عناوين ملخص الأصناف',f:['items',7,22],c:[['head','الخلفية'],['hfg','الكتابة']]},
     itemsBody:{n:'ملخص الأصناف',f:['items',7,22],c:[['ink','الكتابة'],['sumA','خلفية صف الإجمالي'],['grid','الخطوط']]},
     'tot:Tot':{n:'الإجمالي',f:['fTot',8,40,'sumBig'],c:[['totBg','خلفية العنوان'],['totFg','كتابة العنوان'],['sumA','خلفية الرقم']]},
     'tot:Rem':{n:'المتبقي',f:['fRem',8,40,'sumBig'],c:[['remBg','الخلفية'],['remFg','الكتابة']]},
-    'tot:Paid':{n:'المدفوع',f:['fPaid',8,40,'sum'],c:[['paidBg','خلفية الرقم'],['paidFg','كتابة الرقم']],b:['paidB','خط عريض']},
+    'tot:Paid':{n:'المدفوع',f:['fPaid',8,40,'sum'],c:[['paidBg','خلفية الرقم'],['paidFg','كتابة الرقم']]},
     'tot:':{n:'باقي صفوف الإجماليات',f:['sum',7,22],c:[['head','خلفية العنوان'],['hfg','كتابة العنوان'],['sumA','خلفية الرقم'],['sumB','خلفية الرقم (2)']]},
     mt:{n:'صف الإجمالي تحت الجدول',f:['mtF',7,30,'tbl'],c:[['head','خلفية العنوان'],['hfg','كتابة العنوان'],['sumA','خلفية الرقم']],b:['mtHide','إخفاء الصف ده']},
     logo:{n:'اللوجو',f:['logoH',20,120,null,4]},

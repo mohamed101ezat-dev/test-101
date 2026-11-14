@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='265';
+const APP_VER='266';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1491,7 +1491,7 @@ $('themeChk').onchange=()=>setTheme($('themeChk').checked);
 (function(){let p='sage';try{p=localStorage.getItem('pal')||'sage'}catch(e){}setPal(p);
 document.querySelectorAll('#pals button,#palsCalm button').forEach(b=>b.onclick=()=>setPal(b.dataset.p));$('palCustom').value=getCC();$('palCustom').oninput=()=>{try{localStorage.setItem('cc',$('palCustom').value)}catch(e){}setPal('custom')};
 $('animChk').checked=pget('anim',animDef());$('animChk').onchange=()=>{pset('anim',$('animChk').checked);applyAnim()};applyAnim();perfWatch()})();
-[['editInv','editInv'],['dupInv','dupInv'],['repLastOn','repLastOn'],['dayCl','dayCl'],['weekCl','weekCl'],['monCl','monCl'],['bulkRemChk','bulkRem'],['trashOn','trashOn'],['bkAl','bkAl'],['snapOn','snapOn'],['autoBk','autoBk'],['logoOn','logoOn'],['fancyInv','fancyInv'],['pdfOn','pdfOn'],['ceilSz','ceilSz'],['rndTot','rndTot'],['rndDn','rndDn'],['nfRem','nfRem'],['nfStk','nfStk'],['rcOn','rcOn'],['qtOn','qtOn'],['remDays','remDays'],['remOld','remOld'],['remBal','remBal']].forEach(([id,k])=>{$(id).checked=pget(k,true);$(id).onchange=()=>{pset(k,$(id).checked);applyFeatures();drawCusts();if(k==='ceilSz'||k==='rndTot'||k==='rndDn')calc()}});
+[['editInv','editInv'],['dupInv','dupInv'],['repLastOn','repLastOn'],['dayCl','dayCl'],['weekCl','weekCl'],['monCl','monCl'],['bulkRemChk','bulkRem'],['trashOn','trashOn'],['bkAl','bkAl'],['snapOn','snapOn'],['autoBk','autoBk'],['logoOn','logoOn'],['fancyInv','fancyInv'],['pdfOn','pdfOn'],['ceilSz','ceilSz'],['nfRem','nfRem'],['nfStk','nfStk'],['rcOn','rcOn'],['qtOn','qtOn'],['remDays','remDays'],['remOld','remOld'],['remBal','remBal']].forEach(([id,k])=>{$(id).checked=pget(k,true);$(id).onchange=()=>{pset(k,$(id).checked);applyFeatures();drawCusts();if(k==='ceilSz')calc()}});
 /* متابعة الطلبيات: مفتوحة افتراضياً */
 $('ordOn').checked=ordOn();$('ordOn').onchange=()=>{pset('ordOn',$('ordOn').checked);drawDash();calc()};
 /* الإضافات ظاهرة دايماً: مقفولة افتراضياً لأنها مش في كل فاتورة */
@@ -1547,7 +1547,7 @@ let stCur='';
 function stGo(k){stCur=k||'';$('stHome').classList.toggle('hide',!!stCur);document.querySelectorAll('#t-st .stp').forEach(p=>p.classList.toggle('hide',p.dataset.sp!==stCur));
   try{if(stCur==='des'&&window.invDesOpen)invDesOpen();else if(stCur==='msg'){loadMsgUI();msgPrev()}else if(stCur==='pay')pmDraw();else if(stCur==='notes')ntDraw();else if(stCur==='shop'){loadMsgUI();shopTxtLoad()}else if(stCur==='look')fzMark();else if(stCur==='rem')remUI();else if(stCur==='data')storDraw();else if(stCur==='exp')expOpen();else if(stCur==='sup')supOpen(null);else if(stCur==='stk')stkOpen();else if(stCur==='nf')nfUI();else if(!stCur)stSum()}catch(e){}
   window.scrollTo(0,0)}
-function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · '+(n>1?n+' قربوا يخلصوا':'واحد قرب يخلص'):''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
+function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · ⚠️ '+n:''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
   W_('shop',shopN());W_('des',(pget('fancyInv',true)?'التصميم الملون':'تصميم بسيط')+' · '+PAPERS[paperKey()].n);
   const n=liveNotes().length;W_('notes',n?n+(n>1?' ملاحظات':' ملاحظة'):'مفيش ملاحظات');
   W_('inv',[pget('editInv',true)&&'تعديل',pget('dupInv',true)&&'تكرار',pget('pdfOn',true)&&'PDF وطباعة',pget('saveImgOn',false)&&'حفظ كصورة'].filter(Boolean).join(' · ')||'كل الخيارات مقفولة');
@@ -1560,7 +1560,7 @@ function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ss
   W_('look',(document.documentElement.getAttribute('data-theme')==='dark'?'ليلي':'نهاري')+' · خط '+({x:'أصغر',s:'صغير',m:'وسط',l:'كبير',xl:'أكبر'}[lsv('fz','m')||'m']||'وسط'));
   W_('lock',lsv('lkOn','')==='1'?'مقفول برقم سري':'من غير قفل');
   W_('data',$('stor').textContent.replace(/^الحفظ:\s*/,'').replace(/\.$/,''))}
-$('t-st').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){document.querySelector('#bnav button[data-t="'+g.dataset.go+'"]').click();window.scrollTo(0,0);return}const b=e.target.closest('.sti,.stile[data-sp]');if(b){stGo(b.dataset.sp);return}if(e.target.closest('[data-stback]'))stGo('')});
+$('t-st').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){document.querySelector('#bnav button[data-t="'+g.dataset.go+'"]').click();window.scrollTo(0,0);return}const b=e.target.closest('.sti[data-sp],.stile[data-sp]');if(b){stGo(b.dataset.sp);return}if(e.target.closest('[data-stback]'))stGo('')});
 /* ===== الربح ووضع العامل ===== */
 const byTag=()=>{try{const n=localStorage.getItem('wkName');return n?{by:n}:{}}catch(e){return{}}};
 const wkList=()=>{try{return JSON.parse(localStorage.getItem('wkList')||'[]')}catch(e){return[]}};
@@ -1592,7 +1592,7 @@ $('stSrch').oninput=()=>{const q=$('stSrch').value.trim(),box=$('stRes');if(!q){
   const r=stFind(q);$('stMain').classList.add('hide');box.classList.remove('hide');window.stHits=r;
   box.innerHTML=r.length?r.map((x,i)=>`<button type="button" class="sti" data-rs="${i}"><span class="si">🔎</span><span class="stt"><b>${esc(x.t)}</b><small>${x.e?esc(x.pt):'صفحة كاملة'}</small></span><span class="sa">‹</span></button>`).join(''):'<div class="mute" style="padding:10px">مفيش إعداد بالاسم ده. جرّب كلمة تانية.</div>'};
 $('stRes').onclick=e=>{const b=e.target.closest('[data-rs]');if(!b)return;const r=window.stHits[+b.dataset.rs];$('stSrch').value='';$('stRes').classList.add('hide');$('stMain').classList.remove('hide');stGo(r.pg);
-  if(r.e)setTimeout(()=>{let d=r.e.closest('details');while(d){d.open=true;d=d.parentElement&&d.parentElement.closest('details')}r.e.scrollIntoView({block:'center'});r.e.classList.add('stflash');setTimeout(()=>r.e.classList.remove('stflash'),2200)},80)};
+  if(r.e)setTimeout(()=>{let d=r.e.closest('details');while(d){d.open=true;d=d.parentElement&&d.parentElement.closest('details')}const t=r.e.getClientRects().length?r.e:(r.e.closest('.card')||r.e);t.scrollIntoView({block:'center'});t.classList.add('stflash');setTimeout(()=>t.classList.remove('stflash'),2200)},80)};
 /* بيانات المحل: السطور الثابتة */
 function shopTxtLoad(){const d=invd();$('stTop').value=d.topText||'';$('stHead').value=d.headText||'';$('stFoot').value=d.footText||''}
 ['stTop','stHead','stFoot'].forEach(id=>$(id).oninput=()=>{try{localStorage.setItem('shopTxt',JSON.stringify({top:$('stTop').value,head:$('stHead').value,foot:$('stFoot').value}))}catch(e){}setSoon()});
@@ -1606,9 +1606,9 @@ function noteSnap(){const l=liveNotes();return{gnote:l.map(n=>n.t).join('\n'),gn
 const ntSave=l=>{try{localStorage.setItem('invNotes',JSON.stringify(l))}catch(e){}};
 const NCOL=['','#c0261b','#15803d','#1d4ed8','#b08d3c','#c2410c'];
 function ntDraw(){const l=getNotes(),ink=invd().ink||'#14233a';
-  $('ntList').innerHTML=l.map((n,i)=>{const col=n.c||'',cust=!!col&&!NCOL.includes(col);return`<div class="ntr" data-i="${i}"><textarea data-nt="t" rows="2" placeholder="اكتب الملاحظة" style="color:${col||'var(--ink)'};font-weight:${n.b?700:400}">${esc(n.t||'')}</textarea>
+  $('ntList').innerHTML=l.map((n,i)=>{const col=n.c||'',cust=!!col&&!NCOL.includes(col);return`<div class="ntr" data-i="${i}"><textarea data-nt="t" rows="2" placeholder="اكتب الملاحظة" style="color:${col||'var(--ink)'};font-weight:400">${esc(n.t||'')}</textarea>
     <div class="ntc">${NCOL.map(c=>`<button type="button" class="dot${c===col?' on':''}" data-nc="${c}" style="background:${c||ink}" aria-label="${c?'لون':'لون الكتابة العادي'}"></button>`).join('')}<label class="ncust${cust?' on':''}" title="لون تاني"><input type="color" data-nt="c" value="${col||'#14233a'}" aria-label="لون تاني"></label>
-    <button type="button" class="alt nb${n.b?' on':''}" data-nbold="1" aria-label="خط عريض">B</button><span class="sp"></span>
+    <span class="sp"></span>
     <button type="button" class="alt" data-nm="-1"${i?'':' disabled'} aria-label="لفوق">▲</button><button type="button" class="alt" data-nm="1"${i<l.length-1?'':' disabled'} aria-label="لتحت">▼</button><button type="button" class="del" data-nx="1" aria-label="حذف">×</button></div></div>`}).join('')||'<p class="mute" style="margin-top:8px">مفيش ملاحظات. اضغط (+ ملاحظة جديدة).</p>';
   ntPrev()}
 let ntT=0;const ntPrevSoon=()=>{clearTimeout(ntT);ntT=setTimeout(ntPrev,300)};
