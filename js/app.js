@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='266';
+const APP_VER='267';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1547,7 +1547,7 @@ let stCur='';
 function stGo(k){stCur=k||'';$('stHome').classList.toggle('hide',!!stCur);document.querySelectorAll('#t-st .stp').forEach(p=>p.classList.toggle('hide',p.dataset.sp!==stCur));
   try{if(stCur==='des'&&window.invDesOpen)invDesOpen();else if(stCur==='msg'){loadMsgUI();msgPrev()}else if(stCur==='pay')pmDraw();else if(stCur==='notes')ntDraw();else if(stCur==='shop'){loadMsgUI();shopTxtLoad()}else if(stCur==='look')fzMark();else if(stCur==='rem')remUI();else if(stCur==='data')storDraw();else if(stCur==='exp')expOpen();else if(stCur==='sup')supOpen(null);else if(stCur==='stk')stkOpen();else if(stCur==='nf')nfUI();else if(!stCur)stSum()}catch(e){}
   window.scrollTo(0,0)}
-function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · ⚠️ '+n:''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
+function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t)+(supOv()>0?' ⏰':''):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · ⚠️ '+n:''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
   W_('shop',shopN());W_('des',(pget('fancyInv',true)?'التصميم الملون':'تصميم بسيط')+' · '+PAPERS[paperKey()].n);
   const n=liveNotes().length;W_('notes',n?n+(n>1?' ملاحظات':' ملاحظة'):'مفيش ملاحظات');
   W_('inv',[pget('editInv',true)&&'تعديل',pget('dupInv',true)&&'تكرار',pget('pdfOn',true)&&'PDF وطباعة',pget('saveImgOn',false)&&'حفظ كصورة'].filter(Boolean).join(' · ')||'كل الخيارات مقفولة');
@@ -1711,25 +1711,125 @@ $('exAdd').onclick=()=>{const amt=rd2(nv($('exAmt').value)),m=$('exMsg'),dv=$('e
   S.expenses.push(o);put('expenses',o);$('exAmt').value='';$('exNote').value='';$('exMon').value=dv.slice(0,7);drawExp();m.textContent='اتسجل ✓'};
 $('exList').onclick=e=>{const b=e.target.closest('[data-exd]');if(!b||!ok2(b))return;const id=b.dataset.exd,x=S.expenses.find(y=>y.id===id);del('expenses',id);drawExp();if(x)toast('اتمسح المصروف','تراجع',()=>{undel('expenses',x);drawExp()})};
 
-/* الموردين: S.suppliers {id,name} · S.purchases {id,sid,ts,type:'buy'|'pay',amt,note}. الرصيد = اللي عليك للمورد */
-let supCur=null;
+/* الموردين: S.suppliers {id,name,phone,cat,terms,note} · S.purchases {id,sid,ts,type:'buy'|'pay',amt,note,due?,how?,iid?,q?,sk?,pf?}. الرصيد = اللي عليك للمورد.
+   الدفعات بتتوزّع على أقدم شراء الأول (FIFO) عشان نعرف أنهي فاتورة لسه مدفوعة جزء منها وأنهي متأخرة */
+let supCur=null,spSort='owed',spFil='all',spTy='buy',spDay=0,spDue=null,spHow='كاش',spAll=false,spNewCat='';
+const SPC=[['gl','🪟','زجاج'],['ac','🔩','إكسسوار'],['al','🧱','خامات'],['tr','🚚','نقل'],['mt','🛠','صيانة'],['ot','📦','أخرى']],SPDAY=864e5;
+const spCat=k=>SPC.find(c=>c[0]===k),spIc=s=>(spCat(s.cat)||[0,'🚚'])[1];
+const spAgo=t=>{const d=Math.floor((Date.now()-t)/SPDAY);return d<=0?'النهارده':d===1?'امبارح':d===2?'من يومين':d<=10?'من '+d+' أيام':'من '+d+' يوم'};
+const spIn=d=>d<=0?'النهارده':d===1?'بكرة':d===2?'بعد يومين':d<=10?'بعد '+d+' أيام':'بعد '+d+' يوم';
+const spTel=p=>toEn(phoneParts(p)[0]||'').replace(/[^\d+]/g,'');
+function spAge(s){const l=S.purchases.filter(x=>x.sid===s.id).sort((a,b)=>a.ts-b.ts),now=Date.now();const pf=new Set(l.filter(x=>x.pf).map(x=>x.pf));let pool=0;l.forEach(x=>{if(x.type==='pay'&&!x.pf)pool+=+x.amt||0});
+  const rem={};let bal=0,ov=0,nx=null,buy=0,pay=0,nb=0,last=0;
+  l.forEach(x=>{const v=+x.amt||0;last=Math.max(last,x.ts);if(x.type==='pay'){bal-=v;pay+=v;return}bal+=v;buy+=v;nb++;if(pf.has(x.id)){rem[x.id]=0;return}const u=Math.min(pool,v);pool-=u;const r=rd2(v-u);rem[x.id]=r;
+    if(r>0&&x.due){if(x.due<now)ov+=r;else if(!nx||x.due<nx.ts)nx={ts:x.due,amt:r}}});
+  return{bal:rd2(bal),ov:rd2(ov),nx,rem,l,buy:rd2(buy),pay:rd2(pay),nb,last}}
 function supBal(s){return rd2(S.purchases.filter(x=>x.sid===s.id).reduce((a,x)=>a+(x.type==='pay'?-1:1)*(+x.amt||0),0))}
 function supTot(){return rd2(S.suppliers.reduce((a,s)=>a+supBal(s),0))}
-function supOpen(id){supCur=id;$('supHome').classList.toggle('hide',!!id);$('supOne').classList.toggle('hide',!id);$('supMsg').textContent='';$('spMsg').textContent='';if(!$('spDate').value)$('spDate').value=dayKey(Date.now());drawSup();window.scrollTo(0,0)}
+function supOv(){return rd2(S.suppliers.reduce((a,s)=>a+spAge(s).ov,0))}
+const spChips=(arr,on,att)=>arr.map(([v,t])=>`<button type="button" ${att}="${esc(String(v))}"${String(v)===String(on)?' class="on"':''}>${t}</button>`).join('');
+function supOpen(id){supCur=id;$('supHome').classList.toggle('hide',!!id);$('supOne').classList.toggle('hide',!id);$('supMsg').textContent='';$('spMsg').textContent='';
+  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false}
+  drawSup();window.scrollTo(0,0)}
+function spMonth(a){const d=new Date(a),x=new Date(d.getFullYear(),d.getMonth(),1).getTime();return[x,new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
 function drawSup(){const s=S.suppliers.find(x=>x.id===supCur);
-  if(!s){if(supCur){supOpen(null);return}$('supTot').textContent=f(supTot());
-    $('supList').innerHTML=S.suppliers.length?'<tr><th>#</th><th>المورد</th><th>عليك</th></tr>'+S.suppliers.slice().sort((a,b)=>supBal(b)-supBal(a)||a.name.localeCompare(b.name,'ar')).map((x,i)=>`<tr data-sup="${esc(x.id)}"><td class="num">${i+1}</td><td class="tn">${esc(x.name)}</td><td class="num"><b>${f(supBal(x))}</b></td></tr>`).join(''):'<tr><td class="tn mute">لسه مفيش موردين. اكتب اسم مورد فوق.</td></tr>';return}
-  $('supNm').textContent=s.name;$('supB').textContent=f(supBal(s));let run=0;
-  const l=S.purchases.filter(x=>x.sid===s.id).sort((a,b)=>a.ts-b.ts).map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return`<tr><td class="num">${dshort(x.ts).slice(5)}</td><td class="tn">${esc(x.note||(pay?'دفعة':'شراء'))}</td><td class="num">${pay?'':f(v)}</td><td class="num">${pay?f(v):''}</td><td class="num"><b>${f(run)}</b></td><td><button type="button" class="xd" data-spd="${esc(x.id)}" aria-label="حذف">×</button></td></tr>`}).reverse().join('');
-  $('spList').innerHTML=l?'<tr><th>التاريخ</th><th>البيان</th><th>شراء</th><th>دفع</th><th>الرصيد</th><th></th></tr>'+l:'<tr><td class="tn mute">لسه مفيش حركات للمورد ده.</td></tr>'}
+  if(!s){if(supCur){supOpen(null);return}spHome();return}
+  spOne(s)}
+function spHome(){const now=Date.now(),[a,b]=spMonth(now),pm=puIn(a,b),q=$('supQ').value.trim();
+  $('supTot').textContent=f(supTot());{const o=supOv();$('spkOv').textContent=f(o);$('spkOv').parentNode.classList.toggle('bad',o>0)}$('spkMo').textContent=f(pm.buy);$('spkPm').textContent=f(pm.pay);
+  const info=S.suppliers.map(s=>({s,g:spAge(s)})),cats=SPC.filter(c=>S.suppliers.some(s=>s.cat===c[0]));
+  $('supFil').innerHTML=spChips([['all','الكل'],['owe','عليّا فلوس'],['late','⏰ متأخر'],...cats.map(c=>[c[0],c[1]+' '+c[2]])],spFil,'data-sf');
+  $('supSort').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.so===spSort));
+  $('supNewCat').innerHTML=spChips([['','بدون نوع'],...SPC.map(c=>[c[0],c[1]+' '+c[2]])],spNewCat,'data-nc');
+  let l=info.filter(o=>(!q||qm(o.s.name,q))&&(spFil==='all'||(spFil==='owe'?o.g.bal>0:spFil==='late'?o.g.ov>0:o.s.cat===spFil)));
+  l.sort((x,y)=>spSort==='name'?x.s.name.localeCompare(y.s.name,'ar'):spSort==='recent'?(y.g.last-x.g.last)||x.s.name.localeCompare(y.s.name,'ar'):(y.g.bal-x.g.bal)||x.s.name.localeCompare(y.s.name,'ar'));
+  $('supRows').innerHTML=l.length?l.map(({s,g})=>{const w=waNum(s.phone),t=spTel(s.phone),dd=g.nx?Math.ceil((g.nx.ts-now)/SPDAY):0;
+    const bd=g.ov>0?`<span class="tag dr">⏰ متأخر ${f(g.ov)}</span>`:g.nx&&dd<=7?`<span class="tag">⏰ ${spIn(dd)}</span>`:'';
+    return`<div class="sprow" data-sup="${esc(s.id)}"><span class="spi">${spIc(s)}</span><div class="spm"><div class="spn">${esc(s.name)}</div><div class="spd2">${g.l.length?'آخر حركة '+spAgo(g.last)+' · '+(g.l.length===1?'حركة':g.l.length===2?'حركتين':g.l.length<=10?g.l.length+' حركات':g.l.length+' حركة'):'لسه مفيش حركات'} ${bd}</div></div><div class="spv num ${g.bal>0?'dr':g.bal<0?'ok':'mu'}">${g.bal<0?'له '+f(-g.bal):f(g.bal)}</div><span class="spx">${t?`<a href="tel:${esc(t)}" aria-label="اتصل">📞</a>`:''}${w?`<a href="https://wa.me/${w}" target="_blank" rel="noopener" aria-label="واتساب"><i class="wai"></i></a>`:''}</span></div>`}).join(''):`<div class="card mute">${S.suppliers.length?'مفيش مورد بالشكل ده.':'لسه مفيش موردين. اكتب اسم مورد تحت.'}</div>`}
+function spOne(s){const now=Date.now(),g=spAge(s);
+  $('supNm').textContent=s.name;$('supCatB').textContent=s.cat&&spCat(s.cat)?spCat(s.cat)[1]+' '+spCat(s.cat)[2]:'';
+  $('supB').textContent=f(Math.abs(g.bal));$('supB').className='num '+(g.bal>0?'dr':g.bal<0?'ok':'');$('supBL').textContent=g.bal<0?'ليك عنده':'عليك';
+  const du=$('supDue');if(g.ov>0){du.className='spdue bad';du.textContent='⏰ متأخر '+f(g.ov)+(g.l.length?'':'')}else if(g.nx){const dd=Math.ceil((g.nx.ts-now)/SPDAY);du.className='spdue';du.textContent='⏰ أقرب ميعاد: '+f(g.nx.amt)+' '+spIn(dd)}else du.className='spdue hide';
+  {const t=spTel(s.phone),w=waNum(s.phone),c=$('supCall'),a=$('supWa');c.classList.toggle('hide',!t);if(t)c.href='tel:'+t;a.classList.toggle('hide',!w);if(w)a.href='https://wa.me/'+w}
+  const [m0,m1]=spMonth(now),mb=g.l.filter(x=>x.type==='buy'&&x.ts>=m0&&x.ts<m1).reduce((a,x)=>a+(+x.amt||0),0),lp=g.l.filter(x=>x.type==='pay').pop();
+  const st=[['المشتريات',f(g.buy)],['المدفوع',f(g.pay)],['الشهر ده',f(mb)],['الفواتير',String(g.nb)],['المتوسط',g.nb?f(Math.round(g.buy/g.nb)):'-'],['آخر دفعة',lp?f(lp.amt):'-'],['من',g.l.length?dshort(g.l[0].ts).slice(2):'-'],['آخر حركة',g.l.length?spAgo(g.last).replace('من ',''):'-']];
+  $('supStats').innerHTML=st.map(([k,v])=>`<div><small>${k}</small><span class="num">${v}</span></div>`).join('');
+  /* أعمدة آخر 6 شهور */
+  const bars=[];for(let i=5;i>=0;i--){const d=new Date(now);d.setDate(1);d.setMonth(d.getMonth()-i);const [a,b]=spMonth(d.getTime());bars.push({a,v:g.l.filter(x=>x.type==='buy'&&x.ts>=a&&x.ts<b).reduce((q,x)=>q+(+x.amt||0),0)})}
+  const mx=Math.max(1,...bars.map(x=>x.v));$('supBars').classList.toggle('hide',!g.nb);
+  $('supBars').innerHTML=bars.map(x=>`<div><i style="height:${Math.round(x.v/mx*100)}%"></i><small>${new Date(x.a).getMonth()+1}</small></div>`).join('');
+  /* أكتر الأصناف اللي بتشتريها منه */
+  const it=new Map();g.l.forEach(x=>{if(x.type==='buy'&&x.iid){it.set(x.iid,(it.get(x.iid)||0)+(+x.q||0))}});const top=[...it.entries()].map(([i,q])=>({n:(S.items.find(y=>y.id===i)||{}).name,q})).filter(x=>x.n).sort((a,b)=>b.q-a.q).slice(0,4);
+  $('supTop').classList.toggle('hide',!top.length);$('supTop').innerHTML=top.length?'<small>بتشتري منه:</small> '+top.map(x=>`<span class="tag">${esc(x.n)} · ${f(x.q)}</span>`).join(' '):'';
+  spEntry(s,g);spLedger(s,g);spEditFill(s)}
+/* خانة التسجيل: أزرار جاهزة بدل الكتابة */
+function spEntry(s,g){const buy=spTy==='buy';$('spTy').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.ty===spTy));
+  const q=[];if(!buy&&g.bal>0){q.push(['all','كله '+f(g.bal)]);if(g.bal>=2)q.push(['half','النص '+f(Math.ceil(g.bal/2))]);if(g.ov>0&&g.ov<g.bal)q.push(['ov','المتأخر '+f(g.ov)])}
+  const seen=new Set();g.l.slice().reverse().forEach(x=>{if(x.type===spTy&&!seen.has(x.amt)&&seen.size<3){seen.add(x.amt);q.push(['v'+x.amt,f(x.amt)])}});
+  [100,500,1000].forEach(n=>q.push(['+'+n,'+'+f(n)]));
+  $('spQuick').innerHTML=q.map(([v,t])=>`<button type="button" data-q="${esc(v)}">${t}</button>`).join('');
+  $('spDays').innerHTML=spChips([[0,'النهارده'],[1,'امبارح'],[2,'من يومين'],['x','📅 تاريخ تاني']],spDay,'data-dy');$('spDate').classList.toggle('hide',spDay!=='x');
+  $('spDueRow').classList.toggle('hide',!buy);$('spHowRow').classList.toggle('hide',buy);
+  $('spDueRow').innerHTML='<small class="mute">السداد:</small>'+spChips([['','من غير ميعاد'],['paid','✅ اتدفع كله'],[7,'أسبوع'],[15,'15 يوم'],[30,'شهر'],[45,'45 يوم'],[60,'شهرين']],spDue===null?'':spDue,'data-du');
+  $('spHowRow').innerHTML='<small class="mute">دفعت:</small>'+spChips(['كاش','فودافون كاش','انستا','تحويل بنكي','شيك'].map(x=>[x,x]),spHow,'data-hw');
+  const notes=[];g.l.slice().reverse().forEach(x=>{if(x.note&&x.type===spTy&&!notes.includes(x.note)&&notes.length<5)notes.push(x.note)});
+  $('spNotes').innerHTML=notes.map(n=>`<button type="button" data-nt="${esc(n)}">${esc(n)}</button>`).join('');
+  $('spStk').classList.toggle('hide',!buy);
+  const cur=$('spIt').value;$('spIt').innerHTML='<option value="">اختار الصنف</option>'+S.items.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(i=>`<option value="${esc(i.id)}">${esc(i.name)}${szOf(i)?' '+esc(szOf(i)):''}</option>`).join('');$('spIt').value=cur;
+  $('spAdd').textContent=buy?'✅ سجّل الشراء':'✅ سجّل الدفعة'}
+function spLedger(s,g){let run=0;const rows=g.l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse(),lim=spAll?rows.length:15;
+  $('spList').innerHTML=rows.length?'<tr><th>اليوم</th><th>البيان</th><th>شراء</th><th>دفع</th><th>الرصيد</th><th></th></tr>'+rows.slice(0,lim).map(({x,v,pay,run})=>{
+    let sub='';if(pay&&x.how)sub=x.how;else if(!pay){const r=g.rem[x.id];if(r===0)sub='✅ مدفوعة';else if(x.due)sub=(x.due<Date.now()?'⏰ متأخرة ':'⏰ ')+dshort(x.due).slice(5)+(r<v?' · باقي '+f(r):'');else if(r<v)sub='باقي '+f(r)}
+    return`<tr><td class="num">${dshort(x.ts).slice(5)}</td><td class="tn">${esc(x.note||(pay?'دفعة':'شراء'))}${sub?`<small class="mute">${esc(sub)}</small>`:''}</td><td class="num">${pay?'':f(v)}</td><td class="num">${pay?f(v):''}</td><td class="num"><b>${f(run)}</b></td><td><button type="button" class="xd" data-spd="${esc(x.id)}" aria-label="حذف">×</button></td></tr>`}).join(''):'<tr><td class="tn mute">لسه مفيش حركات للمورد ده. سجّل أول شراء من فوق.</td></tr>';
+  $('spMore').classList.toggle('hide',rows.length<=15||spAll)}
+function spEditFill(s){const ae=document.activeElement;if(!($('supEdit').contains(ae)&&/INPUT/.test(ae.tagName))){$('supEN').value=s.name;$('supPh').value=s.phone||'';$('supENote').value=s.note||''}
+  $('supEC').innerHTML=spChips([['','بدون'],...SPC.map(c=>[c[0],c[1]+' '+c[2]])],s.cat||'','data-ec');
+  $('supET').innerHTML=spChips([[0,'من غير'],[7,'أسبوع'],[15,'15 يوم'],[30,'شهر'],[45,'45 يوم'],[60,'شهرين']],+s.terms||0,'data-et')}
+const spSave=(s,k,v)=>{if(v===''||v==null||v===0)delete s[k];else s[k]=v;put('suppliers',s)};
+/* الصفحة الرئيسية */
 $('supAdd').onclick=()=>{const n=$('supName').value.trim().replace(/\s+/g,' '),m=$('supMsg');if(!n){m.textContent='اكتب اسم المورد';return}if(S.suppliers.some(x=>nkey(x.name)===nkey(n))){m.textContent='المورد ده موجود';return}
-  const o={id:uid(),name:n};S.suppliers.push(o);put('suppliers',o);$('supName').value='';m.textContent='';drawSup()};
-$('supList').onclick=e=>{const r=e.target.closest('[data-sup]');if(r)supOpen(r.dataset.sup)};
+  const o={id:uid(),name:n};if(spNewCat)o.cat=spNewCat;S.suppliers.push(o);put('suppliers',o);$('supName').value='';m.textContent='✅ اتضاف، دوس عليه وكمّل بياناته';drawSup()};
+$('supName').onkeydown=e=>{if(e.key==='Enter')$('supAdd').click()};
+$('supQ').oninput=drawSup;
+$('supFil').onclick=e=>{const b=e.target.closest('[data-sf]');if(b){spFil=b.dataset.sf;drawSup()}};
+$('supSort').onclick=e=>{const b=e.target.closest('[data-so]');if(b){spSort=b.dataset.so;drawSup()}};
+$('supNewCat').onclick=e=>{const b=e.target.closest('[data-nc]');if(b){spNewCat=b.dataset.nc;drawSup()}};
+$('supRows').onclick=e=>{if(e.target.closest('a'))return;const r=e.target.closest('[data-sup]');if(r)supOpen(r.dataset.sup)};
 $('supBack').onclick=()=>supOpen(null);
-$('spAdd').onclick=()=>{const amt=rd2(nv($('spAmt').value)),m=$('spMsg'),dv=$('spDate').value,dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(dv);if(!(amt>0)){m.textContent='اكتب المبلغ';return}if(!dm){m.textContent='اختار التاريخ';return}
-  const o={id:uid(),sid:supCur,ts:dv===dayKey(Date.now())?Date.now():new Date(+dm[1],+dm[2]-1,+dm[3],12).getTime(),type:$('spType').value,amt,note:$('spNote').value.trim()};
-  S.purchases.push(o);put('purchases',o);$('spAmt').value='';$('spNote').value='';drawSup();m.textContent='اتسجل ✓'};
-$('spList').onclick=e=>{const b=e.target.closest('[data-spd]');if(!b||!ok2(b))return;const id=b.dataset.spd,x=S.purchases.find(y=>y.id===id);del('purchases',id);drawSup();if(x)toast('اتمسحت الحركة','تراجع',()=>{undel('purchases',x);drawSup()})};
+/* التسجيل */
+$('spTy').onclick=e=>{const b=e.target.closest('[data-ty]');if(!b)return;spTy=b.dataset.ty;drawSup()};
+$('spQuick').onclick=e=>{const b=e.target.closest('[data-q]');if(!b)return;const s=S.suppliers.find(x=>x.id===supCur),g=spAge(s),k=b.dataset.q,cur=nv($('spAmt').value);
+  $('spAmt').value=k==='all'?g.bal:k==='half'?Math.ceil(g.bal/2):k==='ov'?g.ov:k[0]==='+'?rd2(cur+(+k.slice(1))):k.slice(1);fmtAll&&fmtAll();$('spAmt').focus()};
+$('spDays').onclick=e=>{const b=e.target.closest('[data-dy]');if(!b)return;spDay=b.dataset.dy==='x'?'x':+b.dataset.dy;if(spDay==='x'&&!$('spDate').value)$('spDate').value=dayKey(Date.now());drawSup()};
+$('spDueRow').onclick=e=>{const b=e.target.closest('[data-du]');if(!b)return;const v=b.dataset.du;spDue=v===''?null:v==='paid'?'paid':+v;drawSup()};
+$('spHowRow').onclick=e=>{const b=e.target.closest('[data-hw]');if(b){spHow=b.dataset.hw;drawSup()}};
+$('spNotes').onclick=e=>{const b=e.target.closest('[data-nt]');if(b){$('spNote').value=b.dataset.nt}};
+$('spAdd').onclick=()=>{const s=S.suppliers.find(x=>x.id===supCur);if(!s)return;const amt=rd2(nv($('spAmt').value)),m=$('spMsg');if(!(amt>0)){m.textContent='اكتب المبلغ أو دوس على زرار جاهز';return}
+  let ts=Date.now();if(spDay!==0){const dv=spDay==='x'?$('spDate').value:dayKey(Date.now()-spDay*SPDAY),dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(dv);if(!dm){m.textContent='اختار التاريخ';return}ts=dv===dayKey(Date.now())?Date.now():new Date(+dm[1],+dm[2]-1,+dm[3],12).getTime()}
+  const buy=spTy==='buy',o={id:uid(),sid:s.id,ts,type:spTy,amt,note:$('spNote').value.trim()},add=[o];
+  if(buy){const iid=$('spIt').value,q=rd2(nv($('spQty').value));
+    if(iid&&q>0){const it=S.items.find(i=>i.id===iid)||{},st={id:uid(),iid,ts,q};S.stock.push(st);put('stock',st);o.iid=iid;o.q=q;o.sk=st.id;if(!o.note)o.note=(it.name||'صنف')+' × '+f(q)}
+    if(spDue==='paid')add.push({id:uid(),sid:s.id,ts,type:'pay',amt,how:'كاش',note:'سداد '+(o.note||'شراء'),pf:o.id});else if(spDue>0)o.due=ts+spDue*SPDAY}
+  else o.how=spHow;
+  add.forEach(x=>{S.purchases.push(x);put('purchases',x)});
+  $('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';spDay=0;drawSup();m.textContent=(buy?'✅ اتسجل الشراء':'✅ اتسجلت الدفعة')+(add.length>1?' واتدفع':'')+' · '+(supBal(s)<0?'ليك عنده ':'عليك ')+f(Math.abs(supBal(s)))};
+$('spMore').onclick=()=>{spAll=true;drawSup()};
+$('spList').onclick=e=>{const b=e.target.closest('[data-spd]');if(!b||!ok2(b))return;const x=S.purchases.find(y=>y.id===b.dataset.spd);if(!x)return;
+  const rel=S.purchases.filter(y=>y.pf===x.id),sk=S.stock.filter(y=>y.id===x.sk);[x,...rel].forEach(y=>del('purchases',y.id));sk.forEach(y=>del('stock',y.id));drawSup();
+  toast('اتمسحت الحركة'+(rel.length||sk.length?' ومعاها '+(rel.length?'السداد':'')+(rel.length&&sk.length?' و':'')+(sk.length?'المخزون':''):''),'تراجع',()=>{[x,...rel].forEach(y=>undel('purchases',y));sk.forEach(y=>undel('stock',y));drawSup()})};
+/* بيانات المورد */
+const spCur=()=>S.suppliers.find(x=>x.id===supCur);
+$('supEN').onchange=()=>{const s=spCur(),n=$('supEN').value.trim().replace(/\s+/g,' '),m=$('supEM');if(!s)return;if(!n){m.textContent='الاسم مينفعش يبقى فاضي';$('supEN').value=s.name;return}if(S.suppliers.some(x=>x.id!==s.id&&nkey(x.name)===nkey(n))){m.textContent='فيه مورد بنفس الاسم';$('supEN').value=s.name;return}m.textContent='';s.name=n;put('suppliers',s);drawSup()};
+$('supPh').onchange=()=>{const s=spCur();if(s){spSave(s,'phone',$('supPh').value.trim());drawSup()}};
+$('supENote').onchange=()=>{const s=spCur();if(s)spSave(s,'note',$('supENote').value.trim())};
+$('supEC').onclick=e=>{const b=e.target.closest('[data-ec]'),s=spCur();if(b&&s){spSave(s,'cat',b.dataset.ec);drawSup()}};
+$('supET').onclick=e=>{const b=e.target.closest('[data-et]'),s=spCur();if(b&&s){spSave(s,'terms',+b.dataset.et);spDue=+b.dataset.et>0?+b.dataset.et:null;drawSup()}};
+/* كشف حساب بصورة */
+$('supStm').onclick=()=>{const s=spCur();if(!s)return;const g=spAge(s);if(!g.l.length){$('spMsg').textContent='مفيش حركات تتعمل لها كشف';return}
+  let run=0;const all=g.l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return[dshort(x.ts).slice(5),x.note||(pay?'دفعة':'شراء'),pay?'':f(v),pay?f(v):'',f(run)]}),rows=all.slice(-30);
+  const cv=sheet({title:'كشف حساب',name:s.name,sub:'مورد · '+shopN(),date:stamp(Date.now()),tables:[{th:['اليوم','البيان','شراء','دفع','الرصيد'],w:[.16,.34,.17,.16,.17],rows}],
+    sum:[['إجمالي المشتريات',f(g.buy)],['إجمالي المدفوع',f(g.pay)],...(g.ov>0?[['متأخر',f(g.ov)]]:[]),[g.bal<0?'ليك عنده':'الرصيد',f(Math.abs(g.bal)),1]]});
+  showImg(cv,'كشف-'+s.name.replace(/\s+/g,'-')+'.png','كشف حساب '+s.name,false,s.phone||'',null)};
 $('supDel').onclick=e=>{const m=$('spMsg');if(S.purchases.some(x=>x.sid===supCur)){m.textContent='احذف حركات المورد الأول';return}if(!ok2(e.target))return;const s=S.suppliers.find(x=>x.id===supCur);del('suppliers',supCur);supOpen(null);if(s)toast('اتمسح المورد: '+s.name,'تراجع',()=>{undel('suppliers',s);drawSup()})};
 
 /* المخزون بعدد الألواح: S.stock {id,iid,ts,q}، q موجب وارد وسالب صرف.
@@ -1829,7 +1929,7 @@ const XL={inv:['الفواتير',['الكود','التاريخ','العميل',
   cu:['العملاء',['العميل','التليفون','الرصيد'],()=>S.customers.map(c=>[c.name,c.phone||'',balOf(c)])],
   it:['الأصناف',['الصنف','النوع','السعر'],()=>S.items.map(i=>[i.name,i.type==='rd'?'جاهز':'مقطع',i.p])],
   ex:['المصروفات',['التاريخ','النوع','المبلغ','ملاحظة'],()=>S.expenses.slice().sort((a,b)=>a.ts-b.ts).map(x=>[dshort(x.ts),x.cat,x.amt,x.note])],
-  sp:['الموردين',['التاريخ','المورد','النوع','المبلغ','ملاحظة'],()=>S.purchases.slice().sort((a,b)=>a.ts-b.ts).map(x=>[dshort(x.ts),(S.suppliers.find(s=>s.id===x.sid)||{}).name||'',x.type==='pay'?'دفعة':'شراء',x.amt,x.note])],
+  sp:['الموردين',['التاريخ','المورد','النوع','المبلغ','ملاحظة','استحقاق','طريقة الدفع'],()=>S.purchases.slice().sort((a,b)=>a.ts-b.ts).map(x=>[dshort(x.ts),(S.suppliers.find(s=>s.id===x.sid)||{}).name||'',x.type==='pay'?'دفعة':'شراء',x.amt,x.note,x.due?dshort(x.due):'',x.how||''])],
   st:['المخزون',['الصنف','النوع','الرصيد'],()=>{const m=stkAll();return S.items.filter(i=>m.has(i.id)).map(i=>[i.name,i.type==='rd'?'جاهز':'مقطع',m.get(i.id).bal])}]};
 $('xlBox').onclick=async e=>{const k=e.target.dataset.xl;if(!k)return;const[n,h,fn]=XL[k],rows=fn(),m=$('xlMsg');if(!rows.length){m.textContent='مفيش بيانات في '+n;return}
   const r=await dl(new Blob(['﻿'+[h,...rows].map(x=>x.map(csvC).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),n+'-'+dshort(Date.now()).replace(/\//g,'-')+'.csv');m.textContent=r==='fail'?'الملف متحفظش':'اتنزل ملف '+n+' ✓'};

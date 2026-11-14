@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=266">
+<link rel="stylesheet" href="css/style.css?v=267">
 
 
 
@@ -387,16 +387,37 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div id="exList"></div>
 </div>
 <div class="stp hide" data-sp="sup"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🚚 الموردين</b></div>
-<div id="supHome"><div class="card"><div class="ro" style="color:var(--ink)"><span>عليك للموردين</span><b class="num" id="supTot"></b></div>
-  <div class="rowc" style="margin:6px 0 0"><input id="supName" placeholder="اسم مورد جديد" autocomplete="off"><button type="button" class="main" id="supAdd" style="flex:none">➕ مورد</button></div><div class="info" id="supMsg"></div></div>
-<table class="xl" id="supList"></table></div>
-<div id="supOne" class="hide"><div class="card"><div class="ro" style="color:var(--ink)"><b id="supNm"></b><button type="button" class="lnk" id="supBack">→ كل الموردين</button></div>
-  <div class="ro" style="color:var(--ink);margin-top:4px"><span>عليك للمورد ده</span><b class="num" id="supB"></b></div>
-  <div class="g2" style="margin-top:6px"><div><label for="spType">النوع</label><select id="spType"><option value="buy">فاتورة شراء</option><option value="pay">دفعة للمورد</option></select></div><div><label for="spAmt">المبلغ</label><input id="spAmt" inputmode="decimal" autocomplete="off"></div></div>
-  <div class="g2"><div><label for="spDate">التاريخ</label><input type="date" id="spDate"></div><div><label for="spNote">ملاحظة</label><input id="spNote" autocomplete="off"></div></div>
-  <button type="button" class="main" id="spAdd" style="width:100%">✅ حفظ</button><div class="info" id="spMsg"></div></div>
-<table class="xl" id="spList"></table>
-<button type="button" class="alt b-red" id="supDel" style="width:100%;margin-top:8px">🗑️ حذف المورد</button></div>
+<div id="supHome">
+<div class="card spk"><div><small>عليك</small><span class="num" id="supTot"></span></div><div><small>متأخر</small><span class="num" id="spkOv"></span></div><div><small>اشتريت الشهر</small><span class="num" id="spkMo"></span></div><div><small>دفعت الشهر</small><span class="num" id="spkPm"></span></div></div>
+<div class="ro" style="gap:6px;margin:0 0 6px"><input id="supQ" type="search" placeholder="🔍 دوّر على مورد" autocomplete="off" aria-label="بحث في الموردين" style="flex:1;height:34px"></div>
+<div class="spc" id="supFil"></div>
+<div class="spc" id="supSort"><button type="button" data-so="owed">الأكتر دين</button><button type="button" data-so="recent">الأحدث</button><button type="button" data-so="name">أ ← ي</button></div>
+<div id="supRows"></div>
+<div class="card"><div class="rowc" style="margin:0"><input id="supName" placeholder="➕ مورد جديد: الاسم" autocomplete="off" aria-label="اسم المورد"><button type="button" class="main" id="supAdd" style="flex:none">➕ مورد</button></div><div class="spc" id="supNewCat" style="margin-top:6px"></div><div class="info" id="supMsg"></div></div>
+</div>
+<div id="supOne" class="hide">
+<div class="card spd"><div class="ro" style="color:var(--ink)"><button type="button" class="lnk" id="supBack">→ كل الموردين</button><span class="mute" id="supCatB"></span></div>
+  <div class="sph"><span class="spn2" id="supNm"></span><span class="spb"><small id="supBL">عليك</small><span class="num" id="supB"></span></span></div>
+  <div class="spdue hide" id="supDue"></div>
+  <div class="spact"><a class="alt hide" id="supCall">📞 اتصل</a><a class="alt wa hide" id="supWa" target="_blank" rel="noopener"><i class="wai"></i> واتساب</a><button type="button" class="alt" id="supStm">🧾 كشف حساب</button></div>
+  <div class="spst" id="supStats"></div><div class="spbars" id="supBars"></div><div class="spit" id="supTop"></div></div>
+<div class="card" id="spNew"><div class="spc" id="spTy"><button type="button" data-ty="buy">🛒 اشتريت</button><button type="button" data-ty="pay">💵 دفعت</button></div>
+  <div class="rowc" style="margin:6px 0 4px"><input id="spAmt" inputmode="decimal" placeholder="المبلغ" autocomplete="off" aria-label="المبلغ"></div>
+  <div class="spc" id="spQuick"></div>
+  <div class="spc" id="spDays"></div><input type="date" id="spDate" class="hide" aria-label="التاريخ">
+  <div class="spc" id="spDueRow"></div><div class="spc hide" id="spHowRow"></div>
+  <div class="spc" id="spNotes"></div><input id="spNote" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة" style="margin-top:4px">
+  <details class="spdt" id="spStk"><summary>📦 دخّل الأصناف دي في المخزون</summary><div class="ro" style="gap:6px;margin-top:6px"><select id="spIt" aria-label="الصنف" style="flex:2;min-width:0"></select><input id="spQty" inputmode="decimal" placeholder="الكمية" autocomplete="off" aria-label="الكمية" style="flex:1;min-width:0"></div></details>
+  <button type="button" class="main" id="spAdd" style="width:100%;margin-top:8px">✅ حفظ</button><div class="info" id="spMsg"></div></div>
+<div class="card" style="padding:6px 8px"><table class="xl" id="spList"></table><button type="button" class="alt hide" id="spMore" style="width:100%;margin-top:6px">عرض كل الحركات</button></div>
+<details class="card spdt" id="supEdit"><summary>✏️ بيانات المورد</summary>
+  <div class="g2" style="margin-top:6px"><div><label for="supEN">الاسم</label><input id="supEN" autocomplete="off"></div><div><label for="supPh">التليفون</label><input id="supPh" inputmode="tel" autocomplete="off"></div></div>
+  <label style="margin-top:4px">النوع</label><div class="spc" id="supEC"></div>
+  <label style="margin-top:4px">ميعاد السداد المعتاد (بيتحط لوحده على كل شراء)</label><div class="spc" id="supET"></div>
+  <label for="supENote" style="margin-top:4px">ملاحظات عن المورد</label><input id="supENote" autocomplete="off" placeholder="عنوان، مواعيد، اسم المندوب…">
+  <div class="info" id="supEM"></div></details>
+<button type="button" class="alt b-red" id="supDel" style="width:100%;margin-top:4px">🗑️ حذف المورد</button>
+</div>
 </div>
 <div class="stp hide" data-sp="stk"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🧱 المخزون</b></div>
 <div class="card stk-how"><b>💡 بيشتغل إزاي؟</b>
@@ -517,10 +538,10 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=266"></script>
+<script src="js/app.js?v=267"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=266"></script>
-<script src="js/features.js?v=266"></script>
+<script src="js/cutlist.js?v=267"></script>
+<script src="js/features.js?v=267"></script>
 </body>
 </html>
 
