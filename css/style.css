@@ -1271,3 +1271,13 @@ html[data-theme="light"] #rowsHd::before{background:transparent!important;color:
 html[data-theme="dark"] #rowsHd{background:color-mix(in srgb,var(--acc) 30%,var(--card))!important;color:var(--ink)!important}
 html[data-theme="dark"] #rowsHd::before{background:transparent!important}
 #rows .row:nth-child(even){background:color-mix(in srgb,var(--acc) 6%,var(--card))}
+
+/* v265: جدول الفاتورة شكله واحد في كل الألوان — حواف مدورة زي بعض، رأس بلون النظام مسطح، نفس الظل */
+html[data-theme][data-pal] #rowsHd{border-radius:12px 12px 0 0;overflow:hidden;border-color:var(--acc)}
+html[data-theme="light"][data-pal] #rowsHd,html[data-theme="light"][data-pal] #rowsHd::before{background:var(--acc)!important;color:var(--accInk,#fff)!important}
+html[data-theme="light"][data-pal] #rowsHd::before{background:transparent!important;color:inherit!important}
+html[data-theme="light"][data-pal] #rowsHd span,html[data-theme="light"][data-pal] #rowsHd::before{border-color:rgba(255,255,255,.25)!important}
+html[data-theme="dark"][data-pal] #rowsHd,html[data-theme="dark"][data-pal] #rowsHd::before{background:color-mix(in srgb,var(--acc) 30%,var(--card))!important;color:var(--ink)!important}
+html[data-theme="dark"][data-pal] #rowsHd::before{background:transparent!important}
+html[data-theme][data-pal] #rows{border-radius:0 0 12px 12px;overflow:hidden;border-color:var(--acc);box-shadow:var(--soft)}
+html[data-theme][data-pal] #rows .row:nth-child(even){background:color-mix(in srgb,var(--acc) 6%,var(--card))}
