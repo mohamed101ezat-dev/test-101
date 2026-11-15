@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='278';
+const APP_VER='280';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -89,7 +89,7 @@ const getC=id=>S.customers.find(c=>c.id===id);
 /* ---------- التخزين ---------- */
 const hs=t=>{let h=0;for(const ch of t)h=(h*31+ch.charCodeAt(0))|0;return Math.abs(h).toString(36)};
 function migrate(codes=!fbCfg()||!!db){
-  S.items=S.items.map(i=>{const v=i.v||{};return{id:i.id||'i'+hs((i.type||'')+i.name),u:i.u||0,type:i.type==='rd'?'rd':'mq',name:i.name,p:v.p!==undefined?v.p:(i.price||i.p||0),w:v.w!==undefined?v.w:(i.w||0),h:v.h!==undefined?v.h:(i.h||0),...(i.pc?{pc:i.pc}:{})}});
+  S.items=S.items.map(i=>{const v=i.v||{};return{id:i.id||'i'+hs((i.type||'')+i.name),u:i.u||0,type:i.type==='rd'?'rd':'mq',name:i.name,p:v.p!==undefined?v.p:(i.price||i.p||0),w:v.w!==undefined?v.w:(i.w||0),h:v.h!==undefined?v.h:(i.h||0),...(i.pc?{pc:i.pc}:{}),...(i.inv?{inv:i.inv}:{})}});
   let ch=false;S.customers.forEach(c=>{if(c.open===undefined){const rs=ledger(c).sort((a,b)=>a.ts-b.ts);c.open=rs.length?(rs[0].prev||0):(c.balance||0);ch=true}});
   if(ch){DV++;lset('customers',S.customers)}
   if(!codes)return;
@@ -1908,33 +1908,104 @@ $('spList').addEventListener('click',e=>{const b=e.target.closest('[data-spf]');
 $('spkNext').onclick=()=>{const id=$('spkNext').dataset.sup;if(id)supOpen(id)};
 $('supDel').onclick=e=>{const m=$('spMsg');if(S.purchases.some(x=>x.sid===supCur)){m.textContent='احذف حركات المورد الأول';return}if(spFl.length){m.textContent='احذف صور المورد الأول';return}if(!ok2(e.target))return;const s=S.suppliers.find(x=>x.id===supCur);del('suppliers',supCur);supOpen(null);if(s)toast('اتمسح المورد: '+s.name,'تراجع',()=>{undel('suppliers',s);drawSup()})};
 
-/* المخزون بعدد الألواح: S.stock {id,iid,ts,q}، q موجب وارد وسالب صرف.
-   الصنف الجاهز بيتخصم لوحده من الفواتير من أول حركة ليه، والمقطع بيتصرف بإيدك لأن عدد القطع مش عدد ألواح */
-function stkAll(){const m=new Map();S.stock.forEach(x=>{if(!S.items.some(i=>i.id===x.iid))return;const o=m.get(x.iid)||{from:x.ts,bal:0};o.from=Math.min(o.from,x.ts);o.bal=rd2(o.bal+(+x.q||0));m.set(x.iid,o)});
+/* المخزون الكامل: S.stock {id,iid,ts,q,t?,why?,sid?,cost?,note?}، q موجب وارد وسالب صرف، t='adj' يعني تسوية جرد.
+   الصنف الجاهز بيتخصم لوحده من الفواتير من أول حركة ليه، والمقطع بيتصرف بإيدك لأن عدد القطع مش عدد ألواح.
+   بيانات المخزون لكل صنف على الصنف نفسه: item.inv = {mn حد التنبيه, cost سعر الشراء, loc المكان, sid المورد} */
+const SKD=864e5;let stkV='home',stkId=null,stkF='all',stkAct=null,stkRs='قطّعت',stkMF='all';
+function stkAll(){const m=new Map();S.stock.forEach(x=>{const it=S.items.find(i=>i.id===x.iid);if(!it)return;const o=m.get(x.iid)||{from:x.ts,bal:0,it};o.from=Math.min(o.from,x.ts);o.bal=rd2(o.bal+(+x.q||0));m.set(x.iid,o)});
   const rd=new Set(S.items.filter(i=>i.type==='rd').map(i=>i.id));S.invoices.forEach(r=>{if(r.type==='pay')return;(r.rows||[]).forEach(x=>{const o=rd.has(x.i)&&m.get(x.i);if(o&&r.ts>=o.from)o.bal=rd2(o.bal-(x.rt?-1:1)*(+x.c||0))})});return m}
 function stkMin(){return Math.max(0,nv(lsv('stkMin','3')))}
-function stkLow(m){const n=stkMin();return[...m.values()].filter(o=>o.bal<=n).length}
-function stkOpen(){$('stkLim').value=lsv('stkMin','3');$('stkMsg').textContent='';drawStk()}
-/* شاشة المخزون: لكل صنف «عندك كام» وزرارين دخل/طلع بالكلام، وتحت آخر الحركات ومعاها البيع من الفواتير */
-const stkUnit=i=>i.type==='rd'?'':' لوح';
-function stkSales(m){const rd=new Set(S.items.filter(i=>i.type==='rd').map(i=>i.id)),o=[];
-  S.invoices.forEach(r=>{if(r.type==='pay')return;(r.rows||[]).forEach(x=>{const t=rd.has(x.i)&&m.get(x.i);if(t&&r.ts>=t.from&&+x.c)o.push({inv:1,iid:x.i,ts:r.ts,q:(x.rt?1:-1)*(+x.c),code:r.code||('#'+r.no)})})});return o}
-function drawStk(){const m=stkAll(),mn=stkMin(),q=$('stkQ').value,l=S.items.filter(i=>qm(i.name,q)).sort((a,b)=>(m.has(b.id)-m.has(a.id))||a.name.localeCompare(b.name,'ar'));
-  $('stkList').innerHTML=l.length?'<tr><th>الصنف</th><th>عندك</th><th>الكمية</th><th></th><th></th></tr>'+l.map(i=>{const o=m.get(i.id),low=o&&o.bal<=mn;
-    return`<tr data-it="${esc(i.id)}"${low?' class="stk-low"':''}><td class="tn">${esc(i.name)}${szOf(i)?' <small class="num">'+esc(szOf(i))+'</small>':''}${low?'<br><small class="stk-warn">⚠️ قرب يخلص</small>':''}</td><td class="num">${o?`<b>${f(o.bal)}</b><small class="mute">${stkUnit(i)}</small>`:'<small class="mute">لسه</small>'}</td><td class="tq"><input class="sq" inputmode="decimal" placeholder="1" aria-label="الكمية"></td><td class="tb"><button type="button" class="stk-b in" data-sd="1">➕ دخل</button></td><td class="tb"><button type="button" class="stk-b out" data-sd="-1">➖ طلع</button></td></tr>`}).join(''):'<tr><td class="tn mute">'+(q?'مفيش صنف بالاسم ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.')+'</td></tr>';
-  const nm=id=>(S.items.find(i=>i.id===id)||{}).name||'';
-  const g=S.stock.filter(x=>m.has(x.iid)).concat(stkSales(m)).sort((a,b)=>b.ts-a.ts).slice(0,25);
-  $('stkLogH').classList.toggle('hide',!g.length);
-  $('stkLog').innerHTML=g.length?'<tr><th>اليوم</th><th>الصنف</th><th>الحركة</th><th></th></tr>'+g.map(x=>`<tr><td class="num">${dshort(x.ts).slice(5)}</td><td class="tn">${esc(nm(x.iid))}</td><td>${x.inv?(x.q<0?'🧾 اتباع ':'↩️ مرتجع ')+'<b class="num">'+f(Math.abs(x.q))+'</b> <small class="mute">'+esc(x.code)+'</small>':x.q>0?'➕ دخل <b class="num">'+f(x.q)+'</b>':'➖ طلع <b class="num">'+f(-x.q)+'</b>'}</td><td>${x.inv?'':`<button type="button" class="xd" data-skd="${esc(x.id)}" aria-label="حذف الحركة">×</button>`}</td></tr>`).join(''):''}
+const skInv=it=>it.inv||{};
+const skMn=it=>{const v=skInv(it).mn;return v!=null&&v!==''?+v:stkMin()};
+function stkLow(m){return[...m.values()].filter(o=>o.bal<=skMn(o.it)).length}
+const skUn=it=>it.type==='rd'?'قطعة':'لوح';
+const skCost=it=>+skInv(it).cost||0;
+const skNm=it=>esc(it.name)+(szOf(it)?' <small class="num">'+esc(szOf(it))+'</small>':'');
+const skTx=it=>it.name+(szOf(it)?' '+szOf(it):'');
+const skAgo=t=>{if(!t)return'';const d=Math.floor((Date.now()-t)/SKD);return d<=0?'النهارده':d===1?'امبارح':'من '+d+' يوم'};
+function skSet(it,o){it.inv=Object.assign({},it.inv,o);put('items',it)}
+function stkOpen(){$('stkLim').value=lsv('stkMin','3');$('stkMsg').textContent='';stkV='home';stkId=null;stkAct=null;drawStk()}
+function skSales(){const rd=new Set(S.items.filter(i=>i.type==='rd').map(i=>i.id)),m=new Map();
+  S.invoices.forEach(r=>{if(r.type==='pay')return;(r.rows||[]).forEach(x=>{if(!rd.has(x.i)||!+x.c)return;let a=m.get(x.i);if(!a)m.set(x.i,a=[]);a.push({inv:1,iid:x.i,ts:r.ts,q:(x.rt?1:-1)*(+x.c),code:r.code||('#'+r.no)})})});return m}
+function skMovesOf(iid,m,sal){const o=m.get(iid),a=S.stock.filter(x=>x.iid===iid),s=o?(sal.get(iid)||[]).filter(x=>x.ts>=o.from):[];return a.concat(s).sort((x,y)=>y.ts-x.ts)}
+/* حالة كل صنف: new مش مسجل · out خلص · low قرب يخلص · idle راكد (60 يوم من غير حركة) · ok تمام */
+function skInfo(){const m=stkAll(),sal=skSales(),now=Date.now(),last=new Map(),use=new Map(),add=x=>{const q=+x.q||0;if(!last.has(x.iid)||x.ts>last.get(x.iid))last.set(x.iid,x.ts);if(q<0&&x.t!=='adj'&&now-x.ts<=30*SKD)use.set(x.iid,(use.get(x.iid)||0)-q)};
+  S.stock.forEach(add);sal.forEach((a,id)=>{const o=m.get(id);a.forEach(x=>{if(o&&x.ts>=o.from)add(x)})});
+  return S.items.map(it=>{const o=m.get(it.id),tr=!!o,bal=o?o.bal:0,mn=skMn(it),u=use.get(it.id)||0,lt=last.get(it.id)||0,per=u/30;
+    const st=!tr?'new':bal<=0?'out':bal<=mn?'low':(now-lt>60*SKD?'idle':'ok');
+    return{it,tr,bal,mn,use:u,last:lt,left:per>0&&bal>0?Math.floor(bal/per):null,st,val:bal>0?bal*skCost(it):0}})}
+const SKI={out:'❌',low:'⚠️',ok:'✅',idle:'🕸',new:'➕'},SKO={out:0,low:1,ok:2,idle:3,new:4};
+const SKR=[['قطّعت','🔨 قطّعت منه'],['اتكسر','💥 اتكسر'],['عينة','🎁 عينة / هدية'],['من غير فاتورة','📤 بعته من غير فاتورة'],['غير كده','✍️ غير كده']];
+function skHome(){const A=skInfo(),q=$('stkQ').value,c=k=>A.filter(x=>x.st===k).length,val=A.reduce((a,x)=>a+x.val,0),noC=A.filter(x=>x.tr&&x.bal>0&&!skCost(x.it)).length;
+  $('skKV').textContent=f(Math.round(val));$('skKVn').textContent=noC?noC+' من غير سعر':'';$('skKL').textContent=c('low');$('skKO').textContent=c('out');$('skKD').textContent=c('idle');
+  const F=[['all','الكل',A.length],['low','⚠️ قرب يخلص',c('low')],['out','❌ خلص',c('out')],['ok','✅ تمام',c('ok')],['idle','🕸 راكد',c('idle')],['new','➕ مش مسجل',c('new')]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
+  if(!F.some(x=>x[0]===stkF))stkF='all';
+  $('stkFil').innerHTML=F.map(([k,l,n])=>`<button type="button" data-sf="${k}"${k===stkF?' class="on"':''}>${l} <small>${n}</small></button>`).join('');
+  const l=A.filter(x=>(stkF==='all'||x.st===stkF)&&qm(x.it.name,q)).sort((a,b)=>SKO[a.st]-SKO[b.st]||a.it.name.localeCompare(b.it.name,'ar'));
+  $('stkRows').innerHTML=l.length?l.map(x=>{const sub=x.tr?[x.last?'آخر حركة '+skAgo(x.last):'',x.left!=null?'يكفي حوالي '+x.left+' يوم':'',skInv(x.it).loc?'📍 '+esc(skInv(x.it).loc):''].filter(Boolean).join(' · '):'اضغط وسجّل الرصيد';
+    return`<div class="skr ${x.st}" data-sg="one" data-id="${esc(x.it.id)}" role="button" tabindex="0"><span class="sks">${SKI[x.st]}</span><div class="skn"><span>${skNm(x.it)}</span><small>${sub}</small></div><div class="skb"><span class="num">${x.tr?f(x.bal):'—'}</span><small>${skUn(x.it)}</small></div></div>`}).join(''):`<div class="card mute">${S.items.length?'مفيش صنف بالشكل ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.'}</div>`}
+function skMvRow(x,nm){const it=S.items.find(i=>i.id===x.iid)||{},t=x.inv?'sale':(x.t==='adj'?'adj':(x.q>0?'in':'out')),sup=x.sid&&S.suppliers.find(s=>s.id===x.sid);
+  const d=t==='sale'?(x.q<0?'🧾 اتباع ':'↩️ مرتجع ')+'<small class="mute">'+esc(x.code)+'</small>':t==='adj'?'⚖️ جرد <small class="mute">'+(x.q>0?'زاد':'نقص')+'</small>':t==='in'?'➕ دخل'+(x.cost?' <small class="mute">بـ'+f(x.cost)+'</small>':'')+(sup?' <small class="mute">· '+esc(sup.name)+'</small>':''):'➖ '+esc(x.why||'صرف');
+  return`<tr><td class="num">${dshort(x.ts).slice(5)}</td>${nm?`<td class="tn">${esc(it.name||'')}</td>`:''}<td>${d}${x.note?'<br><small class="mute">'+esc(x.note)+'</small>':''}</td><td class="num">${x.q>0?'+':'−'}${f(Math.abs(x.q))}</td><td>${x.inv?'':`<button type="button" class="xd" data-skd="${esc(x.id)}" aria-label="حذف الحركة">×</button>`}</td></tr>`}
+function skSub(h){$('stkHome').classList.toggle('hide',!!h);$('stkSub').classList.toggle('hide',!h);if(h)$('stkSub').innerHTML=h}
+const skBack='<div class="ro" style="color:var(--ink);margin:0 0 6px"><button type="button" class="lnk" data-sg="home">→ كل الأصناف</button></div>';
+function skOne(){const x=skInfo().find(y=>y.it.id===stkId);if(!x){stkV='home';drawStk();return}
+  const it=x.it,inv=skInv(it),mv=skMovesOf(it.id,stkAll(),skSales()),lastIn=mv.find(y=>!y.inv&&y.q>0&&y.t!=='adj'),brk=S.stock.filter(y=>y.iid===it.id&&y.why==='اتكسر'&&Date.now()-y.ts<=30*SKD).reduce((a,y)=>a-y.q,0);
+  const sT={out:'❌ خلص',low:'⚠️ قرب يخلص (الحد '+f(x.mn)+')',idle:'🕸 راكد من أكتر من شهرين',ok:'✅ تمام',new:'لسه ما اتسجلش رصيد. اضغط «جرد» واكتب اللي عندك'}[x.st];
+  const sups=S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')),so=(sel)=>'<option value="">من غير مورد</option>'+sups.map(s=>`<option value="${esc(s.id)}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
+  let form='';
+  if(stkAct==='in')form=`<div class="skf"><div class="rowc"><input id="skQty" inputmode="decimal" placeholder="الكمية" autocomplete="off" aria-label="الكمية"><input id="skCost" inputmode="decimal" placeholder="سعر الوحدة" value="${skCost(it)||''}" autocomplete="off" aria-label="سعر الوحدة"></div><div class="spc">${[1,5,10,20,50].map(n=>`<button type="button" data-qq="${n}">${n}</button>`).join('')}</div><select id="skSup" aria-label="المورد">${so(inv.sid)}</select><label class="opt"><input type="checkbox" id="skPaid"> دفعت كاش دلوقتي (بيتسجل في حساب المورد)</label><input id="skNote" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><div class="mute" id="skTot"></div><button type="button" class="main" data-do="in" style="width:100%">✅ سجّل الدخول</button></div>`;
+  else if(stkAct==='out')form=`<div class="skf"><input id="skQty" inputmode="decimal" placeholder="الكمية" autocomplete="off" aria-label="الكمية"><div class="spc">${SKR.map(([k,l])=>`<button type="button" data-rs="${k}"${k===stkRs?' class="on"':''}>${l}</button>`).join('')}</div><input id="skNote" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><button type="button" class="main" data-do="out" style="width:100%">✅ سجّل الصرف</button></div>`;
+  else if(stkAct==='cnt')form=`<div class="skf"><input id="skQty" inputmode="decimal" placeholder="اللي عندك فعلاً دلوقتي" autocomplete="off" aria-label="الرصيد الفعلي"><div class="mute">البرنامج شايف ${f(x.bal)} ${skUn(it)}. اللي هتكتبه هو اللي هيبقى الرصيد، والفرق بيتسجل حركة جرد.</div><button type="button" class="main" data-do="cnt" style="width:100%">✅ اعتمد الجرد</button></div>`;
+  skSub(skBack+`<div class="card spd"><div class="sph"><span class="spn2">${skNm(it)}</span><span class="spb"><small>عندك</small><span class="num">${x.tr?f(x.bal)+' '+skUn(it):'—'}</span></span></div>
+  <div class="spdue${x.st==='ok'?' hide':''}">${sT}</div>
+  <div class="spst"><div><small>اتصرف 30 يوم</small><span class="num">${f(x.use)}</span></div><div><small>يكفي</small><span class="num">${x.left!=null?x.left+' يوم':'—'}</span></div><div><small>قيمته</small><span class="num">${skCost(it)&&x.bal>0?f(Math.round(x.val)):'—'}</span></div><div><small>آخر دخول</small><span class="num">${lastIn?dshort(lastIn.ts).slice(5):'—'}</span></div></div>
+  ${brk?`<div class="mute" style="margin-top:4px">💥 اتكسر آخر 30 يوم: ${f(brk)} ${skUn(it)}${skCost(it)?' (خسارة '+f(Math.round(brk*skCost(it)))+')':''}</div>`:''}
+  <div class="spc" style="margin:8px 0 4px"><button type="button" data-ac="in"${stkAct==='in'?' class="on"':''}>➕ دخل</button><button type="button" data-ac="out"${stkAct==='out'?' class="on"':''}>➖ صرف</button><button type="button" data-ac="cnt"${stkAct==='cnt'?' class="on"':''}>⚖️ جرد</button></div>${form}<div class="info" id="skMsg" aria-live="polite"></div></div>
+  <details class="card spdt"><summary>⚙️ إعدادات الصنف</summary><div class="g2" style="margin-top:6px"><div><label for="skMn">حد التنبيه</label><input id="skMn" inputmode="decimal" placeholder="${f(stkMin())} (العام)" value="${inv.mn!=null&&inv.mn!==''?inv.mn:''}" autocomplete="off"></div><div><label for="skCs">سعر الشراء</label><input id="skCs" inputmode="decimal" value="${inv.cost||''}" autocomplete="off"></div></div><div class="g2"><div><label for="skLc">المكان (رف / مخزن)</label><input id="skLc" value="${esc(inv.loc||'')}" autocomplete="off"></div><div><label for="skSs">المورد المعتاد</label><select id="skSs">${so(inv.sid)}</select></div></div><button type="button" class="main" data-do="set" style="width:100%;margin-top:6px">💾 حفظ الإعدادات</button></details>
+  <div class="card" style="padding:6px 8px"><div class="mute" style="margin:2px 4px">🕘 حركات الصنف</div><table class="xl">${mv.length?mv.slice(0,40).map(y=>skMvRow(y,false)).join(''):'<tr><td class="tn mute">مفيش حركات لسه.</td></tr>'}</table></div>`)}
+function skCnt(){const A=skInfo().sort((a,b)=>(b.tr-a.tr)||a.it.name.localeCompare(b.it.name,'ar'));
+  skSub(skBack+`<div class="card"><div class="mute">🧮 جرد: اكتب العدد الفعلي جنب كل صنف عدّيته، وسيب اللي مش عايز تعدّه فاضي. الفرق بيتسجل حركة جرد.</div></div><div class="card" style="padding:6px 8px"><table class="xl"><tr><th>الصنف</th><th>في البرنامج</th><th>الفعلي</th></tr>${A.length?A.map(x=>`<tr><td class="tn">${skNm(x.it)}</td><td class="num">${x.tr?f(x.bal):'—'}</td><td class="tq"><input class="skc" data-id="${esc(x.it.id)}" inputmode="decimal" autocomplete="off" aria-label="الفعلي"></td></tr>`).join(''):'<tr><td class="tn mute">مفيش أصناف.</td></tr>'}</table></div><button type="button" class="main" data-do="apply" style="width:100%">✅ اعتمد الجرد</button><div class="info" id="skMsg" aria-live="polite"></div>`)}
+function skOrdTx(sid){const l=[...document.querySelectorAll('#stkSub .sko[data-s="'+sid+'"]')].map(i=>{const q=rd2(nv(i.value)),it=S.items.find(y=>y.id===i.dataset.id);return q>0&&it?'- '+skTx(it)+' × '+f(q):''}).filter(Boolean);return l.length?'محتاج الأصناف دي:\n'+l.join('\n'):''}
+function skOrd(){const A=skInfo().filter(x=>x.st==='low'||x.st==='out'),g=new Map();A.forEach(x=>{const k=skInv(x.it).sid&&S.suppliers.some(s=>s.id===skInv(x.it).sid)?skInv(x.it).sid:'';(g.get(k)||g.set(k,[]).get(k)).push(x)});
+  skSub(skBack+(A.length?[...g.entries()].sort((a,b)=>!a[0]-!b[0]).map(([sid,l])=>{const s=S.suppliers.find(y=>y.id===sid);return`<div class="card"><div class="ro" style="color:var(--ink)"><span>${s?'🚚 '+esc(s.name):'📦 من غير مورد محدد'}</span></div><table class="xl">${l.map(x=>`<tr><td class="tn">${skNm(x.it)}<br><small class="mute">${x.st==='out'?'❌ خلص':'عندك '+f(x.bal)}</small></td><td class="tq"><input class="sko" data-s="${esc(sid)}" data-id="${esc(x.it.id)}" inputmode="decimal" value="${Math.max(1,Math.ceil(x.mn*2-x.bal))}" aria-label="الكمية المطلوبة"></td></tr>`).join('')}</table><div class="spact" style="margin-top:6px">${s&&waNum(s.phone)?`<button type="button" class="alt" data-og="${esc(sid)}">📲 ابعت واتساب</button>`:''}<button type="button" class="alt" data-oc="${esc(sid)}">📋 انسخ القايمة</button></div></div>`}).join(''):'<div class="card mute">✅ مفيش حاجة ناقصة دلوقتي.</div>')+'<div class="mute" style="margin:4px 2px">الكميات المقترحة تكفي ضعف حد التنبيه. عدّلها قبل ما تبعت.</div><div class="info" id="skMsg" aria-live="polite"></div>')}
+function skMv(){const m=stkAll(),sal=skSales(),a=S.stock.filter(x=>m.has(x.iid)),s=[];sal.forEach((l,id)=>{const o=m.get(id);l.forEach(x=>{if(o&&x.ts>=o.from)s.push(x)})});
+  const T=x=>x.inv?'sale':x.t==='adj'?'adj':x.q>0?'in':'out',all=a.concat(s).sort((x,y)=>y.ts-x.ts),l=all.filter(x=>stkMF==='all'||T(x)===stkMF).slice(0,80);
+  skSub(skBack+`<div class="spc">${[['all','الكل'],['in','➕ دخل'],['out','➖ صرف'],['adj','⚖️ جرد'],['sale','🧾 بيع']].map(([k,t])=>`<button type="button" data-mf="${k}"${k===stkMF?' class="on"':''}>${t}</button>`).join('')}</div><div class="card" style="padding:6px 8px"><table class="xl">${l.length?l.map(x=>skMvRow(x,true)).join(''):'<tr><td class="tn mute">مفيش حركات.</td></tr>'}</table></div>`)}
+function drawStk(){if(stkV==='home'){skSub('');skHome()}else if(stkV==='one')skOne();else if(stkV==='cnt')skCnt();else if(stkV==='ord')skOrd();else if(stkV==='mv')skMv();else{stkV='home';skSub('');skHome()}}
 $('stkQ').oninput=drawStk;
 $('stkLim').onchange=e=>{svk('stkMin',String(Math.max(0,nv(e.target.value))));drawStk()};
-$('stkList').onclick=e=>{const b=e.target.closest('[data-sd]');if(!b)return;const tr=b.closest('tr'),v=tr.querySelector('.sq').value.trim(),q=v?rd2(nv(v)):1,m=$('stkMsg');if(!(q>0)){m.textContent='اكتب الكمية صح';return}
-  const it=S.items.find(i=>i.id===tr.dataset.it)||{};
-  /* v189: مينفعش تطلّع أكتر من اللي عندك (كان الرصيد بينزل بالسالب) */
-  if(+b.dataset.sd<0){const cur=stkAll().get(tr.dataset.it),have=cur?cur.bal:0;if(q>have+1e-9){m.textContent=have>0?'⚠️ عندك '+f(have)+stkUnit(it)+' بس من '+(it.name||'الصنف')+'، مينفعش تطلّع '+f(q):'⚠️ مفيش رصيد من '+(it.name||'الصنف')+'. سجّل اللي عندك بـ «دخل» الأول';return}}
-  const o={id:uid(),iid:tr.dataset.it,ts:Date.now(),q:q*+b.dataset.sd};S.stock.push(o);put('stock',o);drawStk();
-  const bal=(stkAll().get(o.iid)||{}).bal;m.textContent=(o.q>0?'✅ دخل ':'✅ طلع ')+f(q)+' '+(it.name||'')+' · بقى عندك '+f(bal)+stkUnit(it)};
-$('stkLog').onclick=e=>{const b=e.target.closest('[data-skd]');if(!b||!ok2(b))return;del('stock',b.dataset.skd);drawStk()};
+function skMsg(t){const e=$('skMsg')||$('stkMsg');if(e)e.textContent=t}
+function skPush(o){S.stock.push(o);put('stock',o)}
+function skDo(k){const it=S.items.find(i=>i.id===stkId),A=k==='apply'?null:it;
+  if(k==='set'){skSet(it,{mn:$('skMn').value.trim()===''?null:Math.max(0,nv($('skMn').value)),cost:$('skCs').value.trim()===''?null:Math.max(0,nv($('skCs').value)),loc:$('skLc').value.trim()||null,sid:$('skSs').value||null});stkAct=null;skOne();skMsg('✅ اتحفظت إعدادات الصنف');return}
+  if(k==='apply'){const m=stkAll();let n=0;document.querySelectorAll('#stkSub .skc').forEach(i=>{if(i.value.trim()==='')return;const a=Math.max(0,rd2(nv(i.value))),o=m.get(i.dataset.id),d=rd2(a-(o?o.bal:0));if(d!==0){skPush({id:uid(),iid:i.dataset.id,ts:Date.now(),q:d,t:'adj',why:'جرد'});n++}});
+    if(!n){skMsg('مفيش فرق. كله مطابق أو لسه ما كتبتش أرقام');return}stkV='home';drawStk();toast('✅ الجرد اتعتمد · اتعدّل '+plN(n,'صنف'));return}
+  const q=rd2(nv($('skQty').value)),cur=stkAll().get(it.id),have=cur?cur.bal:0,note=$('skNote')?$('skNote').value.trim():'',ts=Date.now();
+  if(k==='cnt'){if($('skQty').value.trim()===''||q<0){skMsg('اكتب الرصيد الفعلي');return}const d=rd2(q-have);if(!d){skMsg('✅ الرصيد مطابق');return}skPush({id:uid(),iid:it.id,ts,q:d,t:'adj',why:'جرد'});stkAct=null;skOne();skMsg('✅ الرصيد بقى '+f(q)+' '+skUn(it));return}
+  if(!(q>0)){skMsg('اكتب الكمية');return}
+  if(k==='out'){if(q>have+1e-9){skMsg(have>0?'⚠️ عندك '+f(have)+' '+skUn(it)+' بس، مينفعش تصرف '+f(q):'⚠️ مفيش رصيد. سجّل اللي عندك بـ «جرد» الأول');return}
+    skPush({id:uid(),iid:it.id,ts,q:-q,t:'out',why:stkRs,...(note?{note}:{})});stkAct=null;skOne();skMsg('✅ اتصرف '+f(q)+' · بقى عندك '+f(rd2(have-q))+' '+skUn(it));return}
+  if(k==='in'){const c=Math.max(0,rd2(nv($('skCost').value))),sid=$('skSup').value,s=sid&&S.suppliers.find(y=>y.id===sid),st={id:uid(),iid:it.id,ts,q,t:'in',...(c?{cost:c}:{}),...(s?{sid}:{}),...(note?{note}:{})};
+    let msg='✅ دخل '+f(q)+' '+skUn(it)+' · بقى عندك '+f(rd2(have+q));
+    if(s&&c){const o={id:uid(),sid,ts,type:'buy',amt:rd2(q*c),note:skTx(it)+' × '+f(q),iid:it.id,q,sk:st.id};st.pk=o.id;const add=[o];
+      if($('skPaid').checked)add.push({id:uid(),sid,ts,type:'pay',amt:o.amt,how:'كاش',note:'سداد '+o.note,pf:o.id});else if(s.terms>0)o.due=ts+s.terms*SKD;
+      add.forEach(y=>{S.purchases.push(y);put('purchases',y)});msg+=' · اتسجل على '+s.name+(add.length>1?' واتدفع':' ('+f(o.amt)+')')}
+    skPush(st);skSet(it,{...(c?{cost:c}:{}),...(sid?{sid}:{})});stkAct=null;skOne();skMsg(msg)}}
+$('stkPanel').addEventListener('click',e=>{const t=e.target;let b;
+  if(b=t.closest('[data-sf]')){stkF=b.dataset.sf;drawStk();return}
+  if(b=t.closest('[data-sg]')){const k=b.dataset.sg;if(k==='one'){stkId=b.dataset.id;stkAct=null}stkV=k;drawStk();$('stkPanel').scrollIntoView({block:'start'});return}
+  if(b=t.closest('[data-ac]')){stkAct=stkAct===b.dataset.ac?null:b.dataset.ac;skOne();return}
+  if(b=t.closest('[data-qq]')){const i=$('skQty');i.value=rd2((nv(i.value)||0)+ +b.dataset.qq);i.dispatchEvent(new Event('input'));return}
+  if(b=t.closest('[data-rs]')){stkRs=b.dataset.rs;t.closest('.spc').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return}
+  if(b=t.closest('[data-mf]')){stkMF=b.dataset.mf;skMv();return}
+  if(b=t.closest('[data-do]')){skDo(b.dataset.do);return}
+  if(b=t.closest('[data-og]')){const s=S.suppliers.find(y=>y.id===b.dataset.og),tx=skOrdTx(b.dataset.og);if(!s||!tx){skMsg('اكتب كمية لصنف واحد على الأقل');return}window.open('https://wa.me/'+waNum(s.phone)+'?text='+encodeURIComponent(tx),'_blank','noopener');return}
+  if(b=t.closest('[data-oc]')){const tx=skOrdTx(b.dataset.oc);if(!tx){skMsg('اكتب كمية لصنف واحد على الأقل');return}(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(()=>skMsg('✅ اتنسخت القايمة'),()=>skMsg('معرفتش أنسخ. اكتبها بإيدك'));return}
+  if(b=t.closest('[data-skd]')){const x=S.stock.find(y=>y.id===b.dataset.skd);if(!x)return;{const o=stkAll().get(x.iid);if(x.q>0&&o&&o.bal-x.q<-1e-9){toast('⚠️ مينفعش تمسح الدخول ده: الرصيد هيبقى بالسالب. امسح الحركات اللي بعده الأول');return}}if(!ok2(b))return;const pk=S.purchases.filter(y=>y.sk===x.id),rel=S.purchases.filter(y=>pk.some(p=>p.id===y.pf));
+    del('stock',x.id);[...pk,...rel].forEach(y=>del('purchases',y.id));drawStk();toast('اتمسحت الحركة'+(pk.length?' ومعاها شراء المورد':''),'تراجع',()=>{undel('stock',x);[...pk,...rel].forEach(y=>undel('purchases',y));drawStk()})}});
+$('stkPanel').addEventListener('input',e=>{if(e.target.id==='skQty'||e.target.id==='skCost'){const q=rd2(nv(($('skQty')||{}).value)),c=rd2(nv(($('skCost')||{}).value)),t=$('skTot');if(t)t.textContent=q>0&&c>0?'الإجمالي '+f(rd2(q*c)):''}});
+$('stkPanel').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('skr')){e.preventDefault();e.target.click()}});
 
 /* الإشعارات: رسالة فوق لو البرنامج قدامك، وإشعار من الموبايل لو في الخلفية، والضغط عليهم بيفتح الحاجة نفسها.
    nfSave بيسيب آخر تنبيهات في IndexedDB عشان sw.js يعرضها لوحده (periodicsync) والبرنامج مقفول */

@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=278">
+<link rel="stylesheet" href="css/style.css?v=280">
 
 
 
@@ -424,15 +424,16 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <button type="button" class="alt b-red" id="supDel" style="width:100%;margin-top:4px">🗑️ حذف المورد</button>
 </div>
 </div>
-<div class="stp hide" data-sp="stk"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🧱 المخزون</b></div>
-<div class="card stk-how"><b>💡 بيشتغل إزاي؟</b>
-  <div class="stk-st">➕ <span>بضاعة جت لك؟ اكتب الكمية جنب الصنف واضغط <b>دخل</b>.</span></div>
-  <div class="stk-st">🧾 <span>لما تبيع الصنف في فاتورة، بينقص من المخزون لوحده.</span></div>
-  <div class="stk-st">➖ <span class="cut-only">فتحت لوح عشان تقطّع منه، أو حاجة باظت؟ اضغط <b>طلع</b>. (الأصناف المقطّعة بتتعد بالألواح، فمش بتنقص لوحدها من الفاتورة)</span><span class="gen-only">حاجة باظت أو أخدتها من غير فاتورة؟ اضغط <b>طلع</b>.</span></div>
-  <div class="g2" style="margin:8px 0 0"><div><label for="stkQ">🔍 دوّر على صنف</label><input id="stkQ" autocomplete="off" placeholder="اسم الصنف"></div><div><label for="stkLim">⚠️ نبّهني لما يفضل</label><input id="stkLim" inputmode="decimal" autocomplete="off"></div></div><div class="info" id="stkMsg" aria-live="polite"></div></div>
-<table class="xl" id="stkList"></table>
-<div class="sgh" id="stkLogH" style="margin-top:10px">🕘 آخر الحركات</div>
-<table class="xl" id="stkLog"></table>
+<div class="stp hide" data-sp="stk" id="stkPanel"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🧱 المخزون</b></div>
+<div id="stkHome">
+<div class="card spk"><div><small>💰 قيمة المخزون</small><span class="num" id="skKV"></span><small id="skKVn"></small></div><div><small>⚠️ قرب يخلص</small><span class="num" id="skKL"></span></div><div><small>❌ خلص</small><span class="num" id="skKO"></span></div><div><small>🕸 راكد</small><span class="num" id="skKD"></span></div></div>
+<div class="ro" style="gap:6px;margin:0 0 6px"><input id="stkQ" type="search" placeholder="🔍 دوّر على صنف" autocomplete="off" aria-label="بحث في المخزون" style="flex:1;height:34px"></div>
+<div class="spc" id="stkFil"></div>
+<div class="spc"><button type="button" data-sg="cnt">🧮 جرد</button><button type="button" data-sg="ord">📋 قايمة الطلب</button><button type="button" data-sg="mv">🕘 كل الحركات</button></div>
+<div id="stkRows"></div>
+<details class="card spdt"><summary>⚙️ حد التنبيه العام</summary><label for="stkLim" style="margin-top:6px">نبّهني لما يفضل (أي صنف مالوش حد خاص بيه)</label><input id="stkLim" inputmode="decimal" autocomplete="off"><div class="mute" style="margin-top:4px">الصنف الجاهز بينقص لوحده من الفواتير. المقطّع بتتعد ألواحه بإيدك (صرف / جرد). كل صنف ممكن تحط له حد وسعر ومكان ومورد من صفحته.</div><div class="info" id="stkMsg" aria-live="polite"></div></details>
+</div>
+<div id="stkSub" class="hide"></div>
 </div>
 <div class="stp hide" data-sp="nf"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🔔 الإشعارات</b></div>
 <div class="card"><b>📱 إشعارات الموبايل</b><div style="margin-top:4px" id="nfStat"></div>
@@ -544,10 +545,10 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=278"></script>
+<script src="js/app.js?v=280"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=278"></script>
-<script src="js/features.js?v=278"></script>
+<script src="js/cutlist.js?v=280"></script>
+<script src="js/features.js?v=280"></script>
 </body>
 </html>
 

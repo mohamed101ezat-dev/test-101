@@ -1374,3 +1374,21 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 /* v278: أسماء العملاء المقترحة: خلفية برتقالي فاتح دايماً في كل الألوان والـ3D */
 html[data-theme] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme] :is(#recentC,#siteC) button.b-cu{background:#ffe5cc!important;background-image:none!important;border:1px solid #fdba74!important;border-bottom-width:1px!important;color:#9a3412!important;box-shadow:none!important}
 html[data-theme="dark"] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme="dark"] :is(#recentC,#siteC) button.b-cu{background:#4a2c14!important;background-image:none!important;border-color:#9a5b2b!important;color:#fdba74!important}
+
+/* v279: المخزون الكامل */
+#t-st .skr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:5px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer}
+#t-st .skr .sks{font-size:18px;line-height:1}
+#t-st .skr .skn{display:flex;flex-direction:column;min-width:0}
+#t-st .skr .skn>span{font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#t-st .skr .skn small{font-size:11px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#t-st .skr .skb{display:flex;flex-direction:column;align-items:center;min-width:44px;line-height:1.15}
+#t-st .skr .skb span{font-size:17px;color:var(--ink)}
+#t-st .skr .skb small{font-size:10.5px;color:var(--mute)}
+#t-st .skr.low{background:rgba(251,146,60,.14);border-color:rgba(251,146,60,.5)}
+#t-st .skr.out{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.42)}
+#t-st .skr.idle,#t-st .skr.new{opacity:.78}
+#t-st .skf{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+#t-st .skf .rowc{display:flex;gap:6px;margin:0}#t-st .skf .rowc>input{flex:1;min-width:0}
+#t-st .skf .spc{margin:0}
+#t-st .tq .skc,#t-st .tq .sko{width:64px;height:30px;text-align:center;padding:0 2px}
+#t-st .spc>button small{opacity:.8}
