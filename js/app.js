@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='284';
+const APP_VER='285';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1590,7 +1590,7 @@ $('phFix').onclick=()=>{let n=0;S.customers.forEach(c=>{const v=normPhones(c.pho
 wkApply();
 /* بحث الإعدادات: بيدوّر في كل الخيارات والشروحات ويفتح الصفحة ويظلل الخيار */
 const arN=s=>String(s||'').toLowerCase().replace(/[\u064B-\u065F\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
-const ST_SYN={exp:'مصروف مصاريف ايجار كهربا مرتبات صرف',sup:'مورد موردين شراء بضاعه فاتوره شراء',stk:'مخزون الواح كميه جرد',pay:'طرق الدفع محفظه فودافون انستا كاش نسبه عموله',msg:'واتساب رساله قالب نص',rem:'تذكير متاخر مديونين ديون ميعاد',cl:'اقفال تقرير يومي شهري ربح صافي',nf:'اشعار تنبيه',look:'شكل لون ليلي خط حجم',lock:'قفل رقم سري بصمه امان حذف تعديل',data:'نسخه احتياطي حفظ استيراد تصدير فايربيس سحابي مزامنه حساب',shop:'اسم المحل لوجو لقب عنوان',des:'تصميم الفاتوره الوان خط ختم علامه مائيه',notes:'ملاحظات الفاتوره',inv:'خيارات الفاتوره طباعه pdf تقريب تعديل تكرار طلبيات'};
+const ST_SYN={exp:'مصروف مصاريف ايجار كهربا مرتبات صرف',sup:'مورد موردين شراء بضاعه فاتوره شراء',stk:'مخزون الواح كميه جرد',pay:'طرق الدفع محفظه فودافون انستا كاش نسبه عموله',msg:'واتساب رساله قالب نص',rem:'تذكير متاخر مديونين ديون ميعاد تذكير الكل',cl:'اقفال تقرير يومي شهري ربح صافي',nf:'اشعار تنبيه',look:'شكل لون ليلي خط حجم',lock:'قفل رقم سري بصمه امان حذف تعديل',data:'نسخه احتياطي حفظ استيراد تصدير فايربيس سحابي مزامنه حساب',shop:'اسم المحل لوجو لقب اسم الفاتوره طريقه البيع',des:'تصميم الفاتوره الوان خط ختم علامه مائيه',notes:'ملاحظات الفاتوره سطور ثابته عنوان واتساب انستا فودافون ارقام تحويل',inv:'خيارات الفاتوره طباعه pdf qr كود تقريب تعديل تكرار طلبيات حفظ صوره نولون خصم'};
 let stIdx=null;
 function stBuild(){stIdx=[];document.querySelectorAll('#t-st .stp').forEach(p=>{const pg=p.dataset.sp,pt=((p.querySelector('.sth b')||{}).textContent||'').trim();stIdx.push({pg,pt,t:pt,k:arN(pt+' '+(ST_SYN[pg]||'')),e:null});
   p.querySelectorAll('label.opt,.card>b,.card>label,summary,.card>.mute').forEach(e=>{const t=e.textContent.replace(/\s+/g,' ').trim();if(t.length>1&&t.length<150)stIdx.push({pg,pt,t,k:arN(t+' '+pt),e})})})}

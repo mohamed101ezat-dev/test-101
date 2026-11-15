@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=284">
+<link rel="stylesheet" href="css/style.css?v=285">
 
 
 
@@ -272,7 +272,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div id="stMain">
   <div class="stiles" style="grid-template-columns:repeat(4,minmax(0,1fr))"><button type="button" class="stile" data-go="it"><span class="ti">📦</span><b>الأصناف</b><small id="ssIt"></small></button><button type="button" class="stile" data-sp="stk"><span class="ti">🧱</span><b>المخزون</b><small id="ssStk"></small></button><button type="button" class="stile" data-sp="sup"><span class="ti">🚚</span><b>الموردين</b><small id="ssSup"></small></button><button type="button" class="stile" data-sp="exp"><span class="ti">💸</span><b>المصروفات</b><small id="ss_exp"></small></button></div>
   <div class="sgh">الفاتورة</div>
-  <div class="sgl"><button type="button" class="sti" data-sp="shop"><span class="si">🏪</span><span class="stt"><b>بيانات المحل</b><small id="ss_shop"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="des"><span class="si">🎨</span><span class="stt"><b>تصميم الفاتورة</b><small id="ss_des"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="inv"><span class="si">🧾</span><span class="stt"><b>خيارات وطباعة</b><small id="ss_inv"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="notes"><span class="si">📝</span><span class="stt"><b>ملاحظات الفاتورة</b><small id="ss_notes"></small></span><span class="sa">‹</span></button></div>
+  <div class="sgl"><button type="button" class="sti" data-sp="shop"><span class="si">🏪</span><span class="stt"><b>بيانات المحل</b><small id="ss_shop"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="des"><span class="si">🎨</span><span class="stt"><b>تصميم الفاتورة</b><small id="ss_des"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="inv"><span class="si">🧾</span><span class="stt"><b>خيارات وطباعة</b><small id="ss_inv"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="notes"><span class="si">📝</span><span class="stt"><b>ملاحظات وسطور ثابتة</b><small id="ss_notes"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">الفلوس</div>
   <div class="sgl"><button type="button" class="sti" data-sp="pay"><span class="si">💳</span><span class="stt"><b>طرق الدفع</b><small id="ss_pay"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="cl"><span class="si">📊</span><span class="stt"><b>الإقفال والتقارير</b><small id="ss_cl"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">العملاء</div>
@@ -291,14 +291,8 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="card"><b>🖼️ اللوجو</b><div class="mute">بيظهر فوق الفاتورة وفي أعلى البرنامج. حجمه بيتظبط من تصميم الفاتورة.</div><div style="margin-top:6px"><label class="alt logo-pick" for="logoFile">🖼️ اختيار صورة اللوجو</label><input type="file" id="logoFile" accept="image/*" class="vh">
     <div id="logoBox" class="hide" style="margin-top:6px"><img id="logoPrev" alt="اللوجو" style="max-height:60px;max-width:60%;display:block;margin-bottom:6px;background:#fff;border-radius:6px;padding:4px"><label class="opt"><input type="checkbox" id="logoOn"> إظهار اللوجو على الفاتورة</label><button class="alt b-red" id="logoDel" style="margin-top:6px">🗑️ حذف اللوجو</button></div>
     <div class="info" id="logoMsg"></div></div></div>
-<div class="card"><b>📝 سطور ثابتة في الفاتورة</b><div class="mute">رقم الواتساب، العنوان، حساب إنستا، أرقام التحويل… بتظهر في كل الفواتير.</div>
-  <label style="margin-top:6px">فوق اللوجو</label><textarea id="stTop" rows="2" placeholder="مثال: واتساب 01012345678"></textarea>
-  <label style="margin-top:6px">تحت اللوجو</label><textarea id="stHead" rows="2" placeholder="مثال: العنوان · الفرع الرئيسي"></textarea>
-  <label style="margin-top:6px">آخر الفاتورة</label><textarea id="stFoot" rows="2" placeholder="مثال: إنستا: اسم حسابك · فودافون كاش: 010..."></textarea>
-  <div class="mute" style="margin-top:4px">السطور دي بتظهر مع التصميم الملون.</div></div>
 </div>
 <div class="stp hide" data-sp="des" id="invDes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🎨 تصميم الفاتورة</b></div>
-<div class="card"><label class="opt"><input type="checkbox" id="qrOn"> QR على الفاتورة المطبوعة</label><div class="mute">كود صغير في آخر الفاتورة اللي بتطبعها (A4 أو حراري) فيه ملخصها. مش بيظهر في صورة الواتس ولا الـPDF. تمسحه من 📷 في السجل للتحقق منها.</div></div>
 <div class="card"><label class="opt"><input type="checkbox" id="fancyInv"> التصميم الملون</label><div class="mute">جداول مدوّرة وألوان وملخص الأصناف. لو قفلته، الفاتورة بتطلع بشكل بسيط والإعدادات اللي تحت مش بتأثر عليها.</div></div>
 <button type="button" class="main" id="dzOpen" style="width:100%;margin:6px 0">✋ صمّم الفاتورة بإيدك (اسحب وكبّر ولوّن على الفاتورة نفسها)</button>
 <div class="idprev" id="idPrev" title="دوس عشان تصمّم بإيدك" style="cursor:pointer"></div>
@@ -317,26 +311,33 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="ro" style="gap:6px;margin-top:6px"><span class="mute" id="idCur" style="flex:1"></span><button class="alt b-red" id="idReset" style="flex:none">↩️ رجّع الأصلي</button></div>
   <div class="ro" style="gap:6px;margin-top:6px"><button class="alt" id="idExp" style="flex:1">📤 تصدير القوالب</button><button class="alt" id="idImp" style="flex:1">📥 استيراد قوالب</button><input type="file" id="idImpF" accept=".json,application/json" class="hide"></div><div class="info" id="idMsg"></div></details>
 </div>
-<div class="stp hide" data-sp="notes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>📝 ملاحظات الفاتورة</b></div>
+<div class="stp hide" data-sp="notes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>📝 ملاحظات وسطور الفاتورة</b></div>
 <div class="card"><b>📝 الملاحظات اللي بتظهر تحت الفاتورة</b><div class="mute">ضيف أكتر من ملاحظة، وكل واحدة بلونها. بتتحفظ مع كل فاتورة جديدة، والفواتير القديمة بتفضل زي ما هي.</div>
   <div id="ntList"></div><button type="button" class="alt" id="ntAdd" style="width:100%;margin-top:8px">➕ ملاحظة جديدة</button></div>
 <div class="card"><b>👁️ شكلها في الفاتورة</b><div id="ntPrevBox" style="margin-top:6px"></div><div class="mute" style="margin-top:4px">حجم الخط والمحاذاة من: تصميم الفاتورة ← حجم ومحاذاة الملاحظات.</div></div>
+<div class="card"><b>📝 سطور ثابتة في الفاتورة</b><div class="mute">رقم الواتساب، العنوان، حساب إنستا، أرقام التحويل… بتظهر في كل الفواتير.</div>
+  <label style="margin-top:6px">فوق اللوجو</label><textarea id="stTop" rows="2" placeholder="مثال: واتساب 01012345678"></textarea>
+  <label style="margin-top:6px">تحت اللوجو</label><textarea id="stHead" rows="2" placeholder="مثال: العنوان · الفرع الرئيسي"></textarea>
+  <label style="margin-top:6px">آخر الفاتورة</label><textarea id="stFoot" rows="2" placeholder="مثال: إنستا: اسم حسابك · فودافون كاش: 010..."></textarea>
+  <div class="mute" style="margin-top:4px">السطور دي بتظهر مع التصميم الملون.</div></div>
 </div>
 <div class="stp hide" data-sp="inv"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🧾 خيارات الفاتورة والطباعة</b></div>
 <div class="card"><b>🧾 بعد حفظ الفاتورة</b>
   <label class="opt"><input type="checkbox" id="ordOn"> متابعة الطلبيات (⏳ تحت التجهيز ← ✅ جاهز ← 📦 اتسلّم)</label>
-  <label class="opt"><input type="checkbox" id="xAlw"> النولون والخصم ورد الكاش ظاهرين دايماً (من غير ما تدوس «+ إضافات»)</label>
-  <label class="opt"><input type="checkbox" id="ceilSz"> تقريب العرض والطول لأعلى رقم صحيح عند حساب المتر (42.2 و42.5 يتحسبوا 43)</label>
   <label class="opt"><input type="checkbox" id="editInv"> تعديل الفاتورة بعد حفظها</label>
-  <label class="opt"><input type="checkbox" id="dupInv"> تكرار فاتورة قديمة لنفس العميل</label>
-  <label class="opt"><input type="checkbox" id="repLastOn"> زرار «↻ كرر آخر فاتورة لنفس العميل» تحت اسم العميل</label>
-  <label class="opt"><input type="checkbox" id="saveImgOn"> زرار «حفظ كصورة» في شريط الحفظ (بينزّل الصورة في التنزيلات)</label></div>
+  <label class="opt"><input type="checkbox" id="dupInv"> تكرار فاتورة قديمة لنفس العميل</label></div>
 <div class="card"><b>🧩 اللي يظهر في شاشة الفاتورة</b>
   <label class="opt"><input type="checkbox" id="rcOn"> أزرار آخر العملاء تحت خانة الاسم</label>
-  <label class="opt"><input type="checkbox" id="qtOn"> عروض الأسعار (زرار «عرض سعر» وقايمة العروض)</label></div>
+  <label class="opt"><input type="checkbox" id="repLastOn"> زرار «↻ كرر آخر فاتورة لنفس العميل» تحت اسم العميل</label>
+  <label class="opt"><input type="checkbox" id="xAlw"> النولون والخصم ورد الكاش ظاهرين دايماً (من غير ما تدوس «+ إضافات»)</label>
+  <label class="opt"><input type="checkbox" id="qtOn"> عروض الأسعار (زرار «عرض سعر» وقايمة العروض)</label>
+  <label class="opt"><input type="checkbox" id="saveImgOn"> زرار «حفظ كصورة» في شريط الحفظ (بينزّل الصورة في التنزيلات)</label></div>
+<div class="card"><b>📐 الحساب</b>
+  <label class="opt"><input type="checkbox" id="ceilSz"> تقريب العرض والطول لأعلى رقم صحيح عند حساب المتر (42.2 و42.5 يتحسبوا 43)</label></div>
 <div class="card"><b>🖨 الطباعة والـ PDF</b>
   <label class="opt"><input type="checkbox" id="pdfOn"> زرار PDF والطباعة تحت الفاتورة</label>
-  <div id="paperBox"><label style="margin-top:6px">مقاس الورق</label><select id="paperSel"><option value="a4">A4 عادي</option><option value="t80">ورق حراري 80 مم</option><option value="t58">ورق حراري 58 مم</option></select></div></div>
+  <div id="paperBox"><label style="margin-top:6px">مقاس الورق</label><select id="paperSel"><option value="a4">A4 عادي</option><option value="t80">ورق حراري 80 مم</option><option value="t58">ورق حراري 58 مم</option></select></div>
+  <label class="opt" style="margin-top:8px"><input type="checkbox" id="qrOn"> QR في آخر الفاتورة المطبوعة</label><div class="mute">كود صغير فيه ملخص الفاتورة، بيظهر في الطباعة (A4 أو حراري) بس، مش في صورة الواتس ولا الـPDF. تمسحه من 📷 في السجل للتحقق منها.</div></div>
 </div>
 <div class="stp hide" data-sp="pay"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>💳 طرق الدفع</b></div>
 <div class="card"><b>💳 طرق الدفع الجاهزة</b><div class="mute">بتظهر زراير في الفاتورة وفي صفحة الدفع. النسبة بتتخصم من المبلغ المدفوع (زي عمولة المحفظة)، و0 يعني من غير خصم.</div>
@@ -345,8 +346,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 </div>
 <div class="stp hide" data-sp="msg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b><i class="wai"></i> رسائل الواتساب</b></div>
 <div class="card"><b>📤 الإرسال</b>
-  <label class="opt"><input type="checkbox" id="autoWa"> بعد حفظ الفاتورة افتح الإرسال للعميل على طول</label>
-  <label class="opt"><input type="checkbox" id="bulkRemChk"> زرار تذكير كل المديونين مرة واحدة</label></div>
+  <label class="opt"><input type="checkbox" id="autoWa"> بعد حفظ الفاتورة افتح الإرسال للعميل على طول</label></div>
 <div class="mute" style="margin:2px 4px 6px">اضغط على أي زرار من اللي تحت الرسالة عشان تحط اسم العميل أو المبلغ مكانه، وهيتبدل لوحده وقت الإرسال.</div>
 <div class="card"><b>🧾 رسالة الفاتورة</b><textarea id="tplInv" rows="6" style="margin-top:6px"></textarea><div class="vch" data-for="tplInv"></div><label>شكلها عند العميل</label><div class="wab" id="pvInv"></div></div><div class="card"><b>💵 رسالة الدفعة</b><textarea id="tplPay" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplPay"></div><label>شكلها عند العميل</label><div class="wab" id="pvPay"></div></div><div class="card"><b>🔔 رسالة تذكير الدين</b><textarea id="tplRem" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplRem"></div><label class="opt"><input type="checkbox" id="remDays"> أضيف «مرّ كام يوم على آخر دفعة» في الرسالة لوحدها</label><label class="opt"><input type="checkbox" id="remOld"> أذكر أقدم فاتورة متأخرة (تاريخها والمتبقي)</label><label class="opt"><input type="checkbox" id="remBal"> أذكر الرصيد السابق لو العميل عليه رصيد قديم</label><div class="ro" style="gap:6px;margin:4px 0 0"><label style="flex:1;margin:0;font-size:12px">الصياغة تبقى أحزم بعد كام يوم (0 = مقفول)</label><input id="remFirm" type="text" inputmode="numeric" style="width:64px;flex:none;text-align:center"></div><input id="remPay" placeholder="بيانات الدفع: رقم محفظة أو حساب (بتتضاف آخر الرسالة)" style="margin-top:6px"><div class="ro" style="gap:6px;margin:4px 0 0"><label style="flex:1;margin:0;font-size:12px">«تواصل معنا» بعد كام يوم (0 = مقفول)</label><input id="remLong" type="text" inputmode="numeric" style="width:64px;flex:none;text-align:center"></div><details style="margin-top:6px"><summary>✏️ صياغة سطور التذكير (فاضي = الأصل)</summary><div class="mute" style="margin:4px 0">اكتب جملتك مكان الأصلية. المتغيّرات: {عدد} {التاريخ} {المتبقي} {المبلغ} {البيانات}</div><label>جملة السداد العادية</label><input id="rtSoft"><label>جملة السداد الأحزم</label><input id="rtFirm"><label>جملة «تواصل معنا» (بعد المدة الطويلة)</label><input id="rtLong"><label>لو دفع قبل كده</label><input id="rtPaid"><label>لو ما دفعش خالص</label><input id="rtNever"><label>أقدم فاتورة</label><input id="rtOld"><label>الرصيد السابق</label><input id="rtBal"><label>بيانات الدفع</label><input id="rtPay"><div class="ro" style="gap:6px;margin-top:6px"><label style="flex:1;margin:0;font-size:12px">معاينة بصياغة</label><select id="remPvT" style="width:auto;flex:none"><option value="soft">عادية</option><option value="firm">أحزم</option><option value="long">تواصل معنا</option></select><button type="button" class="alt" id="rtReset" style="flex:none">↺ رجّع الأصل</button></div></details><label>شكلها عند العميل</label><div class="wab" id="pvRem"></div></div><div class="card"><b>📦 رسالة الطلب جاهز</b><textarea id="tplRdy" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplRdy"></div><label>شكلها عند العميل</label><div class="wab" id="pvRdy"></div></div>
 <button type="button" class="alt b-red" id="tplReset" style="width:100%;margin-top:4px">↩️ رجوع للرسايل الأصلية</button>
@@ -357,7 +357,8 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <label style="margin-top:8px">يعتبر متأخر لو عدّى من غير ما يدفع</label>
   <div class="seg s" id="remDaysSeg" style="margin-top:4px"><button type="button" data-rd="1">يوم</button><button type="button" data-rd="2">يومين</button><button type="button" data-rd="3">3 أيام</button><button type="button" data-rd="7">أسبوع</button><button type="button" data-rd="14">أسبوعين</button><button type="button" data-rd="30">شهر</button></div>
   <div class="ro" style="gap:6px;margin-top:6px;justify-content:flex-start"><span class="mute">أو اكتب عدد الأيام:</span><input id="remDaysIn" type="text" inputmode="numeric" style="width:64px;text-align:center"><span class="mute">يوم</span></div>
-  <div class="ro" style="gap:6px;margin-top:10px;justify-content:flex-start"><span class="mute">متنبهنيش لو الحساب أقل من</span><input id="remMinIn" type="text" inputmode="decimal" placeholder="0" style="width:90px;text-align:center"><span class="mute">جنيه</span></div></div>
+  <div class="ro" style="gap:6px;margin-top:10px;justify-content:flex-start"><span class="mute">متنبهنيش لو الحساب أقل من</span><input id="remMinIn" type="text" inputmode="decimal" placeholder="0" style="width:90px;text-align:center"><span class="mute">جنيه</span></div>
+  <label class="opt" style="margin-top:8px"><input type="checkbox" id="bulkRemChk"> زرار «تذكير كل المديونين» مرة واحدة (في صفحة المديونيات)</label></div>
 <div class="card"><b>❓ إزاي بيشتغل</b><div class="mute" style="line-height:1.8;margin-top:4px">
   • العميل اللي عدّى عليه المدة دي من آخر دفعة (أو من آخر تذكير) بيظهر في السجل في سطر «🔔 محتاجين تذكير»، وأول مرة تفتح البرنامج كل يوم بيطلعلك تنبيه.<br>
   • لو حددت للعميل ميعاد سداد من صفحته في المديونين، بيتنبهك يوم الميعاد نفسه. وأي دفعة بتلغي الميعاد.<br>
@@ -546,11 +547,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=284"></script>
-<script src="js/qr.js?v=284"></script>
+<script src="js/app.js?v=285"></script>
+<script src="js/qr.js?v=285"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=284"></script>
-<script src="js/features.js?v=284"></script>
+<script src="js/cutlist.js?v=285"></script>
+<script src="js/features.js?v=285"></script>
 </body>
 </html>
 
