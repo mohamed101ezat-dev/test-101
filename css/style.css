@@ -1370,3 +1370,7 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 #spBox .sprow .spa{width:66px}
 #spBox .sprow .pin input{width:28px}
 #spBox .sprow .spk{width:28px}
+
+/* v278: أسماء العملاء المقترحة: خلفية برتقالي فاتح دايماً في كل الألوان والـ3D */
+html[data-theme] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme] :is(#recentC,#siteC) button.b-cu{background:#ffe5cc!important;background-image:none!important;border:1px solid #fdba74!important;border-bottom-width:1px!important;color:#9a3412!important;box-shadow:none!important}
+html[data-theme="dark"] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme="dark"] :is(#recentC,#siteC) button.b-cu{background:#4a2c14!important;background-image:none!important;border-color:#9a5b2b!important;color:#fdba74!important}
