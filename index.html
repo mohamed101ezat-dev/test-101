@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=285">
+<link rel="stylesheet" href="css/style.css?v=286">
 
 
 
@@ -323,6 +323,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 </div>
 <div class="stp hide" data-sp="inv"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🧾 خيارات الفاتورة والطباعة</b></div>
 <div class="card"><b>🧾 بعد حفظ الفاتورة</b>
+  <label class="opt"><input type="checkbox" id="autoWa"> افتح إرسال الواتساب للعميل على طول بعد الحفظ</label>
   <label class="opt"><input type="checkbox" id="ordOn"> متابعة الطلبيات (⏳ تحت التجهيز ← ✅ جاهز ← 📦 اتسلّم)</label>
   <label class="opt"><input type="checkbox" id="editInv"> تعديل الفاتورة بعد حفظها</label>
   <label class="opt"><input type="checkbox" id="dupInv"> تكرار فاتورة قديمة لنفس العميل</label></div>
@@ -345,8 +346,6 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="card"><b>👥 نسب العملاء المحفوظة</b><div class="mute">البرنامج بيفتكر آخر نسبة اتسجلت لكل عميل. امسح النسبة لو عايز العميل يرجع للنسبة العامة.</div><div id="pmCust"></div></div>
 </div>
 <div class="stp hide" data-sp="msg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b><i class="wai"></i> رسائل الواتساب</b></div>
-<div class="card"><b>📤 الإرسال</b>
-  <label class="opt"><input type="checkbox" id="autoWa"> بعد حفظ الفاتورة افتح الإرسال للعميل على طول</label></div>
 <div class="mute" style="margin:2px 4px 6px">اضغط على أي زرار من اللي تحت الرسالة عشان تحط اسم العميل أو المبلغ مكانه، وهيتبدل لوحده وقت الإرسال.</div>
 <div class="card"><b>🧾 رسالة الفاتورة</b><textarea id="tplInv" rows="6" style="margin-top:6px"></textarea><div class="vch" data-for="tplInv"></div><label>شكلها عند العميل</label><div class="wab" id="pvInv"></div></div><div class="card"><b>💵 رسالة الدفعة</b><textarea id="tplPay" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplPay"></div><label>شكلها عند العميل</label><div class="wab" id="pvPay"></div></div><div class="card"><b>🔔 رسالة تذكير الدين</b><textarea id="tplRem" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplRem"></div><label class="opt"><input type="checkbox" id="remDays"> أضيف «مرّ كام يوم على آخر دفعة» في الرسالة لوحدها</label><label class="opt"><input type="checkbox" id="remOld"> أذكر أقدم فاتورة متأخرة (تاريخها والمتبقي)</label><label class="opt"><input type="checkbox" id="remBal"> أذكر الرصيد السابق لو العميل عليه رصيد قديم</label><div class="ro" style="gap:6px;margin:4px 0 0"><label style="flex:1;margin:0;font-size:12px">الصياغة تبقى أحزم بعد كام يوم (0 = مقفول)</label><input id="remFirm" type="text" inputmode="numeric" style="width:64px;flex:none;text-align:center"></div><input id="remPay" placeholder="بيانات الدفع: رقم محفظة أو حساب (بتتضاف آخر الرسالة)" style="margin-top:6px"><div class="ro" style="gap:6px;margin:4px 0 0"><label style="flex:1;margin:0;font-size:12px">«تواصل معنا» بعد كام يوم (0 = مقفول)</label><input id="remLong" type="text" inputmode="numeric" style="width:64px;flex:none;text-align:center"></div><details style="margin-top:6px"><summary>✏️ صياغة سطور التذكير (فاضي = الأصل)</summary><div class="mute" style="margin:4px 0">اكتب جملتك مكان الأصلية. المتغيّرات: {عدد} {التاريخ} {المتبقي} {المبلغ} {البيانات}</div><label>جملة السداد العادية</label><input id="rtSoft"><label>جملة السداد الأحزم</label><input id="rtFirm"><label>جملة «تواصل معنا» (بعد المدة الطويلة)</label><input id="rtLong"><label>لو دفع قبل كده</label><input id="rtPaid"><label>لو ما دفعش خالص</label><input id="rtNever"><label>أقدم فاتورة</label><input id="rtOld"><label>الرصيد السابق</label><input id="rtBal"><label>بيانات الدفع</label><input id="rtPay"><div class="ro" style="gap:6px;margin-top:6px"><label style="flex:1;margin:0;font-size:12px">معاينة بصياغة</label><select id="remPvT" style="width:auto;flex:none"><option value="soft">عادية</option><option value="firm">أحزم</option><option value="long">تواصل معنا</option></select><button type="button" class="alt" id="rtReset" style="flex:none">↺ رجّع الأصل</button></div></details><label>شكلها عند العميل</label><div class="wab" id="pvRem"></div></div><div class="card"><b>📦 رسالة الطلب جاهز</b><textarea id="tplRdy" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplRdy"></div><label>شكلها عند العميل</label><div class="wab" id="pvRdy"></div></div>
 <button type="button" class="alt b-red" id="tplReset" style="width:100%;margin-top:4px">↩️ رجوع للرسايل الأصلية</button>
@@ -472,8 +471,6 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
     <div id="lkRecSet" class="hide"><button type="button" class="alt" id="lkRecMake" style="width:100%;margin-top:10px"></button><div id="lkRecShow" class="hide" style="margin-top:6px"></div></div></div>
 </div>
 <div class="stp hide" data-sp="data"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>💾 الحفظ والنسخ</b></div>
-<div class="card"><b>📞 توحيد أرقام العملاء</b><div class="mute">بيصلّح الأرقام القديمة (مسافات، +20، 002…) علشان الواتساب والاتصال يشتغلوا.</div><button type="button" class="alt" id="phFix" style="width:100%;margin-top:6px">🧹 وحّد كل الأرقام</button><div class="info" id="phMsg"></div></div>
-<div class="card"><b>📦 مساحة التخزين</b><div id="stMeter"></div></div>
 <div class="card"><b>☁️ الحفظ والمزامنة</b><div id="stor" class="stor"></div>
     <div id="fbStat" style="margin:4px 0 8px;font-size:14px">مش مربوطة بحساب.</div>
     <div class="mute num" id="fbWho" style="margin-bottom:6px;direction:ltr;text-align:right"></div>
@@ -485,12 +482,6 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="btns"><button class="main" id="bkSave">💾 حفظ نسخة</button><button class="alt" id="bkLoad">♻️ استرجاع نسخة</button><input type="file" id="bkFile" accept=".json,application/json" class="hide"></div>
   <div class="btns"><button class="alt b-out" id="bkShare">📤 مشاركة نسخة (درايف / واتساب)</button></div><div class="info" id="bkMsg"></div>
   <label class="opt"><input type="checkbox" id="bkAl"> تنبيه لو عدّى أسبوع من غير نسخة</label></div>
-<div class="card" id="impBox"><b>📥 استيراد من Excel</b><div class="mute" style="margin-top:4px">ملف Excel (xlsx) أو CSV. أول صف يبقى عناوين، زي: الاسم، الموبايل، الرصيد، السعر.</div>
-  <div class="btns"><button type="button" class="alt" data-imp="customers">👥 العملاء</button><button type="button" class="alt" data-imp="items">📦 الأصناف</button></div><input type="file" id="impFile" class="hide" accept=".xlsx,.csv,.txt,.xls">
-  <div id="impAsk" class="hide"><div class="mute" id="impPrev" style="margin-top:6px;line-height:1.8"></div><div class="btns"><button type="button" class="main" id="impGo">✅ ضيفهم</button><button type="button" class="alt" id="impNo">✖️ إلغاء</button></div></div><div class="info" id="impMsg"></div></div>
-<div class="card" id="xlBox"><b>📊 تصدير Excel</b><div class="mute" style="margin-top:4px">ملف بيتفتح في Excel أو Google Sheets.</div>
-  <div class="btns"><button type="button" class="alt" data-xl="inv">🧾 الفواتير</button><button type="button" class="alt" data-xl="cu">👥 العملاء</button><button type="button" class="alt" data-xl="it">📦 الأصناف</button></div>
-  <div class="btns"><button type="button" class="alt" data-xl="ex">💸 المصروفات</button><button type="button" class="alt" data-xl="sp">🚚 الموردين</button><button type="button" class="alt" data-xl="st">🧱 المخزون</button></div><div class="info" id="xlMsg"></div></div>
 <details class="card"><summary>🗄 نسخ تلقائية (على الجهاز والسحابة)</summary>
   <label class="opt"><input type="checkbox" id="snapOn"> نسخة على الجهاز كل يوم (آخر 14 يوم)</label>
   <div class="mute" style="margin:2px 0 6px">بتحميك من الحذف أو التعديل بالغلط، بس مش بتحميك لو الموبايل نفسه ضاع.</div>
@@ -502,6 +493,14 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <label class="opt"><input type="checkbox" id="trashOn"> الفاتورة المحذوفة تتحفظ 30 يوم</label>
   <div class="mute" style="margin:6px 0">اضغط (استرجاع) عشان ترجع الفاتورة.</div>
   <div id="trList"></div><div class="info" id="trMsg"></div></details>
+<div class="card" id="impBox"><b>📥 استيراد من Excel</b><div class="mute" style="margin-top:4px">ملف Excel (xlsx) أو CSV. أول صف يبقى عناوين، زي: الاسم، الموبايل، الرصيد، السعر.</div>
+  <div class="btns"><button type="button" class="alt" data-imp="customers">👥 العملاء</button><button type="button" class="alt" data-imp="items">📦 الأصناف</button></div><input type="file" id="impFile" class="hide" accept=".xlsx,.csv,.txt,.xls">
+  <div id="impAsk" class="hide"><div class="mute" id="impPrev" style="margin-top:6px;line-height:1.8"></div><div class="btns"><button type="button" class="main" id="impGo">✅ ضيفهم</button><button type="button" class="alt" id="impNo">✖️ إلغاء</button></div></div><div class="info" id="impMsg"></div></div>
+<div class="card" id="xlBox"><b>📊 تصدير Excel</b><div class="mute" style="margin-top:4px">ملف بيتفتح في Excel أو Google Sheets.</div>
+  <div class="btns"><button type="button" class="alt" data-xl="inv">🧾 الفواتير</button><button type="button" class="alt" data-xl="cu">👥 العملاء</button><button type="button" class="alt" data-xl="it">📦 الأصناف</button></div>
+  <div class="btns"><button type="button" class="alt" data-xl="ex">💸 المصروفات</button><button type="button" class="alt" data-xl="sp">🚚 الموردين</button><button type="button" class="alt" data-xl="st">🧱 المخزون</button></div><div class="info" id="xlMsg"></div></div>
+<div class="card"><b>📦 مساحة التخزين</b><div id="stMeter"></div></div>
+<div class="card"><b>📞 توحيد أرقام العملاء</b><div class="mute">بيصلّح الأرقام القديمة (مسافات، +20، 002…) علشان الواتساب والاتصال يشتغلوا.</div><button type="button" class="alt" id="phFix" style="width:100%;margin-top:6px">🧹 وحّد كل الأرقام</button><div class="info" id="phMsg"></div></div>
 </div>
 </section>
 
@@ -547,11 +546,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=285"></script>
-<script src="js/qr.js?v=285"></script>
+<script src="js/app.js?v=286"></script>
+<script src="js/qr.js?v=286"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=285"></script>
-<script src="js/features.js?v=285"></script>
+<script src="js/cutlist.js?v=286"></script>
+<script src="js/features.js?v=286"></script>
 </body>
 </html>
 
