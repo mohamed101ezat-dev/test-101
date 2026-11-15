@@ -38,7 +38,7 @@
       moreNone: 'ده أحسن ترتيب لقيته.', moreMin: 'ده أقل عدد شيتات ممكن ✓', morePins: 'فك تثبيت القطع الأول.', hintOne: 'خيار «استخدام شيت واحد فقط» شغال. أوقفه لاستخدام باقي الشيتات.', hintMat: 'خيار «مراعاة الخامة» شغال: القطعة تتحط فقط على شيت من نفس الخامة. راجع عمود الخامة.', hintMore: 'أضف شيتات أكثر (أو زوّد عدد الشيتات).', cantDrop: 'لا يمكن وضعها هنا: تتداخل مع قطعة أخرى أو لا يمكن قصها بقصات مستقيمة. حول الدائرة لازم القطعة تبقى جوه مربع الدائرة نفسها، في ركن.', cantRot: 'لا توجد مساحة للتدوير هنا.', needPin: 'ثبّت قطعة واحدة على الأقل ثم أعد ترتيب الباقي.', rearranged: 'تم تحديث الترتيب', cantPack: 'لا يمكن قص القطع المثبتة بقصات مستقيمة.', pinned: 'مثبتة',
       gaps: 'استخدام الفراغات حول الدوائر', gapN: 'قطع داخل الفراغات', gapNote: 'القطع ذات الإطار الأحمر المتقطع بتطلع من أركان مربع الدائرة/البيضاوي: اقطع المربع حسب القائمة، وبعدين اقطع الدائرة منه، وبعدين اقطع القطع دي من الأركان اللي فضلت. المكان محسوب من الركن العلوي الشمال للشيت.', shape: 'الشكل', shapeR: 'مستطيل', shapeC: 'دائرة (القطر)', shapeO: 'بيضاوي',
       copy: 'نسخ قائمة القطع', copied: 'تم النسخ', saved: 'تم الحفظ في المتصفح', copyFail: 'تعذر النسخ',
-      warn: function (n, list) { return n + ' قطعة لا تتسع في الشيتات المتاحة: ' + list + '.'; }, hintBig: 'فيه قطع أكبر من كل الشيتات المتاحة.',
+      warn: function (n, list) { return '⚠️ ' + n + ' قطعة ملقتش مكان — ' + list + ' ·'; }, hintBig: 'فيه قطع أكبر من كل الشيتات المتاحة.',
       zin: 'تكبير', zout: 'تصغير', zfit: 'ملائمة العرض', fup: 'تكبير الخط', fdn: 'تصغير الخط', col: 'الألوان', dim: 'أبعاد الشيت',
       enable: 'تفعيل / إيقاف', del: 'حذف', rot: 'مُدوَّرة', panel: 'قطعة', menu: 'القائمة', settings: 'الإعدادات', mSave: 'حفظ المشروع', mLoad: 'تحميل مشروع', mPdf: 'تصدير PDF', mImg: 'تصدير صورة', setDim: 'ترتيب الأبعاد', dimLW: 'الطول × العرض', dimWL: 'العرض × الطول', setDec: 'عدد الأرقام العشرية', setTrim: 'أقل مقاس هالك (الأصغر منه يتحسب هالك)', setOrient: 'اتجاه القص', oOpt: 'الأفضل', oV: 'رأسي أولاً', oH: 'أفقي أولاً', setUnit: 'الوحدة', uGen: 'عام', uCm: 'سم', uMm: 'مم', uM: 'متر', uIn: 'بوصة', ok: 'تمام', tOn: 'تفعيل الكل', tOff: 'إيقاف الكل', tSort: 'ترتيب بالأكبر', tClear: 'مسح الجدول', badFile: 'الملف مش صالح', loaded: 'تم تحميل المشروع', exported: 'تم التصدير', calcBtn: 'احسب'
     },
@@ -995,7 +995,7 @@
       var tooBig = R.unplaced.some(function (u) {
         return !stock.some(function (st) { return (u.w <= st.W + EPS && u.h <= st.H + EPS) || (!S.opts.grain && u.h <= st.W + EPS && u.w <= st.H + EPS); });
       });
-      return '<p class="notice">' + L.warn(R.unplaced.length, Object.keys(m).map(function (k) { return k + ' ×' + m[k]; }).join(lang === 'ar' ? '، ' : ', ')) + ' ' + (tooBig ? L.hintBig : S.opts.one ? L.hintOne : S.opts.material ? L.hintMat : L.hintMore) + '</p>';
+      return '<p class="notice">' + L.warn(R.unplaced.length, Object.keys(m).map(function (k) { return lang === 'ar' ? k + ' (' + m[k] + ')' : k + ' ×' + m[k]; }).join(lang === 'ar' ? '، ' : ', ')) + ' ' + (tooBig ? L.hintBig : S.opts.one ? L.hintOne : S.opts.material ? L.hintMat : L.hintMore) + '</p>';
     }
     function draw() {
       var cv = rr('canvas'), nt = rr('notice');
