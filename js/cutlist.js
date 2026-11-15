@@ -170,6 +170,7 @@
     '.cl .tool button.txt{width:auto;padding:0 10px;font-size:12px;margin-inline-start:auto;border:1px solid var(--line);gap:6px;display:inline-flex;align-items:center;color:var(--fg)}',
     '.cl .tool button.txt+button.txt{margin-inline-start:0}',
     '.cl .empty{padding:50px 10px;text-align:center;color:var(--muted)}',
+    '.cl .card.unfit{border-color:var(--bad);margin:0 0 14px}.cl .card.unfit>.hd{background:var(--bad);color:#fff}.cl .unfit table{width:100%;border-collapse:collapse}.cl .unfit th,.cl .unfit td{padding:8px 12px;text-align:start;font-size:14px}.cl .unfit th{border-bottom:2px solid var(--line);font-weight:400}.cl .unfit tbody tr:nth-child(even){background:var(--stripe)}',
     '.cl .notice{margin:0 0 14px;padding:10px 12px;border:1px solid var(--bad);color:var(--bad);border-radius:3px;font-size:13px}',
 
     '.cl .card{background:var(--surface);border:1px solid var(--line);border-radius:2px}',
@@ -990,12 +991,10 @@
     function hueFor(it) { return HUES[it.ri % HUES.length]; }
     var gid = uid;
     function unplacedNotice() {
-      var m = {}; R.unplaced.forEach(function (u) { var k = '<span class="n">' + pair(u.w, u.h) + '</span>'; m[k] = (m[k] || 0) + 1; });
-      var stock = R.stock || [];
-      var tooBig = R.unplaced.some(function (u) {
-        return !stock.some(function (st) { return (u.w <= st.W + EPS && u.h <= st.H + EPS) || (!S.opts.grain && u.h <= st.W + EPS && u.w <= st.H + EPS); });
-      });
-      return '<p class="notice">' + L.warn(R.unplaced.length, Object.keys(m).map(function (k) { return lang === 'ar' ? k + ' (' + m[k] + ')' : k + ' ×' + m[k]; }).join(lang === 'ar' ? '، ' : ', ')) + ' ' + (tooBig ? L.hintBig : S.opts.one ? L.hintOne : S.opts.material ? L.hintMat : L.hintMore) + '</p>';
+      var m = {}; R.unplaced.forEach(function (u) { var k = pair(u.w, u.h); m[k] = (m[k] || 0) + 1; });
+      var ar = lang === 'ar';
+      return '<section class="card unfit"><button class="hd">' + (ar ? 'مش داخلة في الشيتات' : 'Unable to fit') + CHEV + '</button><div class="cb"><table><thead><tr><th>' + (ar ? 'المقاس' : 'Panel') + '</th><th>' + (ar ? 'العدد' : 'Qty') + '</th></tr></thead><tbody>' +
+        Object.keys(m).map(function (k) { return '<tr><td><span class="n">' + k + '</span></td><td>' + m[k] + '</td></tr>'; }).join('') + '</tbody></table></div></section>';
     }
     function draw() {
       var cv = rr('canvas'), nt = rr('notice');
