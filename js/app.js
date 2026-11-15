@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='283';
+const APP_VER='284';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -423,7 +423,8 @@ function sheet(o){lastSpec=o;const D=invd();
 /* [لوجو, المبلغ] لكل طريقة دفع، عشان تترسم تحت الإجماليات */
 function payStrip(r,raw){if(PY(r))return r.pays.filter(y=>+y.a>0).map(y=>[payTok(y.n)||y.n,f(y.a)]);const v=+raw||0;return v>0?[[payTok(r.pfWhy)||r.pfWhy,f(v)]]:[]}
 const nn=x=>x.rt?'مرتجع'+(x.src?' من فاتورة '+x.src:'')+' - '+x.n:x.n;
-function invSheet(r,paper){const o=invSheet0(r,paper);if(r.type==='inv'&&pget('qrOn',true)&&window.qrText){try{o.qr=qrText(r)}catch(e){}}return o}
+/* v284: الـQR بيتحط في الطباعة بس (qr=true)، مش في صورة الواتس ولا المعاينة ولا الـPDF */
+function invSheet(r,paper,qr){const o=invSheet0(r,paper);if(qr&&r.type==='inv'&&pget('qrOn',true)&&window.qrText){try{o.qr=qrText(r)}catch(e){}}return o}
 function invSheet0(r,paper){const TH=paper==='t80'||paper==='t58',fancy=!TH&&pget('fancyInv',true)&&!(r.rows||[]).some(x=>x.cols),lbl=x=>nn(x)+(x.q>0?(+x.w>0&&+x.h>0&&+x.w>+x.h?' ('+x.h+'/'+x.w+')':' ('+x.w+'/'+x.h+')'):'');const base={name:r.cname,date:stamp(r.ts),note:r.note,wm:1};
   const cd=(pureRet(r)?'مرتجع · ':'')+(r.code?'كود '+r.code+' · ':'')+(r.rcode?'كود المرتجع '+r.rcode+' · ':'');
   if(r.type==='pay')return{...base,fancy,ps:payStrip(r,r.pfv?r.amtRaw:r.amount),st:(+r.rest||0)<=0?'paid':'',...(Array.isArray(r.gn)?{gn:r.gn,gnote:r.gnote||''}:noteSnap()),sub:cd+(isGen()?'إيصال دفعة':'إذن دفعة')+(r.no?' رقم '+r.no:''),sum:[['الحساب قبل الدفعة',fb(r.prev)],...(PY(r)?[...r.pays.map(y=>[(payTok(y.n)||y.n)+(y.p>0?' (خصم '+fq(y.p)+'%)':''),f(y.a)]),...(r.pfv?[['إجمالي خصم التحويلات',f(r.pfv)]]:[]),['صافي الدفعة',f(r.amount),1]]:r.pfv?[[payLbl('المبلغ المدفوع',r.pfWhy,r.amtRaw),f(r.amtRaw)],['خصم '+fq(r.pf)+'% '+(payTok(r.pfWhy)||'من المدفوع'),f(r.pfv)],['صافي الدفعة',f(r.amount),1]]:[[payLbl('المبلغ المدفوع',r.pfWhy,r.amount),f(r.amount),1]]),['الحساب بعد الدفعة',fb(r.rest),1]]};
@@ -477,7 +478,7 @@ $('ressh').onclick=async()=>{if(!curBlob)return;const file=new File([curBlob],cu
 const PAPERS={a4:{n:'A4',w:595.28,h:841.89,m:28},t80:{n:'حراري 80',w:226.77,m:11},t58:{n:'حراري 58',w:164.41,m:8}};
 const paperKey=()=>PAPERS[lsv('paper','a4')]?lsv('paper','a4'):'a4';
 function paperLabels(){const n=PAPERS[paperKey()].n;$('respdf').textContent='📄 PDF · '+n;$('resprint').textContent='🖨 طباعة · '+n}
-const renderPaper=(p,out)=>curRec?sheet({...invSheet(curRec,p),paper:p,out}):sheet({...curSpec,paper:p,out});
+const renderPaper=(p,out)=>curRec?sheet({...invSheet(curRec,p,out==='print'),paper:p,out}):sheet({...curSpec,paper:p,out});
 const jpgBytes=cv=>{const b=atob(cv.toDataURL('image/jpeg',.92).split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
 function buildPdf(pages){const enc=new TextEncoder(),parts=[],offs=[];let len=0;
   const push=b=>{const u=typeof b==='string'?enc.encode(b):b;parts.push(u);len+=u.length};
