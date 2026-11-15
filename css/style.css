@@ -1364,3 +1364,9 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 
 /* v272: شريط أدوات CutList بيلف بدل ما يتسحب، وزراير صغيرة مساحة لمسها أكبر */
 #cimpOpen,#catMgrBtn,#moreBtn,#clear{min-height:32px}
+
+/* v274: صفوف طرق الدفع أضيق عشان صف المحفظة (% + X) ما يركبش على عمود الإجمالي */
+#spBox .sprow{grid-template-columns:28px 66px auto auto;column-gap:4px}
+#spBox .sprow .spa{width:66px}
+#spBox .sprow .pin input{width:28px}
+#spBox .sprow .spk{width:28px}
