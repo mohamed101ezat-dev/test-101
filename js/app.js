@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='280';
+const APP_VER='281';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1835,7 +1835,7 @@ $('spAdd').onclick=()=>{const s=S.suppliers.find(x=>x.id===supCur);if(!s)return;
 $('spMore').onclick=()=>{spAll=true;drawSup()};
 $('spLF').onclick=e=>{const b=e.target.closest('[data-lf]');if(b){spLF=b.dataset.lf;spAll=false;drawSup()}};
 $('spList').onclick=e=>{const eb=e.target.closest('[data-spe]');if(eb){spStartEdit(eb.dataset.spe);return}const b=e.target.closest('[data-spd]');if(!b||!ok2(b))return;const x=S.purchases.find(y=>y.id===b.dataset.spd);if(!x)return;
-  const rel=S.purchases.filter(y=>y.pf===x.id),sk=S.stock.filter(y=>y.id===x.sk);[x,...rel].forEach(y=>del('purchases',y.id));sk.forEach(y=>del('stock',y.id));drawSup();
+  const rel=S.purchases.filter(y=>y.pf===x.id),sk=S.stock.filter(y=>y.id===x.sk||(x.sks||[]).includes(y.id));[x,...rel].forEach(y=>del('purchases',y.id));sk.forEach(y=>del('stock',y.id));drawSup();
   toast('اتمسحت الحركة'+(rel.length||sk.length?' ومعاها '+(rel.length?'السداد':'')+(rel.length&&sk.length?' و':'')+(sk.length?'المخزون':''):''),'تراجع',()=>{[x,...rel].forEach(y=>undel('purchases',y));sk.forEach(y=>undel('stock',y));drawSup()})};
 /* بيانات المورد */
 const spCur=()=>S.suppliers.find(x=>x.id===supCur);
@@ -1972,7 +1972,7 @@ function skOrd(){const A=skInfo().filter(x=>x.st==='low'||x.st==='out'),g=new Ma
 function skMv(){const m=stkAll(),sal=skSales(),a=S.stock.filter(x=>m.has(x.iid)),s=[];sal.forEach((l,id)=>{const o=m.get(id);l.forEach(x=>{if(o&&x.ts>=o.from)s.push(x)})});
   const T=x=>x.inv?'sale':x.t==='adj'?'adj':x.q>0?'in':'out',all=a.concat(s).sort((x,y)=>y.ts-x.ts),l=all.filter(x=>stkMF==='all'||T(x)===stkMF).slice(0,80);
   skSub(skBack+`<div class="spc">${[['all','الكل'],['in','➕ دخل'],['out','➖ صرف'],['adj','⚖️ جرد'],['sale','🧾 بيع']].map(([k,t])=>`<button type="button" data-mf="${k}"${k===stkMF?' class="on"':''}>${t}</button>`).join('')}</div><div class="card" style="padding:6px 8px"><table class="xl">${l.length?l.map(x=>skMvRow(x,true)).join(''):'<tr><td class="tn mute">مفيش حركات.</td></tr>'}</table></div>`)}
-function drawStk(){if(stkV==='home'){skSub('');skHome()}else if(stkV==='one')skOne();else if(stkV==='cnt')skCnt();else if(stkV==='ord')skOrd();else if(stkV==='mv')skMv();else{stkV='home';skSub('');skHome()}}
+function drawStk(){if(stkV==='rcv')skRcv();else if(stkV==='home'){skSub('');skHome()}else if(stkV==='one')skOne();else if(stkV==='cnt')skCnt();else if(stkV==='ord')skOrd();else if(stkV==='mv')skMv();else{stkV='home';skSub('');skHome()}}
 $('stkQ').oninput=drawStk;
 $('stkLim').onchange=e=>{svk('stkMin',String(Math.max(0,nv(e.target.value))));drawStk()};
 function skMsg(t){const e=$('skMsg')||$('stkMsg');if(e)e.textContent=t}
@@ -1994,17 +1994,36 @@ function skDo(k){const it=S.items.find(i=>i.id===stkId),A=k==='apply'?null:it;
     skPush(st);skSet(it,{...(c?{cost:c}:{}),...(sid?{sid}:{})});stkAct=null;skOne();skMsg(msg)}}
 $('stkPanel').addEventListener('click',e=>{const t=e.target;let b;
   if(b=t.closest('[data-sf]')){stkF=b.dataset.sf;drawStk();return}
-  if(b=t.closest('[data-sg]')){const k=b.dataset.sg;if(k==='one'){stkId=b.dataset.id;stkAct=null}stkV=k;drawStk();$('stkPanel').scrollIntoView({block:'start'});return}
+  if(b=t.closest('[data-sg]')){const k=b.dataset.sg;if(k==='rcAdd'){skRc.lines.push({iid:'',q:'',c:''});skRcv();return}if(k==='one'){stkId=b.dataset.id;stkAct=null}stkV=k;drawStk();$('stkPanel').scrollIntoView({block:'start'});return}
   if(b=t.closest('[data-ac]')){stkAct=stkAct===b.dataset.ac?null:b.dataset.ac;skOne();return}
   if(b=t.closest('[data-qq]')){const i=$('skQty');i.value=rd2((nv(i.value)||0)+ +b.dataset.qq);i.dispatchEvent(new Event('input'));return}
   if(b=t.closest('[data-rs]')){stkRs=b.dataset.rs;t.closest('.spc').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return}
   if(b=t.closest('[data-mf]')){stkMF=b.dataset.mf;skMv();return}
-  if(b=t.closest('[data-do]')){skDo(b.dataset.do);return}
+  if(b=t.closest('[data-do]')){if(b.dataset.do==='rcv')skRcSave();else skDo(b.dataset.do);return}
   if(b=t.closest('[data-og]')){const s=S.suppliers.find(y=>y.id===b.dataset.og),tx=skOrdTx(b.dataset.og);if(!s||!tx){skMsg('اكتب كمية لصنف واحد على الأقل');return}window.open('https://wa.me/'+waNum(s.phone)+'?text='+encodeURIComponent(tx),'_blank','noopener');return}
   if(b=t.closest('[data-oc]')){const tx=skOrdTx(b.dataset.oc);if(!tx){skMsg('اكتب كمية لصنف واحد على الأقل');return}(navigator.clipboard?navigator.clipboard.writeText(tx):Promise.reject()).then(()=>skMsg('✅ اتنسخت القايمة'),()=>skMsg('معرفتش أنسخ. اكتبها بإيدك'));return}
-  if(b=t.closest('[data-skd]')){const x=S.stock.find(y=>y.id===b.dataset.skd);if(!x)return;{const o=stkAll().get(x.iid);if(x.q>0&&o&&o.bal-x.q<-1e-9){toast('⚠️ مينفعش تمسح الدخول ده: الرصيد هيبقى بالسالب. امسح الحركات اللي بعده الأول');return}}if(!ok2(b))return;const pk=S.purchases.filter(y=>y.sk===x.id),rel=S.purchases.filter(y=>pk.some(p=>p.id===y.pf));
-    del('stock',x.id);[...pk,...rel].forEach(y=>del('purchases',y.id));drawStk();toast('اتمسحت الحركة'+(pk.length?' ومعاها شراء المورد':''),'تراجع',()=>{undel('stock',x);[...pk,...rel].forEach(y=>undel('purchases',y));drawStk()})}});
+  if(b=t.closest('[data-skd]')){const x=S.stock.find(y=>y.id===b.dataset.skd);if(!x)return;{const o=stkAll().get(x.iid);if(x.q>0&&o&&o.bal-x.q<-1e-9){toast('⚠️ مينفعش تمسح الدخول ده: الرصيد هيبقى بالسالب. امسح الحركات اللي بعده الأول');return}}if(!ok2(b))return;const pk=S.purchases.filter(y=>y.sk===x.id),mp=S.purchases.find(y=>(y.sks||[]).includes(x.id)&&y.sks.length>1),old=mp&&{...mp},rel0=S.purchases.filter(y=>mp&&y.pf===mp.id).map(y=>({...y})),mp1=S.purchases.find(y=>(y.sks||[]).includes(x.id)&&y.sks.length===1);if(mp1)pk.push(mp1);const rel=S.purchases.filter(y=>pk.some(p=>p.id===y.pf));
+    del('stock',x.id);
+    if(mp){const d=rd2((+x.q||0)*(+x.cost||0));mp.sks=mp.sks.filter(k=>k!==x.id);mp.amt=Math.max(0,rd2(mp.amt-d));put('purchases',mp);S.purchases.filter(y=>y.pf===mp.id).forEach(y=>{y.amt=mp.amt;put('purchases',y)})}
+    [...pk,...rel].forEach(y=>del('purchases',y.id));drawStk();toast('اتمسحت الحركة'+(pk.length?' ومعاها شراء المورد':mp?' واتخصمت من شراء المورد':''),'تراجع',()=>{undel('stock',x);[...pk,...rel].forEach(y=>undel('purchases',y));if(mp){Object.assign(mp,old);put('purchases',mp);rel0.forEach(o=>{const y=S.purchases.find(z=>z.id===o.id);if(y){Object.assign(y,o);put('purchases',y)}})}drawStk()})}});
 $('stkPanel').addEventListener('input',e=>{if(e.target.id==='skQty'||e.target.id==='skCost'){const q=rd2(nv(($('skQty')||{}).value)),c=rd2(nv(($('skCost')||{}).value)),t=$('skTot');if(t)t.textContent=q>0&&c>0?'الإجمالي '+f(rd2(q*c)):''}});
+let skRc={sid:'',lines:[{iid:'',q:'',c:''}],paid:false,note:''};
+function skRcTot(){return rd2(skRc.lines.reduce((a,l)=>a+(rd2(nv(l.q))>0&&rd2(nv(l.c))>0?rd2(nv(l.q))*rd2(nv(l.c)):0),0))}
+function skRcv(){const sups=S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')),its=S.items.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+  const io=sel=>'<option value="">اختار الصنف</option>'+its.map(i=>`<option value="${esc(i.id)}"${i.id===sel?' selected':''}>${esc(skTx(i))}</option>`).join('');
+  skSub(skBack+`<div class="card"><div class="mute">📥 استلام بضاعة: المورد بيبعتلك كذا صنف مرة واحدة. سجّلهم كلهم هنا، والإجمالي بيتسجل في حسابه.</div><select id="rcSup" aria-label="المورد" style="margin-top:6px"><option value="">اختار المورد</option>${sups.map(s=>`<option value="${esc(s.id)}"${s.id===skRc.sid?' selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
+  <div class="card" id="rcLines">${skRc.lines.map((l,i)=>`<div class="skl" data-i="${i}"><select class="rcI" aria-label="الصنف">${io(l.iid)}</select><input class="rcQ" inputmode="decimal" placeholder="الكمية" value="${esc(l.q)}" autocomplete="off" aria-label="الكمية"><input class="rcC" inputmode="decimal" placeholder="سعر الوحدة" value="${esc(l.c)}" autocomplete="off" aria-label="سعر الوحدة"><button type="button" class="xd" data-rx="${i}" aria-label="شيل السطر">×</button></div>`).join('')}<button type="button" class="alt" data-sg="rcAdd" style="width:100%;margin-top:6px">➕ صنف تاني</button></div>
+  <div class="card"><div class="ro" style="color:var(--ink)"><span>الإجمالي</span><span class="num" id="rcTot">${f(skRcTot())}</span></div><label class="opt"><input type="checkbox" id="rcPaid"${skRc.paid?' checked':''}> دفعت كاش دلوقتي</label><input id="rcNote" placeholder="ملاحظة (اختياري)" value="${esc(skRc.note)}" autocomplete="off" aria-label="ملاحظة" style="margin-top:4px"><button type="button" class="main" data-do="rcv" style="width:100%;margin-top:6px">✅ سجّل الاستلام</button><div class="info" id="skMsg" aria-live="polite"></div></div>`)}
+function skRcSave(){const m=$('skMsg'),s=S.suppliers.find(y=>y.id===skRc.sid);if(!s){m.textContent='اختار المورد';return}
+  const L=skRc.lines.map(l=>({it:S.items.find(i=>i.id===l.iid),q:rd2(nv(l.q)),c:Math.max(0,rd2(nv(l.c)))})).filter(l=>l.it&&l.q>0);if(!L.length){m.textContent='اختار صنف واكتب كميته';return}
+  const ts=Date.now(),ids=[],tot=rd2(L.reduce((a,l)=>a+l.q*l.c,0)),o={id:uid(),sid:s.id,ts,type:'buy',amt:tot,note:(skRc.note?skRc.note+' · ':'')+L.map(l=>skTx(l.it)+' × '+f(l.q)).join('، '),sks:ids};
+  L.forEach(l=>{const st={id:uid(),iid:l.it.id,ts,q:l.q,t:'in',sid:s.id,...(tot>0?{pk:o.id}:{}),...(l.c?{cost:l.c}:{})};ids.push(st.id);skPush(st);skSet(l.it,{...(l.c?{cost:l.c}:{}),sid:s.id})});
+  if(tot>0){const add=[o];if(skRc.paid)add.push({id:uid(),sid:s.id,ts,type:'pay',amt:tot,how:'كاش',note:'سداد استلام بضاعة',pf:o.id});else if(s.terms>0)o.due=ts+s.terms*SKD;add.forEach(y=>{S.purchases.push(y);put('purchases',y)})}
+  skRc={sid:s.id,lines:[{iid:'',q:'',c:''}],paid:false,note:''};stkV='home';drawStk();toast('✅ استلمت '+plN(L.length,'صنف')+' من '+s.name+(tot>0?' · '+f(tot):''))}
+$('stkPanel').addEventListener('input',e=>{const t=e.target,ln=t.closest('.skl');if(t.id==='rcNote')skRc.note=t.value;if(!ln)return;const l=skRc.lines[+ln.dataset.i];if(!l)return;if(t.classList.contains('rcQ'))l.q=t.value;if(t.classList.contains('rcC'))l.c=t.value;const e2=$('rcTot');if(e2)e2.textContent=f(skRcTot())});
+$('stkPanel').addEventListener('change',e=>{const t=e.target,ln=t.closest('.skl');if(t.id==='rcSup')skRc.sid=t.value;if(t.id==='rcPaid')skRc.paid=t.checked;if(ln&&t.classList.contains('rcI')){const l=skRc.lines[+ln.dataset.i];l.iid=t.value;const it=S.items.find(i=>i.id===t.value);if(it&&!rd2(nv(l.c))&&skCost(it))l.c=String(skCost(it));skRcv()}});
+$('stkPanel').addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;skRc.lines.splice(+b.dataset.rx,1);if(!skRc.lines.length)skRc.lines.push({iid:'',q:'',c:''});skRcv()});
+$('supRcv').onclick=()=>{skRc.sid=supCur||'';stGo('stk');stkV='rcv';drawStk()};
 $('stkPanel').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('skr')){e.preventDefault();e.target.click()}});
 
 /* الإشعارات: رسالة فوق لو البرنامج قدامك، وإشعار من الموبايل لو في الخلفية، والضغط عليهم بيفتح الحاجة نفسها.
