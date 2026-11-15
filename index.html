@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=281">
+<link rel="stylesheet" href="css/style.css?v=282">
 
 
 
@@ -148,7 +148,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div id="hMain">
   <div class="card hide" id="topDebt"></div>
   <div class="card">
-    <input id="hq" aria-label="بحث في السجل" placeholder="ابحث: اسم · كود · مبلغ (700 · 600-800) · صنف · موقع" inputmode="search">
+    <div class="ro" style="gap:6px;flex-wrap:nowrap"><input id="hq" aria-label="بحث في السجل" placeholder="ابحث: اسم · كود · مبلغ (700 · 600-800) · صنف · موقع" inputmode="search" style="flex:1;min-width:0"><button type="button" class="alt" id="qrScanBtn" aria-label="مسح QR" style="flex:none;min-height:0;height:38px;padding:0 12px" onclick="qrScan()">📷</button></div>
     <div class="mute hide" id="hBrk" style="font-weight:700;margin:2px 0"></div>
     <div class="ro"><span class="mute" id="hTot"></span></div>
   </div>
@@ -298,6 +298,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="mute" style="margin-top:4px">السطور دي بتظهر مع التصميم الملون.</div></div>
 </div>
 <div class="stp hide" data-sp="des" id="invDes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🎨 تصميم الفاتورة</b></div>
+<div class="card"><label class="opt"><input type="checkbox" id="qrOn"> QR على الفاتورة</label><div class="mute">كود صغير في آخر الفاتورة فيه ملخصها. تقدر تمسحه من 📷 في السجل للتحقق منها.</div></div>
 <div class="card"><label class="opt"><input type="checkbox" id="fancyInv"> التصميم الملون</label><div class="mute">جداول مدوّرة وألوان وملخص الأصناف. لو قفلته، الفاتورة بتطلع بشكل بسيط والإعدادات اللي تحت مش بتأثر عليها.</div></div>
 <button type="button" class="main" id="dzOpen" style="width:100%;margin:6px 0">✋ صمّم الفاتورة بإيدك (اسحب وكبّر ولوّن على الفاتورة نفسها)</button>
 <div class="idprev" id="idPrev" title="دوس عشان تصمّم بإيدك" style="cursor:pointer"></div>
@@ -545,10 +546,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=281"></script>
+<script src="js/app.js?v=282"></script>
+<script src="js/qr.js?v=282"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=281"></script>
-<script src="js/features.js?v=281"></script>
+<script src="js/cutlist.js?v=282"></script>
+<script src="js/features.js?v=282"></script>
 </body>
 </html>
 

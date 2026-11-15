@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='281';
+const APP_VER='282';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -329,7 +329,7 @@ function sheet(o){lastSpec=o;const D=invd();
     if(o.note){y+=6;wrap('ملاحظة: '+o.note,IW,nf+'px '+F).forEach(s=>{T(s,W-P,y+11,'right',nf+'px '+F);y+=nlh})}
     if(o.gn&&o.gn.length){y+=8;o.gn.forEach(n=>{const fo=(n.b?'bold ':'')+nf+'px '+F;String(n.t).split('\n').forEach(ln=>wrap(ln.trim()||' ',IW,fo).forEach(s=>{T(s,W-P,y+11,'right',fo,TH?'#000':(n.c||'#000'));y+=nlh}));y+=2})}
     else if(o.gnote){y+=8;String(o.gnote).split('\n').forEach(ln=>wrap(ln.trim()||' ',IW,nf+'px '+F).forEach(s=>{T(s,W-P,y+11,'right',nf+'px '+F);y+=nlh}))}
-    return y+(TH?30:4)};
+    if(typeof qrFoot==='function')y+=qrFoot(x,o,W,P,y,TH,F);return y+(TH?30:4)};
     const PL={bg:D.bg,mar:D.marble,head:D.head,hfg:D.hfg,ink:D.ink,grid:D.grid,edge:D.edge,tot:[D.totBg,D.totFg],gold:[D.remBg,D.remFg],paid:[D.paidBg,D.paidFg],lite:[D.sumA,D.ink],lite2:[D.sumB,D.ink],val:D.ink,rows:D.acc.map(c=>[hexMix(c,D.bg,D.tint/100),c])},PALF=PL.rows,HEADC=PL.head,GRIDC=PL.grid,EDGEC=PL.edge;
   const paintF=x=>{x.direction='rtl';x.textBaseline='middle';const LY=o.edit?[]:null,LR=r=>{if(LY)LY.push(r)},R=D.r,GR=D.muteC||'#555555',GP=D.gap==null?10:+D.gap;
     const T=(s,px,py,al,font,col)=>{font=String(font).replace(/^bold /,'');if(/[-]/.test(s))return drawRich(x,s,px,py,al,font,col||PL.ink);x.font=font;x.textAlign=al;x.fillStyle=col||PL.ink;x.fillText(String(s),px,py)};
@@ -415,7 +415,7 @@ function sheet(o){lastSpec=o;const D=invd();
       ps.forEach(([k,v])=>{const im=payImgs&&payImgs[String(k)[0]];if(im&&im.complete&&im.naturalWidth){const iw=ih*im.naturalWidth/im.naturalHeight;x.drawImage(im,cx-iw,y,iw,ih);cx-=iw+G}else if(k){const t=PAY_TOK[String(k)[0]]||k;x.fillText(t,cx,y+ih/2);cx-=x.measureText(t).width+G}x.fillText(v,cx,y+ih/2);cx-=x.measureText(v).width+fz*1.6});x.restore();y+=lh};
     const SEC={tables:secT,summary:()=>{secS();secP()},notes:secN};D.order.forEach(k=>SEC[k]&&SEC[k]());
     if(String(D.footText||'').trim()){y+=6;xt(D.footText,0,null,D.fFoot,'foot')}
-    if(LY)window.__LAY={items:LY,W,H:y+8};return y+8};
+    if(typeof qrFoot==='function')y+=qrFoot(x,o,W,P,y,false,F);if(LY)window.__LAY={items:LY,W,H:y+8};return y+8};
   const pf=o.fancy&&!TH?paintF:paint;
   const H=Math.ceil(pf(mc)),cv=document.createElement('canvas');
   cv.width=W*2;cv.height=H*2;const x=cv.getContext('2d',{willReadFrequently:true});/* الرسم على المعالج: قراية الصورة من كارت الشاشة في الموبايل بطيئة */x.scale(2,2);if(pf===paintF){x.fillStyle=PL.bg;x.fillRect(0,0,W,H);if(PL.mar){const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#f4f5f7');g.addColorStop(.3,'#e6e9ee');g.addColorStop(.5,'#f6f7f9');g.addColorStop(.75,'#e3e6eb');g.addColorStop(1,'#f3f4f6');x.fillStyle=g;x.fillRect(0,0,W,H);x.strokeStyle='rgba(110,120,145,.08)';x.lineWidth=1;for(let i=-H;i<W;i+=58){x.beginPath();x.moveTo(i,0);x.lineTo(i+H*.45,H);x.stroke()}x.strokeStyle='rgba(110,120,145,.05)';for(let i=0;i<W+H;i+=140){x.beginPath();x.moveTo(i,0);x.lineTo(i-H*.7,H);x.stroke()}}}else{x.fillStyle='#fff';x.fillRect(0,0,W,H)}pf(x);drawWM(x,W,H,o,TH,pf===paintF?PL.head:AC);return cv}
@@ -423,7 +423,8 @@ function sheet(o){lastSpec=o;const D=invd();
 /* [لوجو, المبلغ] لكل طريقة دفع، عشان تترسم تحت الإجماليات */
 function payStrip(r,raw){if(PY(r))return r.pays.filter(y=>+y.a>0).map(y=>[payTok(y.n)||y.n,f(y.a)]);const v=+raw||0;return v>0?[[payTok(r.pfWhy)||r.pfWhy,f(v)]]:[]}
 const nn=x=>x.rt?'مرتجع'+(x.src?' من فاتورة '+x.src:'')+' - '+x.n:x.n;
-function invSheet(r,paper){const TH=paper==='t80'||paper==='t58',fancy=!TH&&pget('fancyInv',true)&&!(r.rows||[]).some(x=>x.cols),lbl=x=>nn(x)+(x.q>0?(+x.w>0&&+x.h>0&&+x.w>+x.h?' ('+x.h+'/'+x.w+')':' ('+x.w+'/'+x.h+')'):'');const base={name:r.cname,date:stamp(r.ts),note:r.note,wm:1};
+function invSheet(r,paper){const o=invSheet0(r,paper);if(r.type==='inv'&&pget('qrOn',true)&&window.qrText){try{o.qr=qrText(r)}catch(e){}}return o}
+function invSheet0(r,paper){const TH=paper==='t80'||paper==='t58',fancy=!TH&&pget('fancyInv',true)&&!(r.rows||[]).some(x=>x.cols),lbl=x=>nn(x)+(x.q>0?(+x.w>0&&+x.h>0&&+x.w>+x.h?' ('+x.h+'/'+x.w+')':' ('+x.w+'/'+x.h+')'):'');const base={name:r.cname,date:stamp(r.ts),note:r.note,wm:1};
   const cd=(pureRet(r)?'مرتجع · ':'')+(r.code?'كود '+r.code+' · ':'')+(r.rcode?'كود المرتجع '+r.rcode+' · ':'');
   if(r.type==='pay')return{...base,fancy,ps:payStrip(r,r.pfv?r.amtRaw:r.amount),st:(+r.rest||0)<=0?'paid':'',...(Array.isArray(r.gn)?{gn:r.gn,gnote:r.gnote||''}:noteSnap()),sub:cd+(isGen()?'إيصال دفعة':'إذن دفعة')+(r.no?' رقم '+r.no:''),sum:[['الحساب قبل الدفعة',fb(r.prev)],...(PY(r)?[...r.pays.map(y=>[(payTok(y.n)||y.n)+(y.p>0?' (خصم '+fq(y.p)+'%)':''),f(y.a)]),...(r.pfv?[['إجمالي خصم التحويلات',f(r.pfv)]]:[]),['صافي الدفعة',f(r.amount),1]]:r.pfv?[[payLbl('المبلغ المدفوع',r.pfWhy,r.amtRaw),f(r.amtRaw)],['خصم '+fq(r.pf)+'% '+(payTok(r.pfWhy)||'من المدفوع'),f(r.pfv)],['صافي الدفعة',f(r.amount),1]]:[[payLbl('المبلغ المدفوع',r.pfWhy,r.amount),f(r.amount),1]]),['الحساب بعد الدفعة',fb(r.rest),1]]};
   const RZ=/\s*(\d+(?:\.\d+)?)\s*[×x*]\s*(\d+(?:\.\d+)?)\s*$/,rdz=x=>x.t==='rd'&&!(x.q>0)&&!x.rt?String(x.n).match(RZ):null,bn=x=>rdz(x)?String(x.n).replace(RZ,''):x.n,nb=x=>{const m=rdz(x);return m?nn(x).replace(RZ,''):nn(x)};
@@ -1326,9 +1327,9 @@ const isGen=()=>lsv('biz','')==='gen',defT=()=>isGen()?'rd':'mq';
 function applyBiz(){const g=isGen();document.documentElement.classList.toggle('biz-gen',g);curIT=g?'rd':'mq';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.it===curIT));$('bizSel').value=g?'gen':'cut';
   $('subLbl').textContent=g?'إجمالي الأصناف':'إجمالي الإذن';const l=$('rows').lastElementChild;if(l&&rowBlank(l)&&l.dataset.t!==defT()){l.remove();calc()}if(curTab==='cl'&&g)document.querySelector('#bnav [data-t="new"]').click();try{drawItems()}catch(e){}}
 function bizSet(v){svk('biz',v==='gen'?'gen':'cut');if(v==='gen'&&!lsv('docw',''))svk('docw','فاتورة');applyBiz();loadMsgUI()}
-const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
+const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
 const setGet=()=>{const o={};SET_K.forEach(k=>{const v=lsv(k,null);if(v!==null)o[k]=v});return o},setKey=o=>hs(JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]])));
-function setApply(){try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true)}}catch(e){}}
+function setApply(){try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true);$('qrOn').checked=pget('qrOn',true)}}catch(e){}}
 let setBusy=null,setT=0,setAt=0;
 /* البيانات اللي على السحابة بتكسب لو الجهاز ما اتغيرش من آخر مزامنة. لو الجهاز اتغير، هو اللي بيترفع */
 function setSync(){if(!FBDB||instOff)return Promise.resolve();if(setBusy)return setBusy;clearTimeout(setT);
@@ -1497,7 +1498,7 @@ $('themeChk').onchange=()=>setTheme($('themeChk').checked);
 (function(){let p='sage';try{p=localStorage.getItem('pal')||'sage'}catch(e){}setPal(p);
 document.querySelectorAll('#pals button,#palsCalm button').forEach(b=>b.onclick=()=>setPal(b.dataset.p));$('palCustom').value=getCC();$('palCustom').oninput=()=>{try{localStorage.setItem('cc',$('palCustom').value)}catch(e){}setPal('custom')};
 $('animChk').checked=pget('anim',animDef());$('animChk').onchange=()=>{pset('anim',$('animChk').checked);applyAnim()};applyAnim();perfWatch()})();
-[['editInv','editInv'],['dupInv','dupInv'],['repLastOn','repLastOn'],['dayCl','dayCl'],['weekCl','weekCl'],['monCl','monCl'],['bulkRemChk','bulkRem'],['trashOn','trashOn'],['bkAl','bkAl'],['snapOn','snapOn'],['autoBk','autoBk'],['logoOn','logoOn'],['fancyInv','fancyInv'],['pdfOn','pdfOn'],['ceilSz','ceilSz'],['nfRem','nfRem'],['nfStk','nfStk'],['nfSup','nfSup'],['rcOn','rcOn'],['qtOn','qtOn'],['remDays','remDays'],['remOld','remOld'],['remBal','remBal']].forEach(([id,k])=>{$(id).checked=pget(k,true);$(id).onchange=()=>{pset(k,$(id).checked);applyFeatures();drawCusts();if(k==='ceilSz')calc()}});
+[['editInv','editInv'],['dupInv','dupInv'],['repLastOn','repLastOn'],['dayCl','dayCl'],['weekCl','weekCl'],['monCl','monCl'],['bulkRemChk','bulkRem'],['trashOn','trashOn'],['bkAl','bkAl'],['snapOn','snapOn'],['autoBk','autoBk'],['logoOn','logoOn'],['fancyInv','fancyInv'],['qrOn','qrOn'],['pdfOn','pdfOn'],['ceilSz','ceilSz'],['nfRem','nfRem'],['nfStk','nfStk'],['nfSup','nfSup'],['rcOn','rcOn'],['qtOn','qtOn'],['remDays','remDays'],['remOld','remOld'],['remBal','remBal']].forEach(([id,k])=>{$(id).checked=pget(k,true);$(id).onchange=()=>{pset(k,$(id).checked);applyFeatures();drawCusts();if(k==='ceilSz')calc()}});
 /* متابعة الطلبيات: مفتوحة افتراضياً */
 $('ordOn').checked=ordOn();$('ordOn').onchange=()=>{pset('ordOn',$('ordOn').checked);drawDash();calc()};
 /* الإضافات ظاهرة دايماً: مقفولة افتراضياً لأنها مش في كل فاتورة */

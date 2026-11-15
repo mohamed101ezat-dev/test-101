@@ -2,7 +2,7 @@
 const V = new URL(self.location.href).searchParams.get('v') || '0';
 const C = 'eltabakha-v' + V;
 const Q = '?v=' + V;
-const A = ['./', './index.html', './privacy.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './vodafone.svg', './instapay.png', './css/style.css' + Q, './js/app.js' + Q, './js/cutlist.js' + Q, './js/features.js' + Q];
+const A = ['./', './index.html', './privacy.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './vodafone.svg', './instapay.png', './css/style.css' + Q, './js/app.js' + Q, './js/qr.js' + Q, './js/cutlist.js' + Q, './js/features.js' + Q];
 const NAV_TIMEOUT = 4000; // لو النت بطيء أكتر من كده افتح النسخة المحفوظة على طول
 
 self.addEventListener('install', e => {
