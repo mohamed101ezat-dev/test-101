@@ -170,7 +170,7 @@
     '.cl .tool button.txt{width:auto;padding:0 10px;font-size:12px;margin-inline-start:auto;border:1px solid var(--line);gap:6px;display:inline-flex;align-items:center;color:var(--fg)}',
     '.cl .tool button.txt+button.txt{margin-inline-start:0}',
     '.cl .empty{padding:50px 10px;text-align:center;color:var(--muted)}',
-    '.cl .card.unfit{border-color:var(--bad);margin:0 0 14px}.cl .card.unfit>.hd{background:var(--bad);color:#fff}.cl .unfit table{width:100%;border-collapse:collapse}.cl .unfit th,.cl .unfit td{padding:8px 12px;text-align:start;font-size:14px}.cl .unfit th{border-bottom:2px solid var(--line);font-weight:400}.cl .unfit tbody tr:nth-child(even){background:var(--stripe)}',
+    '.cl .card.unfit{border-color:color-mix(in srgb,var(--bad) 55%,var(--line));margin:0 0 14px}.cl .card.unfit>.hd{background:color-mix(in srgb,var(--bad) 55%,var(--surface));color:#fff}.cl .unfit table{width:100%;border-collapse:collapse}.cl .unfit th,.cl .unfit td{padding:8px 12px;text-align:start;font-size:14px}.cl .unfit th{border-bottom:2px solid var(--line);font-weight:400}.cl .unfit tbody tr:nth-child(even){background:var(--stripe)}',
     '.cl .notice{margin:0 0 14px;padding:10px 12px;border:1px solid var(--bad);color:var(--bad);border-radius:3px;font-size:13px}',
 
     '.cl .card{background:var(--surface);border:1px solid var(--line);border-radius:2px}',
