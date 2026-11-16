@@ -1414,3 +1414,6 @@ html[data-theme="dark"] #recentC button.b-cu[style*="--cc"],html.d3[data-theme="
 /* v299: زرار الرجوع العايم */
 #stFab{position:fixed;right:12px;z-index:60;min-height:0;height:40px;padding:0 16px;border-radius:99px;border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--card) 82%,var(--acc));color:var(--accInk,var(--ink));font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 #stFab.hide{display:none!important}
+
+/* v301: زرار الرجوع العايم واضح (لون أساسي ونص أبيض) */
+html #stFab{background:var(--acc)!important;color:#fff!important;border-color:transparent!important}
