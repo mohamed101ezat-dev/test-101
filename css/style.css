@@ -1405,3 +1405,8 @@ html[data-theme="dark"] #recentC button.b-cu[style*="--cc"],html.d3[data-theme="
 #infoView #monRep{display:none!important}
 #infoView .rhero{margin:4px 0 0}
 #infoView .rtiles{margin:6px 0 0}
+
+/* v297: رقم المبيعات الكبير في التقرير */
+#infoView .rhero .rbig b{font-size:30px!important;font-weight:800!important;line-height:1.1}
+#infoView .rhero .rbig span{font-size:13px!important}
+#infoView .rhero .rcmp{font-size:12px!important}

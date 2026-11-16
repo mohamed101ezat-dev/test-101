@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='296';
+const APP_VER='297';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2370,7 +2370,7 @@ function drawInfo(){
   {const now=Date.now(),part=R.b>now&&R.a<=now;let a2,b2;if(R.u==='g'){a2=R.a-(R.b-R.a);b2=R.a}else{a2=shiftT(R.a,R.u,-1);b2=shiftT(R.b,R.u,-1)}if(part)b2=Math.min(b2,a2+(now-R.a));
     const pv=iSum(a2,b2).s,pl=R.u==='g'||(part&&R.u!=='d')?dshort(a2)+' ← '+dshort(b2-1):labT(a2,R.u),df=rd2(T.s-pv);
     if(pv){const pc=Math.round(Math.abs(df)/pv*100);bd=df?'<em class="'+(df>0?'up':'dn')+'">'+(df>0?'▲ ':'▼ ')+pc+'%</em>':'<em>زي ما هي</em>';cmp='مقارنة بـ '+pl+': '+f(pv)}
-    else if(T.s)cmp='مفيش مبيعات في '+pl+' للمقارنة'}
+    }
   $('infoSum').innerHTML='<div class="rhero"><small>'+esc(R.u==='g'?'من '+dshort(R.a)+' إلى '+dshort(R.b-1):rLab(R))+(R.b>Date.now()&&R.a<=Date.now()&&R.u!=='d'?' (لحد دلوقتي)':'')+'</small>'
     +'<div class="rbig"><b class="num">'+f(T.s)+'</b><span>مبيعات · '+plN(T.n,'فاتورة')+'</span>'+bd+'</div>'
     +(cmp?'<span class="rcmp">'+esc(cmp)+'</span>':'')
