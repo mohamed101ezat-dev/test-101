@@ -1372,8 +1372,8 @@ html[data-theme="dark"] .spsr.bad{color:#f87171}
 #spBox .sprow .spk{width:28px}
 
 /* v278: أسماء العملاء المقترحة: خلفية برتقالي فاتح دايماً في كل الألوان والـ3D */
-html[data-theme] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme] :is(#recentC,#siteC) button.b-cu{background:#f6cf4a!important;background-image:none!important;border:1px solid #c99a06!important;border-bottom-width:1px!important;color:#4a3300!important;box-shadow:none!important}
-html[data-theme="dark"] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme="dark"] :is(#recentC,#siteC) button.b-cu{background:#5a4708!important;background-image:none!important;border-color:#a98a14!important;color:#fde68a!important}
+html[data-theme] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme] :is(#recentC,#siteC) button.b-cu{background:rgba(202,138,4,.26)!important;background-image:none!important;border:1px solid rgba(202,138,4,.6)!important;border-bottom-width:1px!important;color:#5c3a00!important;box-shadow:none!important}
+html[data-theme="dark"] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme="dark"] :is(#recentC,#siteC) button.b-cu{background:rgba(250,204,21,.18)!important;background-image:none!important;border-color:rgba(250,204,21,.45)!important;color:#fde68a!important}
 
 /* v279: المخزون الكامل */
 #t-st .skr{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:5px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer}
