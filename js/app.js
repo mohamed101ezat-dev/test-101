@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='305';
+const APP_VER='306';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1333,9 +1333,9 @@ const isGen=()=>lsv('biz','')==='gen',defT=()=>isGen()?'rd':'mq';
 function applyBiz(){const g=isGen();document.documentElement.classList.toggle('biz-gen',g);curIT=g?'rd':'mq';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.it===curIT));$('bizSel').value=g?'gen':'cut';
   $('subLbl').textContent=g?'إجمالي الأصناف':'إجمالي الإذن';const l=$('rows').lastElementChild;if(l&&rowBlank(l)&&l.dataset.t!==defT()){l.remove();calc()}if(curTab==='cl'&&g)document.querySelector('#bnav [data-t="new"]').click();try{drawItems()}catch(e){}}
 function bizSet(v){svk('biz',v==='gen'?'gen':'cut');if(v==='gen'&&!lsv('docw',''))svk('docw','فاتورة');applyBiz();loadMsgUI()}
-const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
+const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
 const setGet=()=>{const o={};SET_K.forEach(k=>{const v=lsv(k,null);if(v!==null)o[k]=v});return o},setKey=o=>hs(JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]])));
-function setApply(){try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true);$('qrOn').checked=pget('qrOn',true)}}catch(e){}}
+function setApply(){try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true);if($('backFab'))$('backFab').checked=pget('backFab',false);$('qrOn').checked=pget('qrOn',true)}}catch(e){}}
 let setBusy=null,setT=0,setAt=0;
 /* البيانات اللي على السحابة بتكسب لو الجهاز ما اتغيرش من آخر مزامنة. لو الجهاز اتغير، هو اللي بيترفع */
 function setSync(){if(!FBDB||instOff)return Promise.resolve();if(setBusy)return setBusy;clearTimeout(setT);
@@ -2633,9 +2633,13 @@ new MutationObserver(()=>syncNav()).observe(document.body,{subtree:true,attribut
 const _dc=drawCusts;drawCusts=function(){const r=_dc.apply(this,arguments);syncNav();return r};
 
 /* v299: زرار رجوع تحت جنب الصباع في كل صفحات الإعدادات (والأصناف والمخزون والموردين) بدل ما تطلع لفوق */
-(function(){const fb=document.createElement('button');fb.type='button';fb.id='stFab';fb.className='hide';fb.setAttribute('aria-label','رجوع');fb.textContent='→ رجوع';document.body.appendChild(fb);
+(function(){const fb=document.createElement('button');fb.type='button';fb.id='stFab';fb.className='hide';fb.setAttribute('aria-label','رجوع');fb.textContent='→';document.body.appendChild(fb);
   const vis=e=>e&&e.offsetParent!==null&&!e.closest('.hide');
   const pick=()=>{for(const s of ['#stkSub [data-sg="home"]','#supOne #supBack','#t-st .stp [data-stback]','#t-it [data-goset]']){const l=[...document.querySelectorAll(s)].find(vis);if(l)return l}return null};
-  let tg=null;const upd=()=>{tg=pick();fb.classList.toggle('hide',!tg);if(tg){const n=$('bnav'),r=n?n.getBoundingClientRect():null;fb.style.bottom=(r&&r.height?Math.max(0,innerHeight-r.top)+10:16)+'px'}};
+  let tg=null,away=false,ly=window.scrollY;window.addEventListener('scroll',()=>{const y=window.scrollY,a=y>ly+4?true:y<ly-4?false:away;ly=y;if(a!==away){away=a;fb.classList.toggle('away',away)}},{passive:true});
+  const upd=()=>{tg=pget('backFab',false)?pick():null;fb.classList.toggle('hide',!tg);if(tg){const n=$('bnav'),r=n?n.getBoundingClientRect():null;fb.style.bottom=(r&&r.height?Math.max(0,innerHeight-r.top)+10:16)+'px'}};
   fb.onclick=()=>{const t=pick();if(t){t.click();window.scrollTo(0,0)}setTimeout(upd,60)};
   document.addEventListener('click',()=>setTimeout(upd,60));window.addEventListener('resize',upd);setInterval(upd,800);upd()})();
+
+/* v306: زرار الرجوع العايم اختياري (مقفول من الأول) */
+(function(){const b=$('backFab');if(!b)return;b.checked=pget('backFab',false);b.onchange=()=>{pset('backFab',b.checked)}})();
