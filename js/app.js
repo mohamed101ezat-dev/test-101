@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='299';
+const APP_VER='300';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2618,6 +2618,6 @@ const _dc=drawCusts;drawCusts=function(){const r=_dc.apply(this,arguments);syncN
 (function(){const fb=document.createElement('button');fb.type='button';fb.id='stFab';fb.className='hide';fb.setAttribute('aria-label','رجوع');fb.textContent='→ رجوع';document.body.appendChild(fb);
   const vis=e=>e&&e.offsetParent!==null&&!e.closest('.hide');
   const pick=()=>{for(const s of ['#stkSub [data-sg="home"]','#supOne #supBack','#t-st .stp [data-stback]','#t-it [data-goset]']){const l=[...document.querySelectorAll(s)].find(vis);if(l)return l}return null};
-  let tg=null;const upd=()=>{tg=pick();fb.classList.toggle('hide',!tg);if(tg){const n=$('bnav'),hh=n&&vis(n)?n.getBoundingClientRect().height:0;fb.style.bottom=(hh+12)+'px'}};
+  let tg=null;const upd=()=>{tg=pick();fb.classList.toggle('hide',!tg);if(tg){const n=$('bnav'),r=n?n.getBoundingClientRect():null;fb.style.bottom=(r&&r.height?Math.max(0,innerHeight-r.top)+10:16)+'px'}};
   fb.onclick=()=>{const t=pick();if(t){t.click();window.scrollTo(0,0)}setTimeout(upd,60)};
   document.addEventListener('click',()=>setTimeout(upd,60));window.addEventListener('resize',upd);setInterval(upd,800);upd()})();
