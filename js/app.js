@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='306';
+const APP_VER='307';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -616,14 +616,14 @@ const lev1=(a,b)=>{if(a===b)return true;if(Math.abs(a.length-b.length)>1)return 
 const similarCust=v=>{const k=squash(v);if(k.length<4)return null;return S.customers.find(c=>{const q=squash(c.name);return q&&nkey(c.name)!==nkey(v)&&(q===k||(q.length>=5&&lev1(q,k)))})||null};
 function dupGroups(){const m=new Map(),pm=new Map(),out=[],seen=new Set();
   S.customers.filter(c=>!c.arch).forEach(c=>{const k=nkey(c.name);if(k)(m.get(k)||m.set(k,[]).get(k)).push(c);new Set(phoneKeys(c.phone)).forEach(p=>(pm.get(p)||pm.set(p,[]).get(p)).push(c))});
-  const add=(g,lab)=>{if(g.length<2)return;const id=g.map(c=>c.id).sort().join('|');if(seen.has(id))return;seen.add(id);g.lab=lab;out.push(g)};
-  m.forEach(g=>add(g,g[0].name));pm.forEach((g,p)=>add(g,'📞 '+g[0].phone));return out}
+  const ign=pget('dupIgn',[]),add=(g,lab,why)=>{if(g.length<2)return;const id=g.map(c=>c.id).sort().join('|');if(seen.has(id)||ign.includes(id))return;seen.add(id);g.lab=lab;g.why=why;g.gid=id;out.push(g)};
+  m.forEach(g=>add(g,g[0].name,'n'));pm.forEach((g,p)=>add(g,g[0].phone,'p'));return out}
 /* دمج عميل مكرر في التاني: فواتيره كلها بتتنقل، وبياناته الناقصة (تليفون/ملاحظة/عنوان) بتتضاف للباقي، والرصيد الافتتاحي بيتجمع */
 function mergeCust(keepId,loseId){if(keepId===loseId)return;const k=getC(keepId),l=getC(loseId);if(!k||!l)return;
   S.invoices.forEach(r=>{if(r.cid===loseId){r.cid=keepId;r.cname=k.name;put('invoices',r)}});
   k.open=rd2((k.open||0)+(l.open||0));if(!k.phone&&l.phone)k.phone=l.phone;if(!k.addr&&l.addr)k.addr=l.addr;if(!k.note&&l.note)k.note=l.note;if(!k.due&&l.due)k.due=l.due;if(l.pfr)k.pfr={...l.pfr,...(k.pfr||{})};
   S.files.forEach(x=>{if(x.sid===loseId){x.sid=keepId;put('files',x)}});put('customers',k);del('customers',loseId);reflow(keepId)}
-$('cuDup').addEventListener('click',e=>{const b=e.target.closest('[data-mg]');if(!b)return;const keepId=b.dataset.mg,g=dupGroups().find(gr=>gr.some(c=>c.id===keepId));if(!g)return;if(!ok2(b))return;g.forEach(c=>{if(c.id!==keepId)mergeCust(keepId,c.id)});drawCusts();drawDash()});
+$('cuDup').addEventListener('click',e=>{const n=e.target.closest('[data-dupno]');if(n){const a=pget('dupIgn',[]);a.push(n.dataset.dupno);pset('dupIgn',a);drawCusts();return}const b=e.target.closest('[data-mg]');if(!b)return;const keepId=b.dataset.mg,g=dupGroups().find(gr=>gr.some(c=>c.id===keepId));if(!g)return;if(!ok2(b))return;g.forEach(c=>{if(c.id!==keepId)mergeCust(keepId,c.id)});drawCusts();drawDash()});
 function drawCusts(){
   if(selC&&getC(selC)){$('cuMain').classList.add('hide');$('cuDet').classList.remove('hide');drawDet();return}
   selC=null;$('cuDet').classList.add('hide');$('cuMain').classList.remove('hide');
@@ -632,7 +632,7 @@ function drawCusts(){
   const q=$('cq').value.trim();let l=S.customers.filter(c=>(qm(c.name,q)||phoneHit(c,q))&&(cuMode==='arch'?!!c.arch:!c.arch)&&(cuMode==='debt'?balOf(c)>0:cuMode==='credit'?balOf(c)<0:cuMode==='idle'?(t=>t>0&&t<idleCut)(lastTs(c)):true));
   {const byName=(a,b)=>a.name.localeCompare(b.name,'ar');
    l.sort(cuSort==='bal'?(a,b)=>(cuMode==='credit'?balOf(a)-balOf(b):balOf(b)-balOf(a))||byName(a,b):cuSort==='last'?(a,b)=>(cuMode==='idle'?lastTs(a)-lastTs(b):lastTs(b)-lastTs(a))||byName(a,b):byName);$('cuTot').innerHTML='<span>👥 <b>'+plN(l.length,'عميل')+'</b></span><span>📒 مديونيات <b class="num" style="color:var(--danger)">'+f(l.reduce((s,c)=>s+Math.max(0,balOf(c)),0))+'</b></span>'+(()=>{const na=S.customers.filter(c=>c.arch).length;return na||cuMode==='arch'?'<button type="button" class="lnk" data-m="'+(cuMode==='arch'?'all':'arch')+'">'+(cuMode==='arch'?'→ كل العملاء':'🗄 '+na+' مؤرشف')+'</button>':''})()}
-  {const dg=dupGroups();$('cuDup').classList.toggle('hide',!dg.length);if(dg.length)$('cuDup').innerHTML='<div class="card" style="border-color:var(--danger)"><b>⚠️ في عملاء بنفس الاسم أو الرقم</b><div class="mute" style="margin:2px 0 6px">يمكن يكونوا اتكتبوا غلط مرتين. اضغط «خليه الأساسي» على اللي عايز تحتفظ بيه، والباقي هيندمج فيه.</div>'+dg.map(g=>'<div style="margin:8px 0 4px;padding-top:8px;border-top:1px solid var(--line)"><b>'+esc(g.lab||g[0].name)+'</b></div>'+g.map(c=>'<div class="ro" style="color:var(--ink)"><span>'+esc(cSub(c,2))+' · <b class="num">'+bal(c)+'</b></span><button type="button" class="alt" data-mg="'+esc(c.id)+'">خليه الأساسي</button></div>').join('')).join('')+'</div>'}
+  {const dg=dupGroups();$('cuDup').classList.toggle('hide',!dg.length);if(dg.length)$('cuDup').innerHTML='<details class="card dupc"><summary><b>⚠️ عملاء ممكن يكونوا متسجلين مرتين ('+dg.length+')</b><span class="mute"> · افتح وشوف</span></summary><div class="mute" style="margin:4px 0">لو هو نفس الشخص: دوس «✓ ده الصح» على الاسم اللي يفضل، والتاني فواتيره وحسابه يتنقلوا له ويتمسح. لو مش نفس الشخص: دوس «مش هو».</div>'+dg.map(g=>'<div class="dupg"><div class="duph"><span>'+(g.why==='p'?'📞 نفس الرقم <b class="num">'+esc(g.lab)+'</b>':'👤 نفس الاسم <b>'+esc(g.lab)+'</b>')+'</span><button type="button" class="alt dupno" data-dupno="'+esc(g.gid)+'">مش هو ✕</button></div>'+g.map(c=>'<div class="ro dupr"><span><b>'+esc(c.name)+'</b><small class="mute"> · '+esc(cSub(c,2))+' · الحساب <b class="num">'+bal(c)+'</b></small></span><button type="button" class="alt" data-mg="'+esc(c.id)+'">✓ ده الصح</button></div>').join('')+'</div>').join('')+'</details>'}
   $('cuList').innerHTML=l.map(c=>`<div class="rec cr2" data-open="${c.id}"${agStyle(c)}>${av(c.name)}<div style="flex:1;min-width:0"><div class="cn">${esc(c.name)}</div><div class="mute">${esc(cSub(c,2))}</div></div><span class="cb ${bcls(c)} num">${bal(c)}</span></div>`).join('')||`<p class="mute">${S.customers.length?'مفيش عملاء بالاسم أو الرقم ده. امسح البحث.':'لسه مفيش عملاء. اضغط «➕ عميل» أو احفظ فاتورة باسم جديد.'}</p>`}
 
 let cuFK='أخرى';const CUK=[['📄','عقد / اتفاق'],['📐','مقاسات'],['🧾','فاتورة قديمة'],['💳','شيك / إيصال'],['🖼','أخرى']];
@@ -1333,7 +1333,7 @@ const isGen=()=>lsv('biz','')==='gen',defT=()=>isGen()?'rd':'mq';
 function applyBiz(){const g=isGen();document.documentElement.classList.toggle('biz-gen',g);curIT=g?'rd':'mq';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.it===curIT));$('bizSel').value=g?'gen':'cut';
   $('subLbl').textContent=g?'إجمالي الأصناف':'إجمالي الإذن';const l=$('rows').lastElementChild;if(l&&rowBlank(l)&&l.dataset.t!==defT()){l.remove();calc()}if(curTab==='cl'&&g)document.querySelector('#bnav [data-t="new"]').click();try{drawItems()}catch(e){}}
 function bizSet(v){svk('biz',v==='gen'?'gen':'cut');if(v==='gen'&&!lsv('docw',''))svk('docw','فاتورة');applyBiz();loadMsgUI()}
-const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
+const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','dupIgn','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
 const setGet=()=>{const o={};SET_K.forEach(k=>{const v=lsv(k,null);if(v!==null)o[k]=v});return o},setKey=o=>hs(JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]])));
 function setApply(){try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true);if($('backFab'))$('backFab').checked=pget('backFab',false);$('qrOn').checked=pget('qrOn',true)}}catch(e){}}
 let setBusy=null,setT=0,setAt=0;

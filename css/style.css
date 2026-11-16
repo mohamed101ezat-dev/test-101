@@ -1432,3 +1432,10 @@ html #stFab{background:var(--acc)!important;color:#fff!important;border-color:tr
 /* v306: زرار الرجوع دايرة صغيرة وبيختفي وانت نازل */
 html #stFab{width:44px;height:44px;padding:0;font-size:20px;line-height:44px;text-align:center;opacity:.92;transition:transform .2s,opacity .2s}
 html #stFab.away{transform:translateY(90px);opacity:0;pointer-events:none}
+
+/* v307: كارت العملاء المكررين مقفول ومختصر، وكل سطر فيه اسم العميل */
+#cuDup .dupc{border-color:var(--danger)}#cuDup .dupc summary{cursor:pointer;list-style:none}#cuDup .dupc summary::-webkit-details-marker{display:none}
+#cuDup .dupg{margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+#cuDup .duph{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:13px}
+#cuDup .dupr{color:var(--ink);padding:3px 0}#cuDup .dupr small{font-size:12px}
+#cuDup button{padding:4px 10px;min-height:0;font-size:13px}
