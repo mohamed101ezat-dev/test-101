@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='307';
+const APP_VER='308';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -614,16 +614,17 @@ const normPhones=p=>phoneParts(p).map(normPhone).join(' / ');
 const squash=s=>nkey(s).replace(/(.)\1+/g,'$1').replace(/\s/g,'');
 const lev1=(a,b)=>{if(a===b)return true;if(Math.abs(a.length-b.length)>1)return false;let i=0;while(i<a.length&&i<b.length&&a[i]===b[i])i++;const x=a.slice(i),y=b.slice(i);return x.slice(1)===y.slice(1)||x.slice(1)===y||x===y.slice(1)};
 const similarCust=v=>{const k=squash(v);if(k.length<4)return null;return S.customers.find(c=>{const q=squash(c.name);return q&&nkey(c.name)!==nkey(v)&&(q===k||(q.length>=5&&lev1(q,k)))})||null};
+const dupIgnGet=()=>{try{const a=JSON.parse(localStorage.getItem('dupIgn')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}};
 function dupGroups(){const m=new Map(),pm=new Map(),out=[],seen=new Set();
   S.customers.filter(c=>!c.arch).forEach(c=>{const k=nkey(c.name);if(k)(m.get(k)||m.set(k,[]).get(k)).push(c);new Set(phoneKeys(c.phone)).forEach(p=>(pm.get(p)||pm.set(p,[]).get(p)).push(c))});
-  const ign=pget('dupIgn',[]),add=(g,lab,why)=>{if(g.length<2)return;const id=g.map(c=>c.id).sort().join('|');if(seen.has(id)||ign.includes(id))return;seen.add(id);g.lab=lab;g.why=why;g.gid=id;out.push(g)};
+  const ign=dupIgnGet(),add=(g,lab,why)=>{if(g.length<2)return;const id=g.map(c=>c.id).sort().join('|');if(seen.has(id)||ign.includes(id))return;seen.add(id);g.lab=lab;g.why=why;g.gid=id;out.push(g)};
   m.forEach(g=>add(g,g[0].name,'n'));pm.forEach((g,p)=>add(g,g[0].phone,'p'));return out}
 /* دمج عميل مكرر في التاني: فواتيره كلها بتتنقل، وبياناته الناقصة (تليفون/ملاحظة/عنوان) بتتضاف للباقي، والرصيد الافتتاحي بيتجمع */
 function mergeCust(keepId,loseId){if(keepId===loseId)return;const k=getC(keepId),l=getC(loseId);if(!k||!l)return;
   S.invoices.forEach(r=>{if(r.cid===loseId){r.cid=keepId;r.cname=k.name;put('invoices',r)}});
   k.open=rd2((k.open||0)+(l.open||0));if(!k.phone&&l.phone)k.phone=l.phone;if(!k.addr&&l.addr)k.addr=l.addr;if(!k.note&&l.note)k.note=l.note;if(!k.due&&l.due)k.due=l.due;if(l.pfr)k.pfr={...l.pfr,...(k.pfr||{})};
   S.files.forEach(x=>{if(x.sid===loseId){x.sid=keepId;put('files',x)}});put('customers',k);del('customers',loseId);reflow(keepId)}
-$('cuDup').addEventListener('click',e=>{const n=e.target.closest('[data-dupno]');if(n){const a=pget('dupIgn',[]);a.push(n.dataset.dupno);pset('dupIgn',a);drawCusts();return}const b=e.target.closest('[data-mg]');if(!b)return;const keepId=b.dataset.mg,g=dupGroups().find(gr=>gr.some(c=>c.id===keepId));if(!g)return;if(!ok2(b))return;g.forEach(c=>{if(c.id!==keepId)mergeCust(keepId,c.id)});drawCusts();drawDash()});
+$('cuDup').addEventListener('click',e=>{const n=e.target.closest('[data-dupno]');if(n){const a=dupIgnGet();a.push(n.dataset.dupno);try{localStorage.setItem('dupIgn',JSON.stringify(a))}catch(e){}if(window.saveSettings)try{saveSettings()}catch(e){}drawCusts();return}const b=e.target.closest('[data-mg]');if(!b)return;const keepId=b.dataset.mg,g=dupGroups().find(gr=>gr.some(c=>c.id===keepId));if(!g)return;if(!ok2(b))return;g.forEach(c=>{if(c.id!==keepId)mergeCust(keepId,c.id)});drawCusts();drawDash()});
 function drawCusts(){
   if(selC&&getC(selC)){$('cuMain').classList.add('hide');$('cuDet').classList.remove('hide');drawDet();return}
   selC=null;$('cuDet').classList.add('hide');$('cuMain').classList.remove('hide');
