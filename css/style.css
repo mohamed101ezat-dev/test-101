@@ -1425,3 +1425,6 @@ html #stFab{background:var(--acc)!important;color:#fff!important;border-color:tr
 .sktop .skmini{display:flex;justify-content:space-between;gap:6px;margin-top:6px;font-size:13px}
 .skstart{border:1px dashed color-mix(in srgb,var(--acc) 50%,transparent)}
 #stkRows .skb .skz{color:var(--mute);font-size:12px;white-space:nowrap}
+
+/* v304 */
+#stkSub tr.skcr td{padding-top:0;border-top:0}
