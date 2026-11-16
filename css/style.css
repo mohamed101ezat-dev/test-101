@@ -1417,3 +1417,11 @@ html[data-theme="dark"] #recentC button.b-cu[style*="--cc"],html.d3[data-theme="
 
 /* v301: زرار الرجوع العايم واضح (لون أساسي ونص أبيض) */
 html #stFab{background:var(--acc)!important;color:#fff!important;border-color:transparent!important}
+
+/* v302: صفحة المخزن البسيطة */
+.sktop .skh{font-size:17px;font-weight:800}.sktop .skh small{font-size:12px;font-weight:400;color:var(--mute)}
+.sktop .skst{font-size:13px;margin-top:2px}.sktop .skst .dn{color:var(--danger)}.sktop .skst .lw{color:#b45309}.sktop .skst.ok{color:var(--mute)}
+.sktop .skact{display:flex;gap:6px;margin-top:8px}.sktop .skact button{flex:1;min-width:0}
+.sktop .skmini{display:flex;justify-content:space-between;gap:6px;margin-top:6px;font-size:13px}
+.skstart{border:1px dashed color-mix(in srgb,var(--acc) 50%,transparent)}
+#stkRows .skb .skz{color:var(--mute);font-size:12px;white-space:nowrap}

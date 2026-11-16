@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='301';
+const APP_VER='302';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1943,16 +1943,21 @@ function skInfo(){const m=stkAll(),sal=skSales(),now=Date.now(),last=new Map(),u
     return{it,tr,bal,mn,use:u,last:lt,left:per>0&&bal>0?Math.floor(bal/per):null,st,val:bal>0?bal*skCost(it):0}})}
 const SKI={out:'❌',low:'⚠️',ok:'✅',idle:'🕸',new:'➕'},SKO={out:0,low:1,ok:2,idle:3,new:4};
 const SKR=[['قطّعت','🔨 قطّعت منه'],['اتكسر','💥 اتكسر'],['عينة','🎁 عينة / هدية'],['من غير فاتورة','📤 بعته من غير فاتورة'],['غير كده','✍️ غير كده']];
-function skHome(){const A=skInfo(),q=$('stkQ').value,c=k=>A.filter(x=>x.st===k).length,val=A.reduce((a,x)=>a+x.val,0),noC=A.filter(x=>x.tr&&x.bal>0&&!skCost(x.it)).length;
-  $('skKV').textContent=f(Math.round(val));$('skKVn').textContent=noC?noC+' من غير سعر':'';$('skKL').textContent=c('low');$('skKO').textContent=c('out');$('skKD').textContent=c('idle');
-  const F=[['all','الكل',A.length],['low','⚠️ قرب يخلص',c('low')],['out','❌ خلص',c('out')],['ok','✅ تمام',c('ok')],['idle','🕸 راكد',c('idle')],['new','➕ مش مسجل',c('new')]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
+/* v302: صفحة المخزن ببساطة: سطر واحد بالحال، زرارين كبار، وكل صنف قدامه عنده كام */
+function skHome(){const A=skInfo(),q=$('stkQ').value,c=k=>A.filter(x=>x.st===k).length,val=A.reduce((a,x)=>a+x.val,0),nNew=c('new'),nLow=c('low'),nOut=c('out');
+  const st=[nOut?'<b class="dn">❌ '+plN(nOut,'صنف')+' خلص</b>':'',nLow?'<b class="lw">⚠️ '+plN(nLow,'صنف')+' قرب يخلص</b>':''].filter(Boolean).join(' · ');
+  $('skSum').innerHTML='<div class="skh">عندك '+plN(A.length,'صنف')+(val>0?' <small>· قيمتهم حوالي '+f(Math.round(val))+' ج</small>':'')+'</div>'+(st?'<div class="skst">'+st+'</div>':(A.length&&nNew<A.length?'<div class="skst ok">✅ كله تمام</div>':''));
+  const sb=$('skStart');sb.classList.toggle('hide',!(A.length&&nNew>=Math.ceil(A.length/2)));
+  if(!sb.classList.contains('hide'))sb.innerHTML='<b>👋 ابدأ من هنا</b><div class="mute" style="margin:4px 0 8px">'+plN(nNew,'صنف')+' لسه ما اتعدّوش. دوس «✍️ عدّ المخزن» واكتب عندك كام لوح أو قطعة من كل صنف مرة واحدة، وبعد كده البرنامج بيحسب لوحده.</div><button type="button" class="main" data-sg="cnt" style="width:100%">✍️ عدّ المخزن دلوقتي</button>';
+  const F=[['all','الكل',A.length],['out','❌ خلص',nOut],['low','⚠️ قرب يخلص',nLow],['new','مش متعدّ',nNew]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
   if(!F.some(x=>x[0]===stkF))stkF='all';
-  $('stkFil').innerHTML=F.map(([k,l,n])=>`<button type="button" data-sf="${k}"${k===stkF?' class="on"':''}>${l} <small>${n}</small></button>`).join('');
-  const l=A.filter(x=>(stkF==='all'||x.st===stkF)&&qm(x.it.name,q)).sort((a,b)=>SKO[a.st]-SKO[b.st]||a.it.name.localeCompare(b.it.name,'ar'));
-  $('stkRows').innerHTML=l.length?l.map(x=>{const sub=x.tr?[x.last?'آخر حركة '+skAgo(x.last):'',x.left!=null?'يكفي حوالي '+x.left+' يوم':'',skInv(x.it).loc?'📍 '+esc(skInv(x.it).loc):''].filter(Boolean).join(' · '):'اضغط وسجّل الرصيد';
-    return`<div class="skr ${x.st}" data-sg="one" data-id="${esc(x.it.id)}" role="button" tabindex="0"><span class="sks">${SKI[x.st]}</span><div class="skn"><span>${skNm(x.it)}</span><small>${sub}</small></div><div class="skb"><span class="num">${x.tr?f(x.bal):'—'}</span><small>${skUn(x.it)}</small></div></div>`}).join(''):`<div class="card mute">${S.items.length?'مفيش صنف بالشكل ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.'}</div>`}
+  $('stkFil').innerHTML=F.length>1?F.map(([k,l,n])=>`<button type="button" data-sf="${k}"${k===stkF?' class="on"':''}>${l} <small>${n}</small></button>`).join(''):'';
+  const O={out:0,low:1,ok:2,idle:2,new:3},l=A.filter(x=>(stkF==='all'||x.st===stkF||(stkF==='ok'&&x.st==='idle'))&&qm(x.it.name,q)).sort((a,b)=>O[a.st]-O[b.st]||a.it.name.localeCompare(b.it.name,'ar'));
+  $('stkRows').innerHTML=l.length?l.map(x=>{const sub=x.tr?[x.left!=null?'يكفي حوالي '+x.left+' يوم':'',skInv(x.it).loc?'📍 '+esc(skInv(x.it).loc):''].filter(Boolean).join(' · '):'';
+    const ic=x.st==='out'?'❌':x.st==='low'?'⚠️':'';
+    return`<div class="skr ${x.st==='idle'?'ok':x.st}" data-sg="one" data-id="${esc(x.it.id)}" role="button" tabindex="0">${ic?'<span class="sks">'+ic+'</span>':''}<div class="skn"><span>${skNm(x.it)}</span>${sub?'<small>'+sub+'</small>':''}</div><div class="skb">${x.tr?'<span class="num">'+f(x.bal)+'</span><small>'+skUn(x.it)+'</small>':'<small class="skz">مش متعدّ</small>'}</div></div>`}).join(''):`<div class="card mute">${S.items.length?'مفيش صنف بالشكل ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.'}</div>`}
 function skMvRow(x,nm){const it=S.items.find(i=>i.id===x.iid)||{},t=x.inv?'sale':(x.t==='adj'?'adj':(x.q>0?'in':'out')),sup=x.sid&&S.suppliers.find(s=>s.id===x.sid);
-  const d=t==='sale'?(x.q<0?'🧾 اتباع ':'↩️ مرتجع ')+'<small class="mute">'+esc(x.code)+'</small>':t==='adj'?'⚖️ جرد <small class="mute">'+(x.q>0?'زاد':'نقص')+'</small>':t==='in'?'➕ دخل'+(x.cost?' <small class="mute">بـ'+f(x.cost)+'</small>':'')+(sup?' <small class="mute">· '+esc(sup.name)+'</small>':''):'➖ '+esc(x.why||'صرف');
+  const d=t==='sale'?(x.q<0?'🧾 اتباع ':'↩️ مرتجع ')+'<small class="mute">'+esc(x.code)+'</small>':t==='adj'?'✍️ عدّ <small class="mute">'+(x.q>0?'زاد':'نقص')+'</small>':t==='in'?'➕ دخل'+(x.cost?' <small class="mute">بـ'+f(x.cost)+'</small>':'')+(sup?' <small class="mute">· '+esc(sup.name)+'</small>':''):'➖ '+esc(x.why||'صرف');
   return`<tr><td class="num">${dshort(x.ts).slice(5)}</td>${nm?`<td class="tn">${esc(it.name||'')}</td>`:''}<td>${d}${x.note?'<br><small class="mute">'+esc(x.note)+'</small>':''}</td><td class="num">${x.q>0?'+':'−'}${f(Math.abs(x.q))}</td><td>${x.inv?'':`<button type="button" class="xd" data-skd="${esc(x.id)}" aria-label="حذف الحركة">×</button>`}</td></tr>`}
 function skSub(h){$('stkHome').classList.toggle('hide',!!h);$('stkSub').classList.toggle('hide',!h);if(h)$('stkSub').innerHTML=h}
 const skBack='<div class="ro" style="color:var(--ink);margin:0 0 6px"><button type="button" class="lnk" data-sg="home">→ كل الأصناف</button></div>';
