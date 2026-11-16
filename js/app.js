@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='292';
+const APP_VER='293';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -15,9 +15,11 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"'`]/g,c=>({'&':'&amp;','<':'&lt;
 const logErr=(e,w)=>{try{console.error('[فواتير]',w||'',e);const l=JSON.parse(localStorage.getItem('errLog')||'[]');l.push({at:Date.now(),w:w||'',m:String(e&&(e.code||e.message)||e).slice(0,300)});localStorage.setItem('errLog',JSON.stringify(l.slice(-30)))}catch(_){}};
 window.addEventListener('error',e=>logErr(e.error||e.message,'win'));window.addEventListener('unhandledrejection',e=>logErr(e.reason,'promise'));
 window.addEventListener('securitypolicyviolation',e=>logErr(e.blockedURI+' '+e.violatedDirective,'csp'));
-/* ألوان هادية بس (من غير أحمر عشان الأحمر للديون) */
-const CUST_HUES=[42,95,150,172,198,222,258,292,326,18];
-const custHue=id=>{let x=0;for(const ch of String(id))x=(x*31+ch.charCodeAt(0))>>>0;return CUST_HUES[x%CUST_HUES.length]};
+/* لون ثابت لكل عميل ومن غير تكرار: كل عميل جديد ياخد أول لون لسه ما اتاخدش (متحفوظ على الجهاز). 22 درجة هادية من غير أحمر عشان الأحمر للديون */
+const CUST_HUES=Array.from({length:22},(_,i)=>25+i*15);
+const custHue=id=>{let m={};try{m=JSON.parse(localStorage.getItem('custHueMap')||'{}')}catch(e){}
+  if(m[id]==null){const used=new Set(Object.values(m));let k=0;while(used.has(k)&&k<CUST_HUES.length)k++;if(k>=CUST_HUES.length)k=Object.keys(m).length%CUST_HUES.length;m[id]=k;try{localStorage.setItem('custHueMap',JSON.stringify(m))}catch(e){}}
+  return CUST_HUES[(m[id]*7)%CUST_HUES.length]};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const two=n=>String(n).padStart(2,'0');
 /* v190: العدد مع المعدود بالعربي: 2 = مثنى (عميلين)، 3-10 = جمع (5 عملاء)، غير كده مفرد (11 عميل) */
