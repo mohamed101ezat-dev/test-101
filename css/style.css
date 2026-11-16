@@ -1410,3 +1410,7 @@ html[data-theme="dark"] #recentC button.b-cu[style*="--cc"],html.d3[data-theme="
 #infoView .rhero .rbig b{font-size:30px!important;font-weight:800!important;line-height:1.1}
 #infoView .rhero .rbig span{font-size:13px!important}
 #infoView .rhero .rcmp{font-size:12px!important}
+
+/* v299: زرار الرجوع العايم */
+#stFab{position:fixed;right:12px;z-index:60;min-height:0;height:40px;padding:0 16px;border-radius:99px;border:1px solid color-mix(in srgb,var(--acc) 40%,transparent);background:color-mix(in srgb,var(--card) 82%,var(--acc));color:var(--accInk,var(--ink));font-weight:700;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.18);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#stFab.hide{display:none!important}
