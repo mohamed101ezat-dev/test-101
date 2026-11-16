@@ -1396,3 +1396,7 @@ html[data-theme="dark"] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme="dar
 #t-st .skl{display:grid;grid-template-columns:minmax(0,1fr) 56px 64px 24px;gap:4px;align-items:center;margin-bottom:5px}
 #t-st .skl>select{grid-column:1/-1}
 #t-st .skl input{height:30px;text-align:center;padding:0 2px}
+
+/* v292: كل عميل له لون ثابت في شرايح الأسماء (--cc = درجة اللون) */
+html[data-theme] #recentC button.b-cu[style*="--cc"],html.d3[data-theme] #recentC button.b-cu[style*="--cc"]{background:hsla(var(--cc),42%,46%,.13)!important;border-color:hsla(var(--cc),42%,42%,.36)!important;color:hsl(var(--cc),55%,26%)!important}
+html[data-theme="dark"] #recentC button.b-cu[style*="--cc"],html.d3[data-theme="dark"] #recentC button.b-cu[style*="--cc"]{background:hsla(var(--cc),45%,60%,.16)!important;border-color:hsla(var(--cc),45%,62%,.36)!important;color:hsl(var(--cc),60%,78%)!important}
