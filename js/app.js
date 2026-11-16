@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='302';
+const APP_VER='303';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1946,7 +1946,7 @@ const SKR=[['قطّعت','🔨 قطّعت منه'],['اتكسر','💥 اتكس�
 /* v302: صفحة المخزن ببساطة: سطر واحد بالحال، زرارين كبار، وكل صنف قدامه عنده كام */
 function skHome(){const A=skInfo(),q=$('stkQ').value,c=k=>A.filter(x=>x.st===k).length,val=A.reduce((a,x)=>a+x.val,0),nNew=c('new'),nLow=c('low'),nOut=c('out');
   const st=[nOut?'<b class="dn">❌ '+plN(nOut,'صنف')+' خلص</b>':'',nLow?'<b class="lw">⚠️ '+plN(nLow,'صنف')+' قرب يخلص</b>':''].filter(Boolean).join(' · ');
-  $('skSum').innerHTML='<div class="skh">عندك '+plN(A.length,'صنف')+(val>0?' <small>· قيمتهم حوالي '+f(Math.round(val))+' ج</small>':'')+'</div>'+(st?'<div class="skst">'+st+'</div>':(A.length&&nNew<A.length?'<div class="skst ok">✅ كله تمام</div>':''));
+  $('skSum').innerHTML='<div class="skh">'+(A.length?'عندك '+plN(A.length,'صنف'):'مفيش أصناف لسه')+(val>0?' <small>· قيمتهم حوالي '+f(Math.round(val))+' ج</small>':'')+'</div>'+(st?'<div class="skst">'+st+'</div>':(A.length&&nNew<A.length?'<div class="skst ok">✅ كله تمام</div>':''));
   const sb=$('skStart');sb.classList.toggle('hide',!(A.length&&nNew>=Math.ceil(A.length/2)));
   if(!sb.classList.contains('hide'))sb.innerHTML='<b>👋 ابدأ من هنا</b><div class="mute" style="margin:4px 0 8px">'+plN(nNew,'صنف')+' لسه ما اتعدّوش. دوس «✍️ عدّ المخزن» واكتب عندك كام لوح أو قطعة من كل صنف مرة واحدة، وبعد كده البرنامج بيحسب لوحده.</div><button type="button" class="main" data-sg="cnt" style="width:100%">✍️ عدّ المخزن دلوقتي</button>';
   const F=[['all','الكل',A.length],['out','❌ خلص',nOut],['low','⚠️ قرب يخلص',nLow],['new','مش متعدّ',nNew]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
