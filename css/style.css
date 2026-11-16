@@ -1400,3 +1400,8 @@ html[data-theme="dark"] :is(#recentC,#siteC) button.b-cu,html.d3[data-theme="dar
 /* v292: كل عميل له لون ثابت في شرايح الأسماء (--cc = درجة اللون) */
 html[data-theme] #recentC button.b-cu[style*="--cc"],html.d3[data-theme] #recentC button.b-cu[style*="--cc"]{background:hsla(var(--cc),42%,46%,.13)!important;border-color:hsla(var(--cc),42%,42%,.36)!important;color:hsl(var(--cc),55%,26%)!important}
 html[data-theme="dark"] #recentC button.b-cu[style*="--cc"],html.d3[data-theme="dark"] #recentC button.b-cu[style*="--cc"]{background:hsla(var(--cc),45%,60%,.16)!important;border-color:hsla(var(--cc),45%,62%,.36)!important;color:hsl(var(--cc),60%,78%)!important}
+
+/* v295: شاشة التقرير: زرار «تقرير» التاني مالوش لازمة جوه التقرير نفسه */
+#infoView #monRep{display:none!important}
+#infoView .rhero{margin:4px 0 0}
+#infoView .rtiles{margin:6px 0 0}

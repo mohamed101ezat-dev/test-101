@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='294';
+const APP_VER='295';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2234,7 +2234,7 @@ $('dbDet').addEventListener('change',e=>{const t=e.target;if(!t.dataset.ddate||!
 $('bnav').addEventListener('click',e=>{if(e.target.closest('button[data-t="dash"]')&&(dbMode||infoMode)){dbMode=false;infoMode=false;dbSel=null;drawDebt()}});
 $('t-dash').addEventListener('click',e=>{const t=e.target;
   const sc=t.closest('[data-sc]');if(sc){infoMode=true;dbMode=false;dbSel=null;dbPay=null;iPer='d';iSub=sc.dataset.sc==='paid'?'p':'s';drawInfo();drawDebt();window.scrollTo(0,0);return}
-  if(t.closest('#infoCard')){infoMode=!infoMode;dbMode=false;dbSel=null;if(infoMode)drawInfo();drawDebt();window.scrollTo(0,0);return}
+  if(t.closest('#infoCard')){infoMode=!infoMode;dbMode=false;dbSel=null;if(infoMode){iPer='m';iMoreOpen=false;drawInfo()}drawDebt();window.scrollTo(0,0);return}
   if(t.closest('#infoBack')){infoMode=false;drawDebt();window.scrollTo(0,0);return}
   if(t.closest('#dbCard')){infoMode=false;dbMode=true;dbSel=null;drawDebt();window.scrollTo(0,0);return}
   if(t.closest('#dbBack')){dbMode=false;dbSel=null;drawDebt();window.scrollTo(0,0);return}
@@ -2362,21 +2362,29 @@ function drawInfo(){
   $('iMore').classList.toggle('hide',!iMoreOpen);$('iRgB').classList.toggle('hide',iPer!=='g');$('iMoB').classList.toggle('hide',iPer!=='c');
   const R=iRange(),T=iSum(R.a,R.b),recs=S.invoices.filter(r=>r.ts>=R.a&&r.ts<R.b);
   if(iPer==='c'){const d=new Date(R.a);$('iMonth').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
-  $('infoSum').textContent=R.u==='g'?'من '+dshort(R.a)+' إلى '+dshort(R.b-1):rLab(R);
+  /* v295: ملخص واضح فوق (المبيعات كبيرة + مقارنة + 3 مربعات)، وتحت قايمة واحدة بالتفاصيل اللي ليها قيمة بس */
   let rt=0;recs.forEach(r=>{if(r.type==='inv'&&hasRet(r))(r.rows||[]).forEach(x=>{if(x.rt)rt=rd2(rt+Math.abs(+x.v||0))})});
   const P=iAggK('r',R.a,R.b),I=iAggK('i',R.a,R.b),W=iAggK('w',R.a,R.b),top=G=>[...G].sort((x,y)=>y[1].v-x[1].v);
-  const row=(k,em,l,sm,v,cls)=>'<button type="button" class="rrow" data-rk="'+k+'"><span class="rl">'+em+' '+l+(sm?' <small>· '+esc(sm)+'</small>':'')+'</span>'+(v!==''?'<b'+(cls?' class="'+cls+'"':'')+'>'+v+'</b>':'')+'<i>‹</i></button>';
-  let m=row('s','💰','المبيعات',plN(T.n,'فاتورة'),f(T.s))+row('p','💵','المدفوع','',f(T.p),'cr')+row('t','↩️','المرتجع','',f(rt))
-    +row('r','📈','الربح',P.cnt?'بعد المصروفات':'مفيش أسعار شراء',P.cnt?f(rd2(P.tot-T.ex)):'—');
-  {const ex=exIn(R.a,R.b),fx=exTot(ex.filter(x=>x.fx)),pu=puIn(R.a,R.b).buy,net=rd2(T.s-T.ex-pu);
-   m+=row('x','💸','المصروفات',(fx?'منها ثابت '+f(fx):'')+(pu?(fx?' · ':'')+'ومشتريات موردين '+f(pu):''),f(rd2(T.ex+pu)))+row('x','🧮','الصافي','المبيعات − المصروفات',f(net),net<0?'dr':'cr')}
-  const ti=top(I.G)[0],tw=top(W.G).slice(0,2).map(([k,o])=>k+' '+f(o.v)).join(' · ');
-  let d=row('i','📦','الأصناف',ti?'الأكتر: '+ti[0]:'مفيش',''),oc=0;d+=row('w','💳','طرق الدفع',tw||'مفيش','');
-  if(ordOn()){oc=recs.filter(r=>r.type==='inv'&&ordSt(r)!=='d').length;d+=row('o','🧾','الطلبيات',oc?plN(oc,'طلبية')+' لسه ما اتسلمتش':'مفيش','')}
-  $('iRows').innerHTML='<div class="rbox">'+m+'</div><div class="rstp">تفاصيل أكتر · دوس على أي سطر يفتح ورقته</div><div class="rbox">'+d+'</div>';
+  const pu=puIn(R.a,R.b).buy,exA=rd2(T.ex+pu),net=rd2(T.s-exA);
+  let cmp='',bd='';
   {const now=Date.now(),part=R.b>now&&R.a<=now;let a2,b2;if(R.u==='g'){a2=R.a-(R.b-R.a);b2=R.a}else{a2=shiftT(R.a,R.u,-1);b2=shiftT(R.b,R.u,-1)}if(part)b2=Math.min(b2,a2+(now-R.a));
     const pv=iSum(a2,b2).s,pl=R.u==='g'||(part&&R.u!=='d')?dshort(a2)+' ← '+dshort(b2-1):labT(a2,R.u),df=rd2(T.s-pv);
-    $('iCmpL').textContent=!pv?(T.s?'مفيش مبيعات في '+pl+' للمقارنة':''):!df?'المبيعات زي '+pl+' بالظبط':(df>0?'⬆ المبيعات زادت ':'⬇ المبيعات قلّت ')+Math.round(Math.abs(df)/pv*100)+'% عن '+pl+' ('+f(pv)+')'}}
+    if(pv){const pc=Math.round(Math.abs(df)/pv*100);bd=df?'<em class="'+(df>0?'up':'dn')+'">'+(df>0?'▲ ':'▼ ')+pc+'%</em>':'<em>زي ما هي</em>';cmp='مقارنة بـ '+pl+': '+f(pv)}
+    else if(T.s)cmp='مفيش مبيعات في '+pl+' للمقارنة'}
+  $('infoSum').innerHTML='<div class="rhero"><small>'+esc(R.u==='g'?'من '+dshort(R.a)+' إلى '+dshort(R.b-1):rLab(R))+(R.b>Date.now()&&R.a<=Date.now()&&R.u!=='d'?' (لحد دلوقتي)':'')+'</small>'
+    +'<div class="rbig"><b class="num">'+f(T.s)+'</b><span>مبيعات · '+plN(T.n,'فاتورة')+'</span>'+bd+'</div>'
+    +(cmp?'<span class="rcmp">'+esc(cmp)+'</span>':'')
+    +'<div class="rtiles"><div class="rt ok"><small>اتدفع</small><b class="num">'+f(T.p)+'</b></div><div class="rt'+(T.d>0?' bad':'')+'"><small>لسه على العملاء</small><b class="num">'+f(T.d)+'</b></div><div class="rt'+(net<0?' bad':'')+'"><small>الصافي</small><b class="num">'+f(net)+'</b></div></div></div>';
+  $('iCmpL').textContent='';
+  const row=(k,em,l,sm,v,cls)=>'<button type="button" class="rrow" data-rk="'+k+'"><span class="rl">'+em+' '+l+(sm?' <small>· '+esc(sm)+'</small>':'')+'</span>'+(v!==''?'<b'+(cls?' class="'+cls+'"':'')+'>'+v+'</b>':'')+'<i>‹</i></button>';
+  const ti=top(I.G)[0],tw=top(W.G).slice(0,2).map(([k,o])=>k+' '+f(o.v)).join(' · ');
+  let m=row('s','🧾','الفواتير',plN(T.n,'فاتورة')+(T.c?' · '+plN(T.c,'عميل'):''),f(T.s))+row('p','💵','الفلوس اللي دخلت',tw||'',f(T.p),'cr');
+  if(exA)m+=row('x','💸','المصروفات',pu?'منها مشتريات موردين '+f(pu):'',f(exA),'dr');
+  if(P.cnt)m+=row('r','📈','الربح','بعد المصروفات',f(rd2(P.tot-T.ex)));
+  if(rt)m+=row('t','↩️','المرتجع','',f(rt));
+  if(ti)m+=row('i','📦','الأصناف','الأكتر: '+ti[0],'');
+  if(ordOn()){const oc=recs.filter(r=>r.type==='inv'&&ordSt(r)!=='d').length;if(oc)m+=row('o','⏳','طلبيات لسه ما اتسلمتش',plN(oc,'طلبية'),'')}
+  $('iRows').innerHTML=T.n||T.p||exA?'<div class="rstp">التفاصيل · دوس على أي سطر يفتح ورقته</div><div class="rbox">'+m+'</div>':'<div class="info" style="margin-top:8px">مفيش معاملات في الفترة دي.</div>'}
 $('iRows').addEventListener('click',e=>{const b=e.target.closest('[data-rk]');if(!b)return;iSub=b.dataset.rk;repGo()});
 /* ورقة التقرير: جدول تفاصيل للفترة والنوع المختارين، بتفتح كصورة تتحفظ أو تتبعت */
 function repGo(){
