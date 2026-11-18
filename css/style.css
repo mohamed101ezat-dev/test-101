@@ -1451,3 +1451,14 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 #mTabs button{font-size:13px;padding:7px 2px}
 
 .mopts{margin:2px 0 6px}.mopts .opt{padding:5px 0}
+
+/* v314: محرر طرق الدفع */
+#pmOv .pmc2{border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:8px;display:flex;flex-direction:column;gap:6px;background:var(--card)}
+#pmOv .pmc2.off{opacity:.55}
+#pmOv .pmh{display:flex;align-items:center;gap:6px}#pmOv .pmh [data-pm=n]{flex:1;min-width:0}#pmOv .pmh select{width:auto;flex:none;padding:0 4px;min-height:36px;font-size:18px}
+#pmOv .pmh .opt{margin:0;flex:none;padding:0;font-size:12px}
+#pmOv .pmb{display:flex;align-items:center;gap:8px}#pmOv .pmb .pin{display:flex;align-items:center;gap:3px;font-weight:700}#pmOv .pmb .pin input{width:60px;text-align:center;font-weight:700}
+#pmOv .pme{font-size:12px}
+#pmOv .pmt{display:flex;gap:6px;justify-content:flex-end}#pmOv .pmt button{min-width:40px;min-height:30px;padding:2px 10px}
+#pmOv .pmq{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}#pmOv .pmq button{font-size:13px;padding:4px 10px}
+#spChips .spedit,.pwchips .spedit{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;height:56px;padding:5px 3px;border-radius:12px;border:1.5px dashed var(--line);background:transparent;min-width:0;opacity:.8}
