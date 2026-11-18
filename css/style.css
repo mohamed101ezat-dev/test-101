@@ -1449,3 +1449,5 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 .mcust{margin:2px 0 4px;color:var(--danger)}
 .madv{margin-top:8px}.madv summary{cursor:pointer;font-size:13px;color:var(--mute)}
 #mTabs button{font-size:13px;padding:7px 2px}
+
+.mopts{margin:2px 0 6px}.mopts .opt{padding:5px 0}

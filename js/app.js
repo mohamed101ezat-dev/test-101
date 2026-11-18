@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='312';
+const APP_VER='313';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -517,28 +517,28 @@ $('resprint').onclick=()=>{if(!curBlob)return;
   catch(e){$('resm').textContent=baseMsg+' · الطباعة منفعتش، جرّب تاني'}};
 
 const TPLD={inv:'{المحل}\n{اللقب} / {العميل}\n{الفاتورة} - {التاريخ}\nالإجمالي: {الإجمالي}\nالمدفوع: {المدفوع}\nالمتبقي: {المتبقي}',pay:'{المحل}\n{اللقب} / {العميل}\nإيصال دفعة كود {الكود}: {المبلغ}\nالحساب بعد الدفعة: {الحساب}',rem:'السلام عليكم {اللقب} {العميل}\nحسابك عندنا في {المحل}: {الحساب} جنيه.\n{ختام_السداد}. شكراً لتعاملك معنا.',rdy:'السلام عليكم {اللقب} {العميل}\nطلبك (كود {الكود}) جاهز للاستلام من {المحل}.\n{الحساب}\nفي انتظارك، شكراً لتعاملك معنا.'};
-/* v312: رسائل جاهزة بـ3 أساليب، والأسطر بتتشال/تتحط حسب اللي مختاره في الإعدادات (n اسم · t أرقام · s محل · p دفع) */
+/* v313: رسائل جاهزة بـ3 أساليب. كل رسالة (فاتورة/دفع/تذكير/جاهز) ليها اختياراتها لوحدها: n تحية واسم · d تفاصيل · x خصم · t أرقام · m طريقة الدفع · p بيانات الدفع · c ختام · s محل · e إيموجي */
 const TPLG={
-inv:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['','{الفاتورة} · {التاريخ}'],['t','الإجمالي: {الإجمالي}'],['t','المدفوع: {المدفوع}'],['t','الباقي عليك: {المتبقي}'],['p','{بيانات_الدفع}'],['','شكراً لتعاملك معنا 🙏'],['s','{المحل}']],
- o:[['n','{اللقب} {العميل} المحترم'],['','{الفاتورة} بتاريخ {التاريخ}'],['t','إجمالي الفاتورة: {الإجمالي}'],['t','المبلغ المسدد: {المدفوع}'],['t','المبلغ المتبقي: {المتبقي}'],['p','{بيانات_الدفع}'],['','نشكركم على ثقتكم.'],['s','{المحل}']],
- s:[['n','{اللقب} {العميل}'],['','{الفاتورة} · {التاريخ}'],['t','إجمالي {الإجمالي} · مدفوع {المدفوع} · باقي {المتبقي}'],['p','{بيانات_الدفع}'],['s','{المحل}']]},
-pay:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['','وصلتنا دفعتك {المبلغ} ✅ (إيصال كود {الكود})'],['t','الحساب بعد الدفعة: {الحساب}'],['p','{بيانات_الدفع}'],['','شكراً ليك 🙏'],['s','{المحل}']],
- o:[['n','{اللقب} {العميل} المحترم'],['','نفيدكم باستلام دفعة بمبلغ {المبلغ} (إيصال كود {الكود}).'],['t','رصيد الحساب بعد الدفعة: {الحساب}'],['p','{بيانات_الدفع}'],['','نشكركم على حسن تعاونكم.'],['s','{المحل}']],
- s:[['n','{اللقب} {العميل}'],['','دفعة {المبلغ} ✅ (إيصال {الكود})'],['t','الحساب بعد الدفعة {الحساب}'],['p','{بيانات_الدفع}'],['s','{المحل}']]},
-rem:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['t','حسابك عندنا {الحساب} جنيه.'],['','{ختام_السداد}'],['p','{بيانات_الدفع}'],['','شكراً لتعاملك معنا 🙏'],['s','{المحل}']],
- o:[['n','{اللقب} {العميل} المحترم'],['t','نفيدكم بأن رصيد حسابكم لدينا {الحساب} جنيه.'],['','{ختام_السداد}'],['p','{بيانات_الدفع}'],['','مع خالص الشكر.'],['s','{المحل}']],
- s:[['n','{اللقب} {العميل}'],['t','باقي عليك {الحساب} جنيه'],['','{ختام_السداد}'],['p','{بيانات_الدفع}'],['s','{المحل}']]},
-rdy:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['','طلبك (كود {الكود}) جاهز تستلمه 🎉'],['t','{الحساب}'],['','في انتظارك'],['s','{المحل}']],
- o:[['n','{اللقب} {العميل} المحترم'],['','نفيدكم بأن طلبكم (كود {الكود}) جاهز للاستلام.'],['t','{الحساب}'],['','في انتظاركم.'],['s','{المحل}']],
- s:[['n','{اللقب} {العميل}'],['','طلبك (كود {الكود}) جاهز ✅'],['t','{الحساب}'],['s','{المحل}']]}};
-const MFLAG={n:'mNm',t:'mTot',s:'mShop',p:'mPay'};
+inv:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['d','{الفاتورة} · {التاريخ}'],['x','الخصم: {الخصم} {سبب_الخصم}'],['t','الإجمالي: {الإجمالي}'],['t','المدفوع: {المدفوع}'],['t','الباقي عليك: {المتبقي}'],['m','طريقة الدفع: {طريقة_الدفع}'],['p','{بيانات_الدفع}'],['c','شكراً لتعاملك معنا 🙏'],['s','{المحل}']],
+ o:[['n','{اللقب} {العميل} المحترم'],['d','{الفاتورة} بتاريخ {التاريخ}'],['x','الخصم: {الخصم} {سبب_الخصم}'],['t','إجمالي الفاتورة: {الإجمالي}'],['t','المبلغ المسدد: {المدفوع}'],['t','المبلغ المتبقي: {المتبقي}'],['m','طريقة السداد: {طريقة_الدفع}'],['p','{بيانات_الدفع}'],['c','نشكركم على ثقتكم.'],['s','{المحل}']],
+ s:[['n','{اللقب} {العميل}'],['d','{الفاتورة} · {التاريخ}'],['x','خصم {الخصم} {سبب_الخصم}'],['t','إجمالي {الإجمالي} · مدفوع {المدفوع} · باقي {المتبقي}'],['m','{طريقة_الدفع}'],['p','{بيانات_الدفع}'],['c','شكراً 🙏'],['s','{المحل}']]},
+pay:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['','وصلتنا دفعتك {المبلغ} ✅ (إيصال كود {الكود})'],['m','طريقة الدفع: {طريقة_الدفع}'],['t','الحساب بعد الدفعة: {الحساب}'],['p','{بيانات_الدفع}'],['c','شكراً ليك 🙏'],['s','{المحل}']],
+ o:[['n','{اللقب} {العميل} المحترم'],['','نفيدكم باستلام دفعة بمبلغ {المبلغ} (إيصال كود {الكود}).'],['m','طريقة السداد: {طريقة_الدفع}'],['t','رصيد الحساب بعد الدفعة: {الحساب}'],['p','{بيانات_الدفع}'],['c','نشكركم على حسن تعاونكم.'],['s','{المحل}']],
+ s:[['n','{اللقب} {العميل}'],['','دفعة {المبلغ} ✅ (إيصال {الكود})'],['m','{طريقة_الدفع}'],['t','الحساب بعد الدفعة {الحساب}'],['p','{بيانات_الدفع}'],['c','شكراً 🙏'],['s','{المحل}']]},
+rem:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['t','حسابك عندنا {الحساب} جنيه.'],['','{ختام_السداد}'],['p','{بيانات_الدفع}'],['c','شكراً لتعاملك معنا 🙏'],['s','{المحل}']],
+ o:[['n','{اللقب} {العميل} المحترم'],['t','نفيدكم بأن رصيد حسابكم لدينا {الحساب} جنيه.'],['','{ختام_السداد}'],['p','{بيانات_الدفع}'],['c','مع خالص الشكر.'],['s','{المحل}']],
+ s:[['n','{اللقب} {العميل}'],['t','باقي عليك {الحساب} جنيه'],['','{ختام_السداد}'],['p','{بيانات_الدفع}'],['c','شكراً 🙏'],['s','{المحل}']]},
+rdy:{f:[['n','أهلاً {اللقب} {العميل} 👋'],['','طلبك (كود {الكود}) جاهز تستلمه 🎉'],['t','{الحساب}'],['c','في انتظارك'],['s','{المحل}']],
+ o:[['n','{اللقب} {العميل} المحترم'],['','نفيدكم بأن طلبكم (كود {الكود}) جاهز للاستلام.'],['t','{الحساب}'],['c','في انتظاركم.'],['s','{المحل}']],
+ s:[['n','{اللقب} {العميل}'],['','طلبك (كود {الكود}) جاهز ✅'],['t','{الحساب}'],['c','في انتظارك'],['s','{المحل}']]}};
+const MDEF={n:1,d:1,t:1,x:0,m:0,p:1,c:1,s:1,e:1},mo=(k,fl)=>pget('mo_'+k+'_'+fl,!!MDEF[fl]),EMO=/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]\uFE0F?/gu;
 const msSt=k=>{const v=lsv('ms_'+k,'f');return TPLG[k][v]?v:'f'};
-const tplGen=k=>TPLG[k][msSt(k)].filter(([fl])=>!fl||pget(MFLAG[fl],true)).map(x=>x[1]).join('\n');
+const tplGen=k=>{const mg=lsv('mg_'+k,'').trim(),mc=lsv('mc_'+k,'').trim();let s=TPLG[k][msSt(k)].filter(([fl])=>!fl||mo(k,fl)).map(([fl,t])=>fl==='n'&&mg?mg:fl==='c'&&mc?mc:t).join('\n');if(!mo(k,'e'))s=s.replace(EMO,'').replace(/ +\n/g,'\n').replace(/ +$/,'');return s};
 const tplOf=k=>{const v=lsv('tpl_'+k,'');return v.trim()?v:tplGen(k)},shopN=()=>lsv('shop',''),docW=()=>lsv('docw','إذن صرف'),custW=()=>lsv('custw','الأستاذ');
 function fillTpl(k,m,tp){m['اللقب']=custW();tp=tp||tplOf(k);if(!m['المحل'])tp=tp.replace(/\s(?:في|من|عند|لدى)\s\{المحل\}/g,'');return tp.split('\n').map(l=>{const had=/\{[^}]+\}/.test(l),o=l.replace(/\{([^}]+)\}/g,(x,key)=>key in m?m[key]:x).replace(/ {2,}/g,' ').replace(/^\s*\/\s*/,'');return{o,skip:had&&!o.trim()}}).filter(x=>x.skip===false).map(x=>x.o).join('\n')}
 function txtOf(r){const m={'المحل':shopN(),'العميل':r.cname,'التاريخ':dshort(r.ts),'طريقة_الدفع':r.pfWhy||'','عمولة_الدفع':r.pfv?f(r.pfv):'','الخصم':r.disc?f(r.disc):'','سبب_الخصم':r.discWhy||''};
   m['الكود']=r.code?String(r.code):'';
-  m['بيانات_الدفع']=pget('mPay',true)&&r.rest>0?remPayTxt():'';
+  m['بيانات_الدفع']=r.rest>0?remPayTxt():'';
   if(r.type==='pay'){m['المبلغ']=f(r.amount);m['الحساب']=fb(r.rest);return fillTpl('pay',m)}
   m['كود_المرتجع']=r.rcode?String(r.rcode):'';
   m['الفاتورة']=(r.code?'كود '+r.code+' · ':'')+(docW()?docW()+' ':'')+'رقم '+r.no+(r.rcode?' · كود المرتجع '+r.rcode:'');m['الإجمالي']=fb(r.total);m['المدفوع']=f(r.paid);m['المتبقي']=fb(r.rest);return fillTpl('inv',m)}
@@ -551,7 +551,7 @@ const rtDef=k=>(RTS[msSt('rem')]||RTS.f)[k]||RT0[k];
 const rt=k=>{const v=lsv('rt_'+k,'').trim();return v||rtDef(k)},rtf=(s,o)=>s.replace(/\{([^}]+)\}/g,(x,k)=>k in o?o[k]:x);
 const numSet=(k,d)=>{const v=parseInt(toEn(lsv(k,String(d))),10);return isNaN(v)?d:v},remFirmD=()=>numSet('remfirm',30),remLongD=()=>numSet('remlong',90);
 const lateTxt=c=>{const li=lateInfo(c);return li&&li.d>=1?rtf(rt(li.paid?'paid':'never'),{'عدد':dayW(li.d)}):''};
-const remPayTxt=()=>{const p=pget('mPay',true)?lsv('rempay','').trim():'';return p?rtf(rt('pay'),{'البيانات':p}):''};
+const remPayTxt=()=>{const p=lsv('rempay','').trim();return p?rtf(rt('pay'),{'البيانات':p}):''};
 const dueNow=r=>r.type==='inv'?Math.max(0,rd2(val(r)-(r.paid||0))):0;
 const oldTxt=c=>{const l=S.invoices.filter(r=>r.cid===c.id);let pool=l.filter(r=>r.type==='pay').reduce((a,r)=>a+(+r.amount||0),0)+Math.max(0,-(+c.open||0)),o=null,rm=0;
   l.filter(r=>dueNow(r)>0).sort((a,b)=>a.ts-b.ts).forEach(r=>{const d=dueNow(r),u=Math.min(pool,d);pool-=u;if(!o&&d-u>0.004&&Date.now()-r.ts>=864e5){o=r;rm=rd2(d-u)}});return o?rtf(rt('old'),{'التاريخ':dshort(o.ts),'المتبقي':f(rm)}):''};
@@ -559,7 +559,7 @@ const balTxt=c=>+c.open>0?rtf(rt('bal'),{'المبلغ':f(c.open)}):'';
 function remMake(m,tone){let tp=tplOf('rem');const end=tone==='long'?rt('long'):tone==='firm'?rt('firm'):rt('soft');m['ختام_السداد']=end;
   if(!tp.includes('{ختام_السداد}'))tp=tp.split(RT0.soft).join(end);
   const ins=(v,after)=>{if(!m[v]||tp.includes('{'+v+'}'))return;const ls=tp.split('\n');let i=-1,pre=false;for(const x of after||[]){i=ls.findIndex(l=>l.includes(x));if(i>=0){pre=x==='{ختام_السداد}';break}}ls.splice(i<0?ls.length:pre?i:i+1,0,'{'+v+'}');tp=ls.join('\n')};
-  if(pget('remDays',true))ins('مدة_الدين',['{الحساب}','{ختام_السداد}']);if(pget('remOld',true))ins('أقدم_فاتورة',['{مدة_الدين}','{الحساب}','{ختام_السداد}']);if(pget('remBal',true))ins('رصيد_سابق',['{أقدم_فاتورة}','{مدة_الدين}','{الحساب}','{ختام_السداد}']);if(!tp.includes('{بيانات_الدفع}')&&pget('mPay',true))ins('بيانات_الدفع',null);
+  if(pget('remDays',true))ins('مدة_الدين',['{الحساب}','{ختام_السداد}']);if(pget('remOld',true))ins('أقدم_فاتورة',['{مدة_الدين}','{الحساب}','{ختام_السداد}']);if(pget('remBal',true))ins('رصيد_سابق',['{أقدم_فاتورة}','{مدة_الدين}','{الحساب}','{ختام_السداد}']);if(!tp.includes('{بيانات_الدفع}')&&mo('rem','p'))ins('بيانات_الدفع',null);
   return fillTpl('rem',m,tp)}
 const remText=c=>{const li=lateInfo(c),fd=remFirmD(),ld=remLongD(),d=li?li.d:0;return remMake({'العميل':c.name,'المحل':shopN(),'الحساب':f(balOf(c)),'مدة_الدين':lateTxt(c),'أقدم_فاتورة':oldTxt(c),'رصيد_سابق':balTxt(c),'بيانات_الدفع':remPayTxt()},ld>0&&d>=ld?'long':fd>0&&d>=fd?'firm':'soft')};
 /* ===== متابعة الطلبيات: st = p (تحت التجهيز) / r (جاهز) / d أو مفيش (اتسلّم). الفواتير القديمة كلها محسوبة اتسلّمت ===== */
@@ -1354,7 +1354,7 @@ const isGen=()=>lsv('biz','')==='gen',defT=()=>isGen()?'rd':'mq';
 function applyBiz(){const g=isGen();document.documentElement.classList.toggle('biz-gen',g);curIT=g?'rd':'mq';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.it===curIT));$('bizSel').value=g?'gen':'cut';
   $('subLbl').textContent=g?'إجمالي الأصناف':'إجمالي الإذن';const l=$('rows').lastElementChild;if(l&&rowBlank(l)&&l.dataset.t!==defT()){l.remove();calc()}if(curTab==='cl'&&g)document.querySelector('#bnav [data-t="new"]').click();try{drawItems()}catch(e){}}
 function bizSet(v){svk('biz',v==='gen'?'gen':'cut');if(v==='gen'&&!lsv('docw',''))svk('docw','فاتورة');applyBiz();loadMsgUI()}
-const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','dupIgn','ms_inv','ms_pay','ms_rem','ms_rdy','mNm','mTot','mShop','mPay','paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
+const SET_K=['biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','dupIgn','ms_inv','ms_pay','ms_rem','ms_rdy',...['inv','pay','rem','rdy'].flatMap(k=>[...'ndtxmpcse'].map(x=>'mo_'+k+'_'+x).concat(['mg_'+k,'mc_'+k])),'paper','gnote','invNotes','pfPre','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
 const setGet=()=>{const o={};SET_K.forEach(k=>{const v=lsv(k,null);if(v!==null)o[k]=v});return o},setKey=o=>hs(JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]])));
 function setApply(){try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true);if($('backFab'))$('backFab').checked=pget('backFab',false);$('qrOn').checked=pget('qrOn',true)}}catch(e){}}
 let setBusy=null,setT=0,setAt=0;
@@ -1693,14 +1693,23 @@ $('saveImgOn').checked=pget('saveImgOn',false);$('saveImgOn').onchange=()=>{pset
 $('fzSeg').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;$('fzSel').value=b.dataset.z;$('fzSel').onchange();fzMark()};fzMark();
 $('stClOpen').onclick=()=>{drawCl();$('clOv').classList.remove('hide')};
 
-$('tplReset').onclick=e=>{if(!ok2(e.target))return;try{['tpl_inv','tpl_pay','tpl_rem','tpl_rdy'].forEach(k=>localStorage.removeItem(k))}catch(e){}['inv','pay','rem','rdy'].forEach(k=>svk('ms_'+k,'f'));['mNm','mTot','mShop','mPay'].forEach(k=>svk(k,'1'));loadMsgUI();msgPrev()};
+$('tplReset').onclick=e=>{if(!ok2(e.target))return;try{['tpl_inv','tpl_pay','tpl_rem','tpl_rdy'].forEach(k=>localStorage.removeItem(k))}catch(e){}['inv','pay','rem','rdy'].forEach(k=>svk('ms_'+k,'f'));['inv','pay','rem','rdy'].forEach(k=>{[...'ndtxmpcse'].forEach(x=>{try{localStorage.removeItem('mo_'+k+'_'+x)}catch(_){}});['mg_','mc_'].forEach(p=>svk(p+k,''))});loadMsgUI();msgPrev()};
 /* v312: تابات الرسائل + الأسلوب + اللي يظهر */
-function msUI(){document.querySelectorAll('.mpane').forEach(p=>{const k=p.dataset.mp,custom=!!lsv('tpl_'+k,'').trim();p.querySelectorAll('[data-ms]').forEach(b=>b.classList.toggle('on',!custom&&b.dataset.ms===msSt(k)));p.querySelector('.mcust').classList.toggle('hide',!custom)});
-  ['mNm','mTot','mShop','mPay'].forEach(id=>$(id).checked=pget(id,true))}
+const MOP={inv:[['n','التحية واسم العميل'],['d','رقم الفاتورة والتاريخ'],['x','الخصم وسببه'],['t','الإجمالي والمدفوع والباقي'],['m','طريقة الدفع'],['p','طرق الدفع (إنستا باي / فودافون)'],['c','جملة الختام والشكر'],['s','اسم المحل'],['e','الإيموجي 😊']],
+ pay:[['n','التحية واسم العميل'],['m','طريقة الدفع'],['t','الحساب بعد الدفعة'],['p','طرق الدفع (لو لسه عليه فلوس)'],['c','جملة الختام والشكر'],['s','اسم المحل'],['e','الإيموجي 😊']],
+ rem:[['n','التحية واسم العميل'],['t','المبلغ المستحق'],['p','طرق الدفع (إنستا باي / فودافون)'],['c','جملة الختام والشكر'],['s','اسم المحل'],['e','الإيموجي 😊']],
+ rdy:[['n','التحية واسم العميل'],['t','حسابه (لو عليه فلوس)'],['c','جملة الختام'],['s','اسم المحل'],['e','الإيموجي 😊']]};
+function msUI(){document.querySelectorAll('.mpane').forEach(p=>{const k=p.dataset.mp,custom=!!lsv('tpl_'+k,'').trim();
+  p.querySelectorAll('[data-ms]').forEach(b=>b.classList.toggle('on',!custom&&b.dataset.ms===msSt(k)));p.querySelector('.mcust').classList.toggle('hide',!custom);
+  p.querySelector('.mopts').innerHTML=MOP[k].map(([fl,lb])=>'<label class="opt"><input type="checkbox" data-mo="'+fl+'"'+(mo(k,fl)?' checked':'')+'> '+lb+'</label>').join('');
+  const g=p.querySelector('[data-mg]'),cl=p.querySelector('[data-mc]'),L=TPLG[k][msSt(k)];
+  [[g,'mg_','n'],[cl,'mc_','c']].forEach(([i,pre,fl])=>{if(!i)return;const v=lsv(pre+k,'');if(i.value!==v)i.value=v;const d=L.find(x=>x[0]===fl);i.placeholder=d?d[1]:''})})}
 let mTab='inv';
 $('mTabs').onclick=e=>{const b=e.target.closest('[data-mt]');if(!b)return;mTab=b.dataset.mt;$('mTabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.mpane').forEach(p=>p.classList.toggle('hide',p.dataset.mp!==mTab))};
-document.querySelectorAll('.mst').forEach(d=>d.addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;const k=d.dataset.for;try{localStorage.removeItem('tpl_'+k)}catch(_){}svk('ms_'+k,b.dataset.ms);loadMsgUI();msgPrev()}));
-['mNm','mTot','mShop','mPay'].forEach(id=>$(id).addEventListener('change',()=>{svk(id,$(id).checked?'1':'0');loadMsgUI();msgPrev()}));
+const msBack=k=>{try{localStorage.removeItem('tpl_'+k)}catch(_){}};
+document.querySelectorAll('.mst').forEach(d=>d.addEventListener('click',e=>{const b=e.target.closest('[data-ms]');if(!b)return;const k=d.dataset.for;msBack(k);svk('ms_'+k,b.dataset.ms);loadMsgUI();msgPrev()}));
+document.querySelectorAll('.mopts').forEach(d=>d.addEventListener('change',e=>{const i=e.target.closest('[data-mo]');if(!i)return;const k=d.dataset.for;msBack(k);svk('mo_'+k+'_'+i.dataset.mo,i.checked?'1':'0');loadMsgUI();msgPrev()}));
+document.querySelectorAll('[data-mg],[data-mc]').forEach(i=>i.addEventListener('input',()=>{const mg=i.dataset.mg,k=mg||i.dataset.mc;msBack(k);svk((mg?'mg_':'mc_')+k,i.value.trim());$('tpl'+{inv:'Inv',pay:'Pay',rem:'Rem',rdy:'Rdy'}[k]).value=tplOf(k);msgPrev()}));
 /* لو الرسالة القديمة هي النص الافتراضي القديم بالظبط، نشيلها عشان النماذج الجديدة تشتغل */
 try{if(!localStorage.getItem('msMig312')){['inv','pay','rem','rdy'].forEach(k=>{if(lsv('tpl_'+k,'').trim()===TPLD[k])localStorage.removeItem('tpl_'+k)});localStorage.setItem('msMig312','1')}}catch(e){}
 
