@@ -1468,7 +1468,7 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 #t-st [data-sp=pay] .pmh select{width:40px;flex:none;padding:0 2px;font-size:16px}
 #t-st [data-sp=pay] .pmh [data-pm=n],#t-st [data-sp=pay] .pmh [data-pm=num]{flex:1;min-width:0}
 #t-st [data-sp=pay] .pin{display:flex;align-items:center;gap:1px;font-weight:700;font-size:12px;flex:none}#t-st [data-sp=pay] .pin input{width:42px;text-align:center;font-weight:700;padding:0 2px}
-#t-st [data-sp=pay] .pmh .opt{margin:0;flex:none;padding:0;min-height:0}#t-st [data-sp=pay] .pmh .opt input{width:18px;height:18px}
+#t-st [data-sp=pay] .pmh .opt{margin:0;flex:none;padding:0;min-height:0}#t-st [data-sp=pay] .pmh .opt input{height:auto;min-height:0;padding:0;flex:none}#t-st [data-sp=pay] .pmh .del{position:static;width:30px;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px}
 #t-st [data-sp=pay] .pme{font-size:11px;white-space:nowrap;flex:none}
 #t-st [data-sp=pay] .pmh button{min-width:30px;min-height:30px;height:30px;padding:0 6px;flex:none;font-size:13px;margin:0}
 #t-st [data-sp=pay] .pmq{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}#t-st [data-sp=pay] .pmq button,#t-st [data-sp=pay] #pmAdd{font-size:12px;padding:3px 8px;min-height:28px;height:28px;margin:0}
