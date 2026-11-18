@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='315';
+const APP_VER='316';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -437,7 +437,7 @@ function invSheet0(r,paper){const TH=paper==='t80'||paper==='t58',fancy=!TH&&pge
   const pl0=r.rows.filter(x=>!x.cols),pl=(()=>{const o={};let n=0;pl0.forEach(x=>{if(!(bn(x) in o))o[bn(x)]=n++});return pl0.map((x,i)=>[x,i]).sort((a,b)=>o[bn(a[0])]-o[bn(b[0])]||a[1]-b[1]).map(a=>a[0])})(),ar=pl.some(x=>x.q>0||(!TH&&rdz(x))),tables=[];
   const cmap={};let cn=0;pl.forEach(x=>{if(!(bn(x) in cmap))cmap[bn(x)]=cn++});
   const grp={},ord=[];pl.forEach(x=>{const k=bn(x)+'|'+(+x.p||0);if(!grp[k]){grp[k]={n:bn(x),p:+x.p||0,c:0,q:0,v:0,a:x.q>0};ord.push(k)}const sg=x.rt?-1:1;grp[k].c+=sg*(+x.c||0);grp[k].q+=sg*(+x.q||0);grp[k].v+=(+x.v||0)});
-  const itemsTot=ord.reduce((a,k)=>{const y=grp[k];a.c+=y.c;a.q+=y.q;a.v+=y.v;return a},{c:0,q:0,v:0}),showSum=ord.length>=2||(ord.length===1&&pl.length>=3),items=showSum?ord.map(k=>{const y=grp[k];return[y.n,String(y.c),y.a?fq(y.q):'-',f(y.p),f(y.v),cmap[y.n]]}):[];
+  const itemsTot=ord.reduce((a,k)=>{const y=grp[k];a.c+=y.c;a.q+=y.q;a.v+=y.v;return a},{c:0,q:0,v:0}),showSum=ord.length>=1,items=showSum?ord.map(k=>{const y=grp[k];return[y.n,String(y.c),y.a?fq(y.q):'-',f(y.p),f(y.v),cmap[y.n]]}):[];
   if(pl.length)tables.push(TH?(paper==='t58'?{th:['البيان','العدد','القيمة'],w:[.5,.14,.36],rows:pl.map(x=>[lbl(x),x.c,f(x.v)])}:{th:['البيان','العدد','السعر','القيمة'],w:[.4,.12,.24,.24],rows:pl.map(x=>[lbl(x),x.c,f(x.p),f(x.v)])}):ar?{th:['البيان','المقاس','العدد','الكمية','السعر','القيمة'],w:[.3,.16,.1,.14,.14,.16],rows:pl.map(x=>{const a=x.q>0,m=rdz(x);return[nb(x),a?(+x.w>+x.h?x.h+'/'+x.w:x.w+'/'+x.h):m?(+m[1]>+m[2]?m[2]+'/'+m[1]:m[1]+'/'+m[2]):'-',x.c,a?fq(x.q):'-',f(x.p),f(x.v)]})}
     :{th:['البيان','العدد','السعر','القيمة'],w:[.46,.14,.2,.2],rows:pl.map(x=>[nn(x),x.c,f(x.p),f(x.v)])});
   const G={};r.rows.filter(x=>x.cols).forEach(x=>(G[x.t]=G[x.t]||[]).push(x));
