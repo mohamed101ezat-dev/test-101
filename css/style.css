@@ -1453,15 +1453,23 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 .mopts{margin:2px 0 6px}.mopts .opt{padding:5px 0}
 
 /* v314: محرر طرق الدفع */
-#t-st [data-sp=pay] .pmc2{border:1px solid var(--line);border-radius:12px;padding:8px;margin-top:8px;display:flex;flex-direction:column;gap:6px;background:var(--card)}
-#t-st [data-sp=pay] .pmc2.off{opacity:.55}
-#t-st [data-sp=pay] .pmh{display:flex;align-items:center;gap:6px}#t-st [data-sp=pay] .pmh [data-pm=n]{flex:1;min-width:0}#t-st [data-sp=pay] .pmh select{width:auto;flex:none;padding:0 4px;min-height:36px;font-size:18px}
-#t-st [data-sp=pay] .pmh .opt{margin:0;flex:none;padding:0;font-size:12px}
-#t-st [data-sp=pay] .pmb{display:flex;align-items:center;gap:8px}#t-st [data-sp=pay] .pmb .pin{display:flex;align-items:center;gap:3px;font-weight:700}#t-st [data-sp=pay] .pmb .pin input{width:60px;text-align:center;font-weight:700}
-#t-st [data-sp=pay] .pme{font-size:12px}
-#t-st [data-sp=pay] .pmt{display:flex;gap:6px;justify-content:flex-end}#t-st [data-sp=pay] .pmt button{min-width:40px;min-height:30px;padding:2px 10px}
-#t-st [data-sp=pay] .pmq{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}#t-st [data-sp=pay] .pmq button{font-size:13px;padding:4px 10px}
 #spChips .spedit,.pwchips .spedit{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:auto;height:56px;padding:5px 3px;border-radius:12px;border:1.5px dashed var(--line);background:transparent;min-width:0;opacity:.8}
 
 /* v317: صفحة التصميم متقسمة: المقاسات لوحدها، والشكل والألوان لوحدهم */
 #invDes[data-dm=sz] [data-dm=col],#invDes[data-dm=col] [data-dm=sz]{display:none!important}
+
+/* v318: طرق الدفع مضغوطة */
+#t-st [data-sp=pay] .pmcard{padding:8px}
+#t-st [data-sp=pay] .pmhow summary{cursor:pointer;font-size:12px}#t-st [data-sp=pay] .pmhow div{font-size:12px;margin-top:4px}
+#t-st [data-sp=pay] .pmc2{border:1px solid var(--line);border-radius:10px;padding:5px 6px;margin-top:5px;display:flex;flex-direction:column;gap:4px;background:var(--card)}
+#t-st [data-sp=pay] .pmc2.off{opacity:.5}
+#t-st [data-sp=pay] .pmh{display:flex;align-items:center;gap:4px}
+#t-st [data-sp=pay] .pmh input,#t-st [data-sp=pay] .pmh select{height:30px;min-height:30px;font-size:13px;padding:0 6px;margin:0}
+#t-st [data-sp=pay] .pmh select{width:40px;flex:none;padding:0 2px;font-size:16px}
+#t-st [data-sp=pay] .pmh [data-pm=n],#t-st [data-sp=pay] .pmh [data-pm=num]{flex:1;min-width:0}
+#t-st [data-sp=pay] .pin{display:flex;align-items:center;gap:1px;font-weight:700;font-size:12px;flex:none}#t-st [data-sp=pay] .pin input{width:42px;text-align:center;font-weight:700;padding:0 2px}
+#t-st [data-sp=pay] .pmh .opt{margin:0;flex:none;padding:0;min-height:0}#t-st [data-sp=pay] .pmh .opt input{width:18px;height:18px}
+#t-st [data-sp=pay] .pme{font-size:11px;white-space:nowrap;flex:none}
+#t-st [data-sp=pay] .pmh button{min-width:30px;min-height:30px;height:30px;padding:0 6px;flex:none;font-size:13px;margin:0}
+#t-st [data-sp=pay] .pmq{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}#t-st [data-sp=pay] .pmq button,#t-st [data-sp=pay] #pmAdd{font-size:12px;padding:3px 8px;min-height:28px;height:28px;margin:0}
+#t-st [data-sp=pay] #pmAdd{margin-top:4px}
