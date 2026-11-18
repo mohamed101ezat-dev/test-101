@@ -1514,3 +1514,15 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 /* v330 */
 #t-st [data-sp=pay] .tfpl .opt{font-size:13px;margin:4px 0}
 #t-cu .dbtf{margin:0 0 6px}
+
+/* v331: أرقام كل طريقة */
+#t-st [data-sp=pay] .pmal{display:flex;flex-direction:column;gap:4px}
+#t-st [data-sp=pay] .pma2{border:1px solid var(--line);border-radius:8px;padding:4px;display:flex;flex-direction:column;gap:3px;background:color-mix(in srgb,var(--line) 18%,var(--card))}
+#t-st [data-sp=pay] .pma2.off{opacity:.5}#t-st [data-sp=pay] .pma2.full{border-color:#dc2626}
+#t-st [data-sp=pay] .pma2 [data-ac=lb]{flex:.8;min-width:0}#t-st [data-sp=pay] .pma2 [data-ac=num],#t-st [data-sp=pay] .pma2 [data-ac=bn],#t-st [data-sp=pay] .pma2 [data-ac=holder],#t-st [data-sp=pay] .pma2 [data-ac=acct],#t-st [data-sp=pay] .pma2 [data-ac=iban],#t-st [data-sp=pay] .pma2 [data-ac=card]{flex:1.2;min-width:0}
+#t-st [data-sp=pay] .pma2 .pin input{width:38px}
+#t-st [data-sp=pay] .pma2 .del{min-width:26px;width:26px;height:26px;min-height:26px;font-size:12px}
+#t-st [data-sp=pay] .pml{display:flex;align-items:center;gap:4px;font-size:11px;flex-wrap:wrap}#t-st [data-sp=pay] .pml label{display:inline-flex;align-items:center;gap:2px;margin:0;font-size:11px}#t-st [data-sp=pay] .pml input{width:64px;height:24px;min-height:24px;font-size:12px;padding:0 4px;margin:0}
+#t-st [data-sp=pay] .pmu{font-size:11px;color:var(--mute)}#t-st [data-sp=pay] .pmu.full{color:#dc2626;font-weight:700}
+#t-st [data-sp=pay] .pmadd{font-size:12px;align-self:flex-start;padding:2px 4px}
+.spacc{flex:none;min-height:26px;height:26px;padding:0 6px;font-size:11px;border:1px dashed var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin:0;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spacc.full{border-color:#dc2626;color:#dc2626}
