@@ -1440,6 +1440,6 @@ html #stFab.away{transform:translateY(90px);opacity:0;pointer-events:none}
 #cuDup .dupr{color:var(--ink);padding:3px 0}#cuDup .dupr small{font-size:12px}
 html #cuDup button{padding:3px 10px!important;min-height:0!important;height:auto!important;font-size:12.5px!important;flex:0 0 auto;width:auto!important}
 
-/* v309: زراير الدفع (الخضرا) بتاخد لون التطبيق اللي انت مختاره */
-html[data-theme]:not(#zz) :is(button,a).b-green{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 86%,#fff),var(--acc))!important;border-color:transparent!important;color:var(--accInk,#fff)!important;box-shadow:0 6px 12px -7px var(--acc)!important}
-html.d3[data-theme]:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bottom:3px solid color-mix(in srgb,var(--acc) 62%,#000)!important}
+/* v311: زراير الدفع لونها أخضر ثابت مهما اتغير لون التطبيق */
+html:not(#zz) :is(button,a).b-green{background:linear-gradient(180deg,#22c55e,#16a34a)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 6px 12px -7px #16a34a!important}
+html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bottom:3px solid #15803d!important}
