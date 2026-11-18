@@ -1473,3 +1473,8 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 #t-st [data-sp=pay] .pmh button{min-width:30px;min-height:30px;height:30px;padding:0 6px;flex:none;font-size:13px;margin:0}
 #t-st [data-sp=pay] .pmq{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}#t-st [data-sp=pay] .pmq button,#t-st [data-sp=pay] #pmAdd{font-size:12px;padding:3px 8px;min-height:28px;height:28px;margin:0}
 #t-st [data-sp=pay] #pmAdd{margin-top:4px}
+
+/* v321: لوجوهات طرق الدفع */
+.pmlogo{height:16px;width:auto;max-width:44px;vertical-align:middle;object-fit:contain}
+#t-st [data-sp=pay] .pmlg{width:40px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:2px}#t-st [data-sp=pay] .pmlg img{max-width:100%;max-height:100%;object-fit:contain}
+#t-st [data-sp=pay] .pmh select[hidden]{display:none}
