@@ -78,7 +78,8 @@ self.addEventListener('fetch', e => {
 
     const timer = isNav ? setTimeout(() => { fromCache().then(finish); }, NAV_TIMEOUT) : null;
 
-    net.then(r => { clearTimeout(timer); finish(r); })
+    // v326: لو GitHub رجّع صفحة خطأ (زي 500 أو 503 وقت ما يقع)، افتح النسخة المحفوظة بدلها
+    net.then(r => { clearTimeout(timer); if (r && r.ok) { finish(r); return; } fromCache().then(m => finish(m || r)); })
       .catch(() => {
         clearTimeout(timer);
         fromCache().then(m => finish(m || Response.error()));
