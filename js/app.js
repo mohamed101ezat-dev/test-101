@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='321';
+const APP_VER='322';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2506,6 +2506,26 @@ $('iPer').onclick=e=>{if(e.target.closest('#iMoreB')){iMoreOpen=!iMoreOpen;drawI
 $('iMonth').onchange=e=>{const v=e.target.value;if(!v)return;const[y,m]=v.split('-').map(Number);iMon=mS(y,m-1);iPer='c';drawInfo()};
 $('clBtn').onclick=()=>{drawCl();$('clOv').classList.remove('hide')};
 $('clX').onclick=()=>$('clOv').classList.add('hide');
+/* v322: بيانات التحويل كرسالة لوحدها (مش مربوطة بفاتورة ولا عميل) */
+const tfSel=new Set();let tfInit=false;
+function tfBuild(){const L=pfAll(),sel=L.filter((x,i)=>x.on!==false&&String(x.num||'').trim()&&tfSel.has(x.n)),a=nv($('tfAmt').value);
+  let t='💳 بيانات التحويل'+(shopN()?' · '+shopN():'')+'\n';if(a>0)t+='المبلغ: '+f(a)+' جنيه\n';
+  t+=sel.map(x=>'• '+x.n+': '+String(x.num).trim()).join('\n');t+='\n\nبعد التحويل ابعتلنا صورة الإيصال 🙏';$('tfTxt').value=sel.length?t:''}
+function tfOpen(){const L=pfAll().filter(x=>x.on!==false);if(!tfInit){L.forEach(x=>{if(String(x.num||'').trim())tfSel.add(x.n)});tfInit=true}
+  const has=L.filter(x=>String(x.num||'').trim());
+  $('tfList').innerHTML=(L.map(x=>{const ok=!!String(x.num||'').trim();return'<label class="tfi'+(ok?'':' no')+'"><input type="checkbox" data-tfn="'+esc(x.n)+'"'+(ok&&tfSel.has(x.n)?' checked':'')+(ok?'':' disabled')+'><span class="tfl">'+(pmBadge(x.n)||'💳')+'</span><b>'+esc(x.n)+'</b><span class="mute num">'+(ok?esc(String(x.num).trim()):'مفيش رقم')+'</span></label>'}).join(''))
+    +(has.length<L.length?'<button type="button" class="lnk" id="tfGo" style="font-size:12px">➕ ضيف الأرقام من الإعدادات ← طرق الدفع</button>':'');
+  $('tfMsg').textContent='';tfBuild();$('tfOv').classList.remove('hide')}
+$('tfBtn').onclick=tfOpen;
+$('tfX').onclick=()=>$('tfOv').classList.add('hide');
+$('tfOv').addEventListener('click',e=>{if(e.target===$('tfOv'))$('tfOv').classList.add('hide');
+  if(e.target.closest('#tfGo')){$('tfOv').classList.add('hide');document.querySelector('#hdrSet').click();stGo('pay')}});
+$('tfList').addEventListener('change',e=>{const i=e.target.closest('[data-tfn]');if(!i)return;i.checked?tfSel.add(i.dataset.tfn):tfSel.delete(i.dataset.tfn);tfBuild()});
+$('tfAmt').addEventListener('input',tfBuild);
+const tfTx=()=>$('tfTxt').value.trim();
+$('tfWa').onclick=()=>{const t=tfTx();if(!t){$('tfMsg').textContent='علّم طريقة واحدة على الأقل ليها رقم';return}const n=$('tfPh').value.trim()?waNum($('tfPh').value):'';window.open('https://wa.me/'+n+'?text='+encodeURIComponent(t),'_blank','noopener')};
+$('tfCp').onclick=async()=>{const t=tfTx();if(!t){$('tfMsg').textContent='مفيش حاجة تتنسخ';return}try{await navigator.clipboard.writeText(t);$('tfMsg').textContent='✅ اتنسخت'}catch(e){$('tfTxt').select();$('tfMsg').textContent='النص متعلّم، انسخه بإيدك'}};
+$('tfSh').onclick=async()=>{const t=tfTx();if(!t){$('tfMsg').textContent='مفيش حاجة تتبعت';return}if(navigator.share){try{await navigator.share({text:t})}catch(e){}}else $('tfCp').click()};
 $('clOv').addEventListener('click',e=>{if(e.target===$('clOv'))$('clOv').classList.add('hide')});
 $('clTab').onclick=e=>{const k=e.target.dataset.k;if(!k)return;clK=k;drawCl()};
 $('clBody').onclick=e=>{const r=e.target.closest('[data-cl]');if(!r)return;r.dataset.cl==='d'?showClose(+r.dataset.a):showWeek(+r.dataset.a)};

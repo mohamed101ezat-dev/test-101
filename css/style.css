@@ -1478,3 +1478,15 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 .pmlogo{height:16px;width:auto;max-width:44px;vertical-align:middle;object-fit:contain}
 #t-st [data-sp=pay] .pmlg{width:40px;height:30px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:2px}#t-st [data-sp=pay] .pmlg img{max-width:100%;max-height:100%;object-fit:contain}
 #t-st [data-sp=pay] .pmh select[hidden]{display:none}
+
+/* v322: نافذة بيانات التحويل */
+#tfOv .res-in{display:flex;flex-direction:column;gap:6px}
+#tfList{display:flex;flex-direction:column;gap:4px}
+#tfOv .tfi{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:4px 6px;margin:0;cursor:pointer;font-size:13px;color:var(--ink)}
+#tfOv .tfi.no{opacity:.5}
+#tfOv .tfi input{width:18px;height:18px;flex:none;margin:0}
+#tfOv .tfl{width:42px;height:24px;flex:none;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:6px}#tfOv .tfl .pmlogo{height:20px;max-width:40px}
+#tfOv .tfi b{flex:1;min-width:0}#tfOv .tfi .num{font-size:12px;direction:ltr}
+#tfOv .tfrow{display:flex;gap:6px}#tfOv .tfrow input{flex:1;min-width:0;height:32px;font-size:13px;margin:0}
+#tfOv textarea{font-size:13px;margin:0}
+#tfOv .tfbtn{display:flex;gap:6px}#tfOv .tfbtn button{flex:1;min-height:34px;padding:4px 6px;font-size:13px;margin:0}#tfOv .tfbtn .main{flex:1.4}

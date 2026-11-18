@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=321">
+<link rel="stylesheet" href="css/style.css?v=322">
 
 
 
@@ -54,7 +54,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="app-header">
   <div class="hdr-logo"><img id="hdrLogo" alt="" class="hide"></div>
   <span class="hdr-ver" id="hdrVer"></span>
-  <div class="hdr-end"><button type="button" id="nfBell" class="hdr-btn" aria-label="التنبيهات">🔔<span id="nfCnt" class="nf-cnt hide"></span></button><button type="button" id="calcFab" class="hdr-btn" aria-label="حاسبة">🧮</button><button type="button" id="cloudSt" class="hdr-cloud" aria-label="حالة الحفظ على السحابة"><span class="cs-i">☁️</span><span class="cs-d"></span></button><script>(function(){try{var b=document.getElementById('cloudSt'),on=localStorage.getItem('fbOn')==='1'||localStorage.getItem('fbCfg'),l=localStorage.getItem('cloudLast');var s=!on?'off':(l==='ok'&&navigator.onLine!==false)?'ok':'busy';b.className='hdr-cloud '+s;b.dataset.s=s}catch(e){}})()</script><button id="wkOut" class="hdr-set" aria-label="خروج من وضع العامل" style="font-size:13px;width:auto;padding:0 10px">🔓 مالك</button><button id="hdrSet" class="hdr-set" data-t="st" aria-label="إعدادات">⚙️</button></div>
+  <div class="hdr-end"><button type="button" id="nfBell" class="hdr-btn" aria-label="التنبيهات">🔔<span id="nfCnt" class="nf-cnt hide"></span></button><button type="button" id="tfBtn" class="hdr-btn" aria-label="بيانات التحويل" title="بيانات التحويل">💳</button><button type="button" id="calcFab" class="hdr-btn" aria-label="حاسبة">🧮</button><button type="button" id="cloudSt" class="hdr-cloud" aria-label="حالة الحفظ على السحابة"><span class="cs-i">☁️</span><span class="cs-d"></span></button><script>(function(){try{var b=document.getElementById('cloudSt'),on=localStorage.getItem('fbOn')==='1'||localStorage.getItem('fbCfg'),l=localStorage.getItem('cloudLast');var s=!on?'off':(l==='ok'&&navigator.onLine!==false)?'ok':'busy';b.className='hdr-cloud '+s;b.dataset.s=s}catch(e){}})()</script><button id="wkOut" class="hdr-set" aria-label="خروج من وضع العامل" style="font-size:13px;width:auto;padding:0 10px">🔓 مالك</button><button id="hdrSet" class="hdr-set" data-t="st" aria-label="إعدادات">⚙️</button></div>
 </div>
 <div id="busy" class="busy hide" role="status"></div>
 <div id="welc" class="auth hide"><div class="auth-in">
@@ -132,6 +132,15 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="ro" style="color:var(--ink)"><b>📝 عروض الأسعار</b><button class="del" id="qtX" aria-label="إغلاق">×</button></div>
   <div class="mute" style="margin:4px 0 6px">عرض السعر مش بيتسجل على حساب العميل. لما يوافق اضغط (تحويل لفاتورة) واكتب المدفوع واحفظ.</div>
   <div id="qtList"></div></div></div>
+<div id="tfOv" class="res-ov hide" style="z-index:66"><div class="card res-in">
+  <div class="ro" style="color:var(--ink)"><b>💳 بيانات التحويل</b><button class="del" id="tfX" aria-label="إغلاق">×</button></div>
+  <div class="mute" style="font-size:12px">رسالة لوحدها لأي حد بيسأل يحوّل إزاي. علّم الطرق اللي عايز تبعتها.</div>
+  <div id="tfList"></div>
+  <div class="tfrow"><input id="tfAmt" type="text" inputmode="decimal" placeholder="المبلغ (اختياري)" aria-label="المبلغ"><input id="tfPh" type="tel" inputmode="tel" placeholder="رقم الواتساب (اختياري)" aria-label="رقم الواتساب"></div>
+  <textarea id="tfTxt" rows="6" aria-label="نص الرسالة"></textarea>
+  <div class="tfbtn"><button type="button" class="main b-green" id="tfWa">إرسال واتساب</button><button type="button" class="alt" id="tfCp">📋 نسخ</button><button type="button" class="alt" id="tfSh">📤 مشاركة</button></div>
+  <div class="info" id="tfMsg"></div>
+</div></div>
 <div id="clOv" class="res-ov hide" style="z-index:65"><div class="card res-in">
   <div class="ro" style="color:var(--ink)"><b>🗂 الإقفالات</b><button class="del" id="clX" aria-label="إغلاق">×</button></div>
   <div class="seg s" id="clTab" style="margin:4px 0 6px"><button data-k="d" class="on">يومي</button><button data-k="w">أسبوعي (جمعة ← خميس)</button></div>
@@ -552,11 +561,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=321"></script>
-<script src="js/qr.js?v=321"></script>
+<script src="js/app.js?v=322"></script>
+<script src="js/qr.js?v=322"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=321"></script>
-<script src="js/features.js?v=321"></script>
+<script src="js/cutlist.js?v=322"></script>
+<script src="js/features.js?v=322"></script>
 </body>
 </html>
 
