@@ -1526,3 +1526,10 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 #t-st [data-sp=pay] .pmu{font-size:11px;color:var(--mute)}#t-st [data-sp=pay] .pmu.full{color:#dc2626;font-weight:700}
 #t-st [data-sp=pay] .pmadd{font-size:12px;align-self:flex-start;padding:2px 4px}
 .spacc{flex:none;min-height:26px;height:26px;padding:0 6px;font-size:11px;border:1px dashed var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin:0;max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.spacc.full{border-color:#dc2626;color:#dc2626}
+
+/* v332: لوجو موحد في كل مكان بنفس شكل صف المبلغ (لوجو صافي، 18px، من غير برواز) */
+html:not(#zz) .mi{display:inline-flex;align-items:center;justify-content:center;height:22px;width:auto;min-width:22px;max-width:36px;font-size:17px;line-height:1;flex:none;background:none;border:0;padding:0;box-shadow:none}
+html:not(#zz) .mi img,html:not(#zz) .mi svg{height:18px;width:auto;max-width:34px;max-height:18px;display:block;border-radius:4px;object-fit:contain}
+html:not(#zz) #t-st [data-sp=pay] .pmh select[data-pm=ic]{width:30px;height:22px;min-height:22px;border:0;background:none;padding:0;font-size:17px;-webkit-appearance:none;appearance:none;text-align:center}
+html:not(#zz) #tfOv .tfl{width:auto;height:22px;background:none;border-radius:0}
+html:not(#zz) .pmq button,html:not(#zz) .dbtf .tfm{display:inline-flex;align-items:center;gap:4px}
