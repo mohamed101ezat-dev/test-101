@@ -1504,3 +1504,9 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 .dbtf .tfa{border-style:dashed}.dbtf .tfa.on{background:color-mix(in srgb,#16a34a 15%,var(--card));border-color:#16a34a;color:var(--ink)}
 #tfOv .tfao{display:flex;align-items:center;gap:2px;flex:none;margin:0;font-size:14px;cursor:pointer}#tfOv .tfao input{width:18px;height:18px;margin:0}
 #tfOv #tfAmt:disabled{opacity:.45}
+
+/* v329: أماكن ظهور طريقة الدفع */
+#t-st [data-sp=pay] .pmw{display:flex;flex-wrap:wrap;align-items:center;gap:3px;font-size:11px}
+#t-st [data-sp=pay] .pmw label{display:inline-flex;align-items:center;margin:0;padding:2px 7px;min-height:24px;border:1px dashed var(--line);border-radius:99px;cursor:pointer;color:var(--mute);font-size:11px;text-decoration:line-through}
+#t-st [data-sp=pay] .pmw label.on{border-style:solid;border-color:#16a34a;background:color-mix(in srgb,#16a34a 12%,var(--card));color:var(--ink);text-decoration:none}
+#t-st [data-sp=pay] .pmw input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
