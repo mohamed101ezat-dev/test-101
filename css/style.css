@@ -1443,3 +1443,9 @@ html #cuDup button{padding:3px 10px!important;min-height:0!important;height:auto
 /* v311: زراير الدفع لونها أخضر ثابت مهما اتغير لون التطبيق */
 html:not(#zz) :is(button,a).b-green{background:linear-gradient(180deg,#22c55e,#16a34a)!important;border-color:transparent!important;color:#fff!important;box-shadow:0 6px 12px -7px #16a34a!important}
 html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bottom:3px solid #15803d!important}
+
+/* v312: صفحة رسائل الواتساب المبسّطة */
+.mst{margin:4px 0 6px}.mst button{font-size:14px;padding:8px 4px}
+.mcust{margin:2px 0 4px;color:var(--danger)}
+.madv{margin-top:8px}.madv summary{cursor:pointer;font-size:13px;color:var(--mute)}
+#mTabs button{font-size:13px;padding:7px 2px}
