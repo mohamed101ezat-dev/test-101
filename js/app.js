@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='326';
+const APP_VER='327';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2529,7 +2529,9 @@ function tfOpen(){const L=pfAll().filter(x=>x.on!==false);if(!tfInit){L.forEach(
   $('tfList').innerHTML=(L.map(x=>{const ok=!!String(x.num||'').trim();return'<label class="tfi'+(ok?'':' no')+'"><input type="checkbox" data-tfn="'+esc(x.n)+'"'+(ok&&tfSel.has(x.n)?' checked':'')+(ok?'':' disabled')+'><span class="tfl">'+(pmBadge(x.n)||'💳')+'</span><b>'+esc(x.n)+'</b><span class="mute num">'+(ok?esc(String(x.num).trim()):'مفيش رقم')+'</span></label>'}).join(''))
     +(has.length<L.length?'<button type="button" class="lnk" id="tfGo" style="font-size:12px">➕ ضيف الأرقام من الإعدادات ← طرق الدفع</button>':'');
   $('tfAmtOn').checked=tfAmtOn();tfCust=null;$('tfQ').value='';$('tfPh').value='';$('tfAmt').value='';$('tfSug').innerHTML='';$('tfMsg').textContent='';tfBuild();$('tfOv').classList.remove('hide')}
-$('tfBtn').onclick=tfOpen;$('tfOpen2').onclick=()=>{tfOpen();setTimeout(()=>$('tfQ').focus(),50)};
+$('tfBtn').onclick=tfOpen;
+/* v327: رابط احتياطي على Firebase Hosting (لو GitHub وقع أو الموبايل اتغير) */
+$('mirCp').onclick=async()=>{try{await navigator.clipboard.writeText($('mirUrl').value);$('mirMsg').textContent='✅ اتنسخ. ابعته لنفسك على واتساب علشان يبقى معاك'}catch(e){$('mirUrl').select();$('mirMsg').textContent='الرابط متعلّم، انسخه بإيدك'}};$('tfOpen2').onclick=()=>{tfOpen();setTimeout(()=>$('tfQ').focus(),50)};
 $('tfX').onclick=()=>$('tfOv').classList.add('hide');
 $('tfOv').addEventListener('click',e=>{if(e.target===$('tfOv'))$('tfOv').classList.add('hide');
   if(e.target.closest('#tfGo')){$('tfOv').classList.add('hide');document.querySelector('#hdrSet').click();stGo('pay')}});
