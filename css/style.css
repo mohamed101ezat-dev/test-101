@@ -1510,3 +1510,7 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 #t-st [data-sp=pay] .pmw label{display:inline-flex;align-items:center;margin:0;padding:2px 7px;min-height:24px;border:1px dashed var(--line);border-radius:99px;cursor:pointer;color:var(--mute);font-size:11px;text-decoration:line-through}
 #t-st [data-sp=pay] .pmw label.on{border-style:solid;border-color:#16a34a;background:color-mix(in srgb,#16a34a 12%,var(--card));color:var(--ink);text-decoration:none}
 #t-st [data-sp=pay] .pmw input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+
+/* v330 */
+#t-st [data-sp=pay] .tfpl .opt{font-size:13px;margin:4px 0}
+#t-cu .dbtf{margin:0 0 6px}
