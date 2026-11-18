@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='314';
+const APP_VER='315';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -975,7 +975,7 @@ const spShown=x=>x.n==='نقدي'||x.on||x.a>0;
 const rowsHtml=A=>A.map((x,i)=>!spShown(x)?'':`<div class="sprow" data-i="${i}">${spIcon(x.n)}<input class="spa${x.a>=1e7?' lg':''}" type="text" inputmode="decimal" placeholder="0" aria-label="مبلغ ${esc(x.n)}" value="${x.a?esc(fq(x.a)):''}">${x.n==='نقدي'?'':`<span class="pin"><input class="spp" type="text" inputmode="decimal" aria-label="نسبة خصم ${esc(x.n)}" value="${esc(fq(x.p))}"><span>%</span></span>`}<button type="button" class="alt spk"></button><span class="mute num spf"></span></div>`).join('');
 /* مربعات طرق الدفع باللوجو: كل الطرق ظاهرة. الضغطة بتحط المتبقي في الطريقة، والضغطة على المتعلّمة بتشيلها */
 const tileOn=x=>x.a>0||(x.n!=='نقدي'&&!!x.on);
-const chipsHtml=A=>A.map((x,i)=>`<button type="button" class="alt spc${tileOn(x)?' on':''}" data-i="${i}" title="${esc(x.n)}" aria-pressed="${tileOn(x)}">${spIcon(x.n)}<small>${esc(x.n==='نقدي'?'كاش':x.n.replace(/^تحويل\s+/,''))}</small></button>`).join('')+'<button type="button" class="alt spedit" data-pmedit="1" aria-label="تعديل طرق الدفع"><span class="mi">⚙️</span><small>الطرق</small></button>';
+const chipsHtml=A=>A.map((x,i)=>`<button type="button" class="alt spc${tileOn(x)?' on':''}" data-i="${i}" title="${esc(x.n)}" aria-pressed="${tileOn(x)}">${spIcon(x.n)}<small>${esc(x.n==='نقدي'?'كاش':x.n.replace(/^تحويل\s+/,''))}</small></button>`).join('');
 const tilesSync=(box,A)=>box.querySelectorAll('.spc').forEach(b=>{const x=A[+b.dataset.i];if(!x)return;const on=tileOn(x);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
 /* بترجّع true لو الطريقة اتشالت، false لو لازم تتملي بالمتبقي */
 function tileOff(x){if(!tileOn(x))return false;x.a=0;if(x.n!=='نقدي'){x.on=false;x.pe=0}return true}
@@ -1676,9 +1676,6 @@ $('pmList').addEventListener('click',e=>{const r=e.target.closest('.pmc2');if(!r
   const b=e.target.closest('[data-pmx]');if(!b)return;if(r.querySelector('[data-pm=n]').value.trim()&&!ok2(b))return;r.remove();pmSave();pmDraw()});
 $('pmAdd').onclick=()=>{$('pmList').insertAdjacentHTML('beforeend',pmCard({n:'',p:0,num:'',ic:'',on:true}));const ins=$('pmList').querySelectorAll('[data-pm=n]');ins[ins.length-1].focus()};
 $('pmQ').addEventListener('click',e=>{const b=e.target.closest('[data-pq]');if(!b)return;const q=PM_Q[+b.dataset.pq];const a=pfAll();a.push({n:q[0],p:q[2],num:'',ic:q[1]==='💳'?'':q[1],on:true});svk('pfPre2',JSON.stringify(a));pmDraw();$('pfPre').innerHTML=preHtml();spRefresh();calc()});
-const pmOpen=()=>{pmDraw();$('pmOv').classList.remove('hide')};
-$('pmOpen').onclick=pmOpen;$('pmX').onclick=()=>$('pmOv').classList.add('hide');$('pmOv').addEventListener('click',e=>{if(e.target===$('pmOv'))$('pmOv').classList.add('hide')});
-document.addEventListener('click',e=>{if(e.target.closest('[data-pmedit]'))pmOpen()});
 function pmCust(){const l=S.customers.filter(c=>c.pfr&&Object.keys(c.pfr).length).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
   $('pmCust').innerHTML=l.map(c=>Object.entries(c.pfr).map(([n,p])=>`<div class="pmc"><span><b>${esc(c.name)}</b> <span class="mute">${esc(n)}</span></span><span style="display:flex;align-items:center;gap:6px"><b class="num">${fq(p)}%</b><button type="button" class="del" data-pcx="${c.id}" data-pcn="${esc(n)}" aria-label="مسح">×</button></span></div>`).join('')).join('')||'<p class="mute" style="margin-top:6px">لسه مفيش. أول ما تسجل دفعة لعميل بنسبة غير العامة هتظهر هنا.</p>'}
 $('pmCust').addEventListener('click',e=>{const b=e.target.closest('[data-pcx]');if(!b)return;const c=getC(b.dataset.pcx);if(!c||!c.pfr)return;const m={...c.pfr};delete m[b.dataset.pcn];c.pfr=m;put('customers',c);pmCust();calc()});

@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=314">
+<link rel="stylesheet" href="css/style.css?v=315">
 
 
 
@@ -132,14 +132,6 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="ro" style="color:var(--ink)"><b>📝 عروض الأسعار</b><button class="del" id="qtX" aria-label="إغلاق">×</button></div>
   <div class="mute" style="margin:4px 0 6px">عرض السعر مش بيتسجل على حساب العميل. لما يوافق اضغط (تحويل لفاتورة) واكتب المدفوع واحفظ.</div>
   <div id="qtList"></div></div></div>
-<div id="pmOv" class="res-ov hide" style="z-index:75"><div class="card res-in" style="max-width:520px;margin:0 auto">
-<div class="ro" style="gap:6px"><b style="flex:1">💳 طرق الدفع</b><button type="button" class="alt" id="pmX" style="flex:none">✕ قفل</button></div>
-<div class="mute" style="margin:4px 0 2px">النسبة بتتخصم من المبلغ المدفوع (زي عمولة المحفظة)، و0 يعني من غير خصم. الرقم بيظهر في رسائل الواتساب.</div>
-<div id="pmList"></div>
-<label>إضافة سريعة</label><div class="pmq" id="pmQ"></div>
-<button type="button" class="alt" id="pmAdd" style="width:100%;margin-top:6px">➕ طريقة جديدة</button>
-<div class="card" style="margin-top:10px;box-shadow:none"><b>👥 نسب العملاء المحفوظة</b><div class="mute">البرنامج بيفتكر آخر نسبة اتسجلت لكل عميل. امسح النسبة لو عايز العميل يرجع للنسبة العامة.</div><div id="pmCust"></div></div>
-</div></div>
 <div id="clOv" class="res-ov hide" style="z-index:65"><div class="card res-in">
   <div class="ro" style="color:var(--ink)"><b>🗂 الإقفالات</b><button class="del" id="clX" aria-label="إغلاق">×</button></div>
   <div class="seg s" id="clTab" style="margin:4px 0 6px"><button data-k="d" class="on">يومي</button><button data-k="w">أسبوعي (جمعة ← خميس)</button></div>
@@ -213,7 +205,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
     <input id="discWhy" class="hide" placeholder="سبب الخصم (يظهر في الفاتورة)">
     <div class="pgrid">
       <div class="pcol" id="payR">
-        <div class="pbar" id="payBar"><span id="pfFull"></span><span id="pfPre"></span><button type="button" class="alt" id="pfOther">✏️ أخرى</button><button type="button" class="alt" data-pmedit="1" aria-label="تعديل طرق الدفع" title="تعديل طرق الدفع">⚙️</button><span class="mute num" id="pfInfo"></span></div>
+        <div class="pbar" id="payBar"><span id="pfFull"></span><span id="pfPre"></span><button type="button" class="alt" id="pfOther">✏️ أخرى</button><span class="mute num" id="pfInfo"></span></div>
         <div id="spBox" class="hide"><div id="spRows"></div><div id="spFull" class="hide"></div><div class="pbar" id="spChips"></div></div>
       </div>
       <div class="pcol" id="totL">
@@ -350,7 +342,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <label class="opt" style="margin-top:8px"><input type="checkbox" id="qrOn"> QR في آخر الفاتورة المطبوعة</label><div class="mute">كود صغير فيه ملخص الفاتورة، بيظهر في الطباعة (A4 أو حراري) بس، مش في صورة الواتس ولا الـPDF. تمسحه من 📷 في السجل للتحقق منها.</div></div>
 </div>
 <div class="stp hide" data-sp="pay"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>💳 طرق الدفع</b></div>
-<div class="card"><b>💳 طرق الدفع</b><div class="mute">بتتعدّل من جوه شاشة الفاتورة وتسجيل الدفعة نفسها: دوس على «⚙️» جنب طرق الدفع. وتقدر تفتحها من هنا كمان.</div><button type="button" class="main" id="pmOpen" style="width:100%;margin-top:8px">💳 افتح طرق الدفع</button></div>
+<div class="card"><b>💳 طرق الدفع</b><div class="mute" style="margin-bottom:4px">دي الطرق اللي بتظهر كأزرار في الفاتورة وصفحة الدفع.<br>١) <b>أضف طريقة</b> من «إضافة سريعة» تحت أو «➕ طريقة جديدة».<br>٢) اكتب <b>النسبة</b> لو الطريقة بتاخد عمولة (0 = من غير). المثال جنبها بيوريك العميل هيدفع كام ويوصلك كام.<br>٣) اكتب <b>الرقم</b> لو عايزه يظهر في رسائل الواتساب.<br>٤) «شغّالة» تقفلها من غير ما تمسحها، و⬆⬇ للترتيب.</div>
+<div id="pmList"></div>
+<label>إضافة سريعة</label><div class="pmq" id="pmQ"></div>
+<button type="button" class="alt" id="pmAdd" style="width:100%;margin-top:6px">➕ طريقة جديدة</button></div>
+<div class="card"><b>👥 نسب العملاء المحفوظة</b><div class="mute">البرنامج بيفتكر آخر نسبة اتسجلت لكل عميل. امسح النسبة لو عايز العميل يرجع للنسبة العامة.</div><div id="pmCust"></div></div>
 </div>
 <div class="stp hide" data-sp="msg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b><i class="wai"></i> رسائل الواتساب</b></div>
 <div class="mute" style="margin:0 4px 4px">كل رسالة إعداداتها لوحدها، مش مرتبطة بالباقي.</div>
@@ -557,11 +553,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=314"></script>
-<script src="js/qr.js?v=314"></script>
+<script src="js/app.js?v=315"></script>
+<script src="js/qr.js?v=315"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=314"></script>
-<script src="js/features.js?v=314"></script>
+<script src="js/cutlist.js?v=315"></script>
+<script src="js/features.js?v=315"></script>
 </body>
 </html>
 
