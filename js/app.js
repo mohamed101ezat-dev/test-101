@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='323';
+const APP_VER='324';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2277,7 +2277,7 @@ $('monRep').onclick=()=>showMonth(Date.now());
 $('res').addEventListener('click',e=>{if(e.target===$('res'))$('res').classList.add('hide')});
 
 /* النقر على المعاملات في الداشبورد */
-let infoMode=false,dbMode=false,dbSel=null,dbPay=null,iSc='';
+let infoMode=false,dbMode=false,dbSel=null,dbPay=null,iSc='',dbTf=null;
 /* دفعة من صفحة المديون: نفس حساب "خصم من المدفوع" اللي في الفاتورة */
 function dbPayGo(btn){const c=getC(dbSel),m=$('dbp_msg');if(!c||!m)return;const r=pwRecord('db',c);
   if(!r){m.textContent='اكتب المبلغ المدفوع';const a=document.querySelector('[data-pw="db"] .spa');if(a)a.focus();return}
@@ -2291,6 +2291,7 @@ function drawDebt(){$('hMain').classList.toggle('hide',dbMode||infoMode);$('info
     $('dbDet').innerHTML=`<div class="card"><div class="dbh"><button class="lnk" data-dback="1" aria-label="رجوع للمديونين">→</button><div class="cn">${esc(c.name)}</div><span class="dbamt ${bcls(c)}">${b?`<small>${b>0?'عليه':'له'}</small> <b class="num">${f(Math.abs(b))}</b>`:'<b>خالص</b>'}</span><button class="main b-green" data-dpay="1">💵 دفع</button></div>
       <div class="mute dbsub">${esc(cSub(c,2)+(c.remAt?' · آخر تذكير '+agoTxt(c.remAt):''))}</div>
       <div class="dbact"><button class="ab b-out" data-dfull="1">👤 صفحة العميل</button>${b>0?`<button class="ab b-out" data-drem="1"><i class="wai"></i> تذكير</button>`:''}${wn?`<a class="ab wa" target="_blank" rel="noopener" href="https://wa.me/${wn}"><i class="wai"></i> رسالة</a>`:''}${tn?`<a class="ab tel" href="tel:${tn}">📞 اتصال</a>`:''}</div>
+      ${b>0?tfStrip(c,1):''}
       ${wn?'':'<div class="mute" style="margin-top:4px">مفيش رقم متسجل للعميل · يتضاف من صفحة العملاء</div>'}
       ${b>0?(c.due?`<div class="dbdue${dAgo(0)>=c.due?' late':''}">📅 ميعاد السداد: <b>${dueLabel(c.due)}</b>${dAgo(0)>c.due?` <span>(عدّى من ${dz(Math.round((dAgo(0)-c.due)/864e5))})</span>`:''}<button type="button" class="lnk" data-ddx="1">✖️ إلغاء</button></div>`:`<div class="dbdue"><span>📅 ميعاد سداد:</span><button type="button" class="ab" data-dd="1">بكرة</button><button type="button" class="ab" data-dd="2">بعد يومين</button><button type="button" class="ab" data-dd="7">بعد أسبوع</button><input type="date" data-ddate="1" aria-label="اختار تاريخ"></div>`):''}
       ${dbPay===c.id?`<div class="dbpay">
@@ -2301,7 +2302,7 @@ function drawDebt(){$('hMain').classList.toggle('hide',dbMode||infoMode);$('info
   const q=$('dbq').value.trim(),l=S.customers.filter(x=>balOf(x)>0&&qm(x.name,q)).sort((a,b)=>balOf(b)-balOf(a));
   $('dbTot').innerHTML='<small>إجمالي المديونيات · '+plN(l.length,'عميل')+'</small><span class="num">'+f(l.reduce((a,x)=>a+balOf(x),0))+'</span>';
   $('bulkRem').classList.toggle('hide',!(pget('bulkRem',true)&&l.length));
-  $('dbList').innerHTML=l.map(x=>`<div class="rec cr2 dbr" data-dopen="${x.id}"${agStyle(x)}>${av(x.name)}<div class="dbm"><div class="cn">${esc(x.name)}</div>${lateTag(x)}<span class="mute lt">${esc(lastTx(x))}</span></div>${x.due?(dAgo(0)>=x.due?'<span class="tag dr">⚠ ميعاده جه</span>':`<span class="tag ok">📅 ${new Date(x.due).getDate()}/${new Date(x.due).getMonth()+1}</span>`):''}<div class="dbq">${waNum(x.phone)?`<a class="ab wa qa" target="_blank" rel="noopener" href="https://wa.me/${waNum(x.phone)}?text=${encodeURIComponent(remText(x))}"><i class="wai"></i> تذكير</a>`:''}${telNum(x.phone)?`<a class="ab tel qa" href="tel:${telNum(x.phone)}">📞 اتصال</a>`:''}<button type="button" class="ab b-green qa" data-dquick="${x.id}">💵 دفع</button><span class="cb ${bcls(x)} num">${bal(x)}</span></div></div>`).join('')||'<p class="mute">مفيش مديونين ✓</p>'}
+  $('dbList').innerHTML=l.map(x=>`<div class="rec cr2 dbr${dbTf===x.id?' tfon':''}" data-dtf="${x.id}"${agStyle(x)}>${av(x.name)}<div class="dbm"><div class="cn">${esc(x.name)}</div>${lateTag(x)}<span class="mute lt">${esc(lastTx(x))}</span></div>${x.due?(dAgo(0)>=x.due?'<span class="tag dr">⚠ ميعاده جه</span>':`<span class="tag ok">📅 ${new Date(x.due).getDate()}/${new Date(x.due).getMonth()+1}</span>`):''}<div class="dbq">${waNum(x.phone)?`<a class="ab wa qa" target="_blank" rel="noopener" href="https://wa.me/${waNum(x.phone)}?text=${encodeURIComponent(remText(x))}"><i class="wai"></i> تذكير</a>`:''}${telNum(x.phone)?`<a class="ab tel qa" href="tel:${telNum(x.phone)}">📞 اتصال</a>`:''}<button type="button" class="ab b-green qa" data-dquick="${x.id}">💵 دفع</button><span class="cb ${bcls(x)} num">${bal(x)}</span></div></div>${dbTf===x.id?tfStrip(x):''}`).join('')||'<p class="mute">مفيش مديونين ✓</p>'}
 $('dbq').oninput=drawDebt;
 $('dbDet').addEventListener('change',e=>{const t=e.target;if(!t.dataset.ddate||!t.value)return;const c=getC(dbSel);if(!c)return;const[y,m,d]=t.value.split('-').map(Number);c.due=new Date(y,m-1,d).getTime();delete c.snz;put('customers',c);drawDebt();remDraw()});
 $('bnav').addEventListener('click',e=>{if(e.target.closest('button[data-t="dash"]')&&(dbMode||infoMode)){dbMode=false;infoMode=false;dbSel=null;drawDebt()}});
@@ -2310,11 +2311,14 @@ $('t-dash').addEventListener('click',e=>{const t=e.target;
   if(t.closest('#infoCard')){const op=!(infoMode&&!dbMode&&!iSc);iSc='';infoMode=op;dbMode=false;dbSel=null;if(infoMode){iPer='m';iMoreOpen=false;drawInfo()}drawDebt();window.scrollTo(0,0);return}
   if(t.closest('#infoBack')){infoMode=false;drawDebt();window.scrollTo(0,0);return}
   /* v298: كارت المديونيات زي كارت التقرير: دوسة تفتح ودوسة تقفل */
-  if(t.closest('#dbCard')){const op=!dbMode;infoMode=false;dbMode=op;dbSel=null;dbPay=null;drawDebt();window.scrollTo(0,0);return}
+  if(t.closest('#dbCard')){const op=!dbMode;infoMode=false;dbMode=op;dbSel=null;dbPay=null;dbTf=null;drawDebt();window.scrollTo(0,0);return}
   if(t.closest('#dbBack')){dbMode=false;dbSel=null;drawDebt();window.scrollTo(0,0);return}
   {const dq=t.closest('[data-dquick]');if(dq){dbSel=dq.dataset.dquick;dbPay=dbSel;delete PW.db;drawDebt();window.scrollTo(0,0);const i=document.querySelector('[data-pw="db"] .spa');if(i)i.focus();return}}
   {const df=t.closest('[data-dfull]');if(df){const id=dbSel;document.querySelector('#bnav button[data-t="cu"]').click();selC=id;delete PW.cu;per='all';cdq='';pMo=0;editOpen=false;cuEd=false;cuPm=false;drawCusts();window.scrollTo(0,0);return}}
-  const o=t.closest('[data-dopen]');if(o){dbSel=o.dataset.dopen;dbPay=null;drawDebt();window.scrollTo(0,0);return}
+  {const tm=t.closest('[data-tfm]');if(tm){tfSendC(getC(tm.dataset.tfc),tm.dataset.tfm);return}}
+  if(t.closest('[data-tfset]')){document.querySelector('#hdrSet').click();stGo('pay');return}
+  const o=t.closest('[data-dopen]');if(o){dbSel=o.dataset.dopen;dbPay=null;dbTf=null;drawDebt();window.scrollTo(0,0);return}
+  {const tr=t.closest('[data-dtf]');if(tr&&!t.closest('a')){dbTf=dbTf===tr.dataset.dtf?null:tr.dataset.dtf;drawDebt();return}}
   if(t.closest('[data-dback]')){dbSel=null;dbPay=null;drawDebt();return}
   if(t.closest('[data-drem]')){const c=getC(dbSel);if(c)openRem(c);return}
   {const dd=t.closest('[data-dd]'),dx=t.closest('[data-ddx]');if(dd||dx){const c=getC(dbSel);if(!c)return;if(dd){c.due=dAgo(-(+dd.dataset.dd));delete c.snz}else delete c.due;put('customers',c);drawDebt();remDraw();return}}
@@ -2507,21 +2511,32 @@ $('iMonth').onchange=e=>{const v=e.target.value;if(!v)return;const[y,m]=v.split(
 $('clBtn').onclick=()=>{drawCl();$('clOv').classList.remove('hide')};
 $('clX').onclick=()=>$('clOv').classList.add('hide');
 /* v322: بيانات التحويل كرسالة لوحدها (مش مربوطة بفاتورة ولا عميل) */
-const tfSel=new Set();let tfInit=false;
-function tfBuild(){const L=pfAll(),sel=L.filter((x,i)=>x.on!==false&&String(x.num||'').trim()&&tfSel.has(x.n)),a=nv($('tfAmt').value);
-  let t='💳 بيانات التحويل'+(shopN()?' · '+shopN():'')+'\n';if(a>0)t+='المبلغ: '+f(a)+' جنيه\n';
-  t+=sel.map(x=>'• '+x.n+': '+String(x.num).trim()).join('\n');t+='\n\nبعد التحويل ابعتلنا صورة الإيصال 🙏';$('tfTxt').value=sel.length?t:''}
+const tfSel=new Set();let tfInit=false,tfCust=null;
+/* v324: طرق الدفع اللي ليها رقم + نص الرسالة (مشترك بين النافذة والمديونين) */
+const tfNums=()=>pfAll().filter(x=>x.on!==false&&String(x.num||'').trim());
+function tfMake(L,a,nm){let t=(nm?'أهلاً يا '+nm+' 👋\n':'')+'💳 بيانات التحويل'+(shopN()?' · '+shopN():'')+'\n';if(a>0)t+='المطلوب: '+f(a)+' جنيه\n';
+  return t+L.map(x=>'• '+x.n+': '+String(x.num).trim()).join('\n')+'\n\nبعد التحويل ابعتلنا صورة الإيصال 🙏'}
+/* كارت صغير بطرق الدفع: دوسة على الطريقة تفتح واتساب العميل بالرقم بتاعها */
+function tfStrip(c,det){const L=tfNums();if(!L.length)return'<div class="dbtf"><button type="button" class="lnk" data-tfset="1">💳 ضيف أرقام التحويل من الإعدادات ← طرق الدفع</button>'+(det?'':'<button type="button" class="ab" data-dopen="'+c.id+'">👤 التفاصيل</button>')+'</div>';
+  return'<div class="dbtf"><span class="mute">💳 ابعتله:</span>'+L.map(x=>'<button type="button" class="ab tfm" data-tfc="'+c.id+'" data-tfm="'+esc(x.n)+'">'+(pmBadge(x.n)||'💳')+'<span>'+esc(x.n.replace(/^تحويل\s+/,''))+'</span></button>').join('')+(L.length>1?'<button type="button" class="ab tfm" data-tfc="'+c.id+'" data-tfm="*">الكل</button>':'')+(det?'':'<button type="button" class="ab" data-dopen="'+c.id+'">👤 التفاصيل</button>')+'</div>'}
+function tfSendC(c,m){const L=m==='*'?tfNums():tfNums().filter(x=>x.n===m);if(!c||!L.length)return;const t=tfMake(L,Math.max(0,balOf(c)),c.name),n=waNum(c.phone);
+  window.open('https://wa.me/'+(n||'')+'?text='+encodeURIComponent(t),'_blank','noopener');if(!n)toast('العميل ملوش رقم، اختار الشات بنفسك')}
+function tfBuild(){const sel=tfNums().filter(x=>tfSel.has(x.n)),a=nv($('tfAmt').value);$('tfTxt').value=sel.length?tfMake(sel,a,tfCust&&tfCust.name):''}
 function tfOpen(){const L=pfAll().filter(x=>x.on!==false);if(!tfInit){L.forEach(x=>{if(String(x.num||'').trim())tfSel.add(x.n)});tfInit=true}
   const has=L.filter(x=>String(x.num||'').trim());
   $('tfList').innerHTML=(L.map(x=>{const ok=!!String(x.num||'').trim();return'<label class="tfi'+(ok?'':' no')+'"><input type="checkbox" data-tfn="'+esc(x.n)+'"'+(ok&&tfSel.has(x.n)?' checked':'')+(ok?'':' disabled')+'><span class="tfl">'+(pmBadge(x.n)||'💳')+'</span><b>'+esc(x.n)+'</b><span class="mute num">'+(ok?esc(String(x.num).trim()):'مفيش رقم')+'</span></label>'}).join(''))
     +(has.length<L.length?'<button type="button" class="lnk" id="tfGo" style="font-size:12px">➕ ضيف الأرقام من الإعدادات ← طرق الدفع</button>':'');
-  $('tfMsg').textContent='';tfBuild();$('tfOv').classList.remove('hide')}
-$('tfBtn').onclick=tfOpen;
+  tfCust=null;$('tfQ').value='';$('tfPh').value='';$('tfAmt').value='';$('tfSug').innerHTML='';$('tfMsg').textContent='';tfBuild();$('tfOv').classList.remove('hide')}
+$('tfBtn').onclick=tfOpen;$('tfOpen2').onclick=()=>{tfOpen();setTimeout(()=>$('tfQ').focus(),50)};
 $('tfX').onclick=()=>$('tfOv').classList.add('hide');
 $('tfOv').addEventListener('click',e=>{if(e.target===$('tfOv'))$('tfOv').classList.add('hide');
   if(e.target.closest('#tfGo')){$('tfOv').classList.add('hide');document.querySelector('#hdrSet').click();stGo('pay')}});
 $('tfList').addEventListener('change',e=>{const i=e.target.closest('[data-tfn]');if(!i)return;i.checked?tfSel.add(i.dataset.tfn):tfSel.delete(i.dataset.tfn);tfBuild()});
 $('tfAmt').addEventListener('input',tfBuild);
+$('tfQ').addEventListener('input',()=>{const q=$('tfQ').value.trim();tfCust=null;if(!q){$('tfSug').innerHTML='';tfBuild();return}
+  const l=S.customers.filter(x=>qm(x.name,q)||(x.phone&&String(x.phone).includes(q))).sort((a,b)=>balOf(b)-balOf(a)).slice(0,6);
+  $('tfSug').innerHTML=l.map(x=>'<button type="button" class="tfs" data-tfcu="'+x.id+'"><b>'+esc(x.name)+'</b><span class="mute num">'+(balOf(x)>0?'عليه '+f(balOf(x)):(x.phone?esc(x.phone):''))+'</span></button>').join('')||'<div class="mute" style="font-size:12px">مفيش عميل بالاسم ده</div>';tfBuild()});
+$('tfSug').addEventListener('click',e=>{const b=e.target.closest('[data-tfcu]');if(!b)return;const x=getC(b.dataset.tfcu);if(!x)return;tfCust=x;$('tfQ').value=x.name;$('tfPh').value=x.phone||'';$('tfAmt').value=balOf(x)>0?fq(balOf(x)):'';$('tfSug').innerHTML='';$('tfMsg').textContent=x.phone?'':'⚠ العميل ده ملوش رقم، اكتبه تحت';tfBuild()});
 const tfTx=()=>$('tfTxt').value.trim();
 $('tfWa').onclick=()=>{const t=tfTx();if(!t){$('tfMsg').textContent='علّم طريقة واحدة على الأقل ليها رقم';return}const n=$('tfPh').value.trim()?waNum($('tfPh').value):'';window.open('https://wa.me/'+n+'?text='+encodeURIComponent(t),'_blank','noopener')};
 $('tfCp').onclick=async()=>{const t=tfTx();if(!t){$('tfMsg').textContent='مفيش حاجة تتنسخ';return}try{await navigator.clipboard.writeText(t);$('tfMsg').textContent='✅ اتنسخت'}catch(e){$('tfTxt').select();$('tfMsg').textContent='النص متعلّم، انسخه بإيدك'}};

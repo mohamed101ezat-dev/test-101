@@ -1490,3 +1490,12 @@ html.d3:not(#zz) :is(button,a).b-green:not(#t-cl *){border:0!important;border-bo
 #tfOv .tfrow{display:flex;gap:6px}#tfOv .tfrow input{flex:1;min-width:0;height:32px;font-size:13px;margin:0}
 #tfOv textarea{font-size:13px;margin:0}
 #tfOv .tfbtn{display:flex;gap:6px}#tfOv .tfbtn button{flex:1;min-height:34px;padding:4px 6px;font-size:13px;margin:0}#tfOv .tfbtn .main{flex:1.4}
+
+/* v324: كارت طرق الدفع تحت المديون + بحث العميل في نافذة التحويل */
+.dbtf{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:5px 6px;margin:-2px 0 6px;border:1px dashed var(--line);border-radius:10px;background:var(--card);font-size:12px}
+.dbtf .ab{min-height:28px;height:28px;padding:0 8px;font-size:12px;display:inline-flex;align-items:center;gap:4px;margin:0}
+.dbtf .tfm .pmlogo{height:16px;max-width:36px;background:#fff;border-radius:3px}
+.dbr.tfon{outline:2px solid color-mix(in srgb,var(--acc,#16a34a) 50%,transparent);outline-offset:-2px}
+#tfOv .tfq input{width:100%;height:32px;font-size:13px;margin:0}
+#tfSug{display:flex;flex-direction:column;gap:3px}#tfSug:empty{display:none}
+#tfOv .tfs{display:flex;justify-content:space-between;align-items:center;gap:6px;min-height:30px;padding:3px 8px;font-size:13px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);margin:0;text-align:right}
