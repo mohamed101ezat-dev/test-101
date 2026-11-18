@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=316">
+<link rel="stylesheet" href="css/style.css?v=317">
 
 
 
@@ -273,7 +273,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="sgh">البيانات</div>
   <div class="stiles" style="grid-template-columns:repeat(4,minmax(0,1fr))"><button type="button" class="stile" data-go="it"><span class="ti">📦</span><b>الأصناف</b><small id="ssIt"></small></button><button type="button" class="stile" data-sp="stk"><span class="ti">🧱</span><b>المخزون</b><small id="ssStk"></small></button><button type="button" class="stile" data-sp="sup"><span class="ti">🚚</span><b>الموردين</b><small id="ssSup"></small></button><button type="button" class="stile" data-sp="exp"><span class="ti">💸</span><b>المصروفات</b><small id="ss_exp"></small></button></div>
   <div class="sgh">الفاتورة</div>
-  <div class="sgl"><button type="button" class="sti" data-sp="shop"><span class="si">🏪</span><span class="stt"><b>بيانات المحل</b><small id="ss_shop"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="des"><span class="si">🎨</span><span class="stt"><b>تصميم الفاتورة</b><small id="ss_des"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="inv"><span class="si">🧾</span><span class="stt"><b>خيارات وطباعة</b><small id="ss_inv"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="notes"><span class="si">📝</span><span class="stt"><b>ملاحظات وسطور ثابتة</b><small id="ss_notes"></small></span><span class="sa">‹</span></button></div>
+  <div class="sgl"><button type="button" class="sti" data-sp="shop"><span class="si">🏪</span><span class="stt"><b>بيانات المحل</b><small id="ss_shop"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="des"><span class="si">📐</span><span class="stt"><b>تصميم ومقاسات الفاتورة</b><small id="ss_des"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="desc"><span class="si">🎨</span><span class="stt"><b>شكل الفاتورة والألوان</b><small id="ss_desc"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="inv"><span class="si">🧾</span><span class="stt"><b>خيارات وطباعة</b><small id="ss_inv"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="notes"><span class="si">📝</span><span class="stt"><b>ملاحظات وسطور ثابتة</b><small id="ss_notes"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">الفلوس</div>
   <div class="sgl"><button type="button" class="sti" data-sp="pay"><span class="si">💳</span><span class="stt"><b>طرق الدفع</b><small id="ss_pay"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="cl"><span class="si">📊</span><span class="stt"><b>الإقفال والتقارير</b><small id="ss_cl"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">العملاء</div>
@@ -293,19 +293,19 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
     <div id="logoBox" class="hide" style="margin-top:6px"><img id="logoPrev" alt="اللوجو" style="max-height:60px;max-width:60%;display:block;margin-bottom:6px;background:#fff;border-radius:6px;padding:4px"><label class="opt"><input type="checkbox" id="logoOn"> إظهار اللوجو على الفاتورة</label><button class="alt b-red" id="logoDel" style="margin-top:6px">🗑️ حذف اللوجو</button></div>
     <div class="info" id="logoMsg"></div></div></div>
 </div>
-<div class="stp hide" data-sp="des" id="invDes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🎨 تصميم الفاتورة</b></div>
-<div class="card"><label class="opt"><input type="checkbox" id="fancyInv"> التصميم الملون</label><div class="mute">جداول مدوّرة وألوان وملخص الأصناف. لو قفلته، الفاتورة بتطلع بشكل بسيط والإعدادات اللي تحت مش بتأثر عليها.</div></div>
+<div class="stp hide" data-sp="des" id="invDes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b id="desT">📐 تصميم ومقاسات الفاتورة</b></div>
+<div class="card" data-dm="col"><label class="opt"><input type="checkbox" id="fancyInv"> التصميم الملون</label><div class="mute">جداول مدوّرة وألوان وملخص الأصناف. لو قفلته، الفاتورة بتطلع بشكل بسيط والإعدادات اللي تحت مش بتأثر عليها.</div></div>
 <button type="button" class="main" id="dzOpen" style="width:100%;margin:6px 0">✋ صمّم الفاتورة بإيدك (اسحب وكبّر ولوّن على الفاتورة نفسها)</button>
 <div class="idprev" id="idPrev" title="دوس عشان تصمّم بإيدك" style="cursor:pointer"></div>
-<details class="card idg" open><summary>🎨 الألوان</summary><div id="idCol"></div></details>
-<details class="card idg"><summary>📐 المقاسات واللوجو</summary><div id="idSize"></div></details>
-<details class="card idg"><summary>🔤 الخطوط</summary><div id="idFont"></div></details>
-<details class="card idg"><summary>📝 المحتوى والترتيب</summary><div id="idCont"></div></details>
-<details class="card idg"><summary>📏 أعمدة جدول البنود (العرض والمحاذاة)</summary><div id="idCols"></div></details>
-<details class="card idg"><summary>🔢 مربعات الإجمالي والمتبقي والمدفوع</summary><div id="idTot"></div></details>
-<details class="card idg"><summary>✍️ حجم ومحاذاة الملاحظات والسطور الثابتة</summary><div id="idTxt"></div></details>
-<details class="card idg wmg"><summary>💧 العلامة المائية والختم</summary><div id="idWm"></div></details>
-<details class="card idg"><summary>💾 القوالب: احفظ تصميمك أو ارجع لتصميم جاهز</summary>
+<details class="card idg" data-dm="col" open><summary>🎨 الألوان</summary><div id="idCol"></div></details>
+<details class="card idg" data-dm="sz" open><summary>📐 المقاسات واللوجو</summary><div id="idSize"></div></details>
+<details class="card idg" data-dm="sz"><summary>🔤 الخطوط</summary><div id="idFont"></div></details>
+<details class="card idg" data-dm="sz"><summary>📝 المحتوى والترتيب</summary><div id="idCont"></div></details>
+<details class="card idg" data-dm="sz"><summary>📏 أعمدة جدول البنود (العرض والمحاذاة)</summary><div id="idCols"></div></details>
+<details class="card idg" data-dm="sz"><summary>🔢 مربعات الإجمالي والمتبقي والمدفوع</summary><div id="idTot"></div></details>
+<details class="card idg" data-dm="sz"><summary>✍️ حجم ومحاذاة الملاحظات والسطور الثابتة</summary><div id="idTxt"></div></details>
+<details class="card idg wmg" data-dm="col"><summary>💧 العلامة المائية والختم</summary><div id="idWm"></div></details>
+<details class="card idg" data-dm="col"><summary>💾 القوالب: احفظ تصميمك أو ارجع لتصميم جاهز</summary>
   <div class="mute" style="margin:6px 0">القالب نسخة محفوظة من الألوان والمقاسات والخطوط بس. الملاحظات والسطور الثابتة واللوجو مش بيتغيروا معاه.</div>
   <div class="qs" id="idTpls" style="margin:6px 0"></div>
   <div class="ro" style="gap:6px"><input id="idName" placeholder="اسم للتصميم الحالي" style="flex:1"><button class="main" id="idSave" style="flex:none">💾 حفظ كقالب</button></div>
@@ -553,11 +553,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=316"></script>
-<script src="js/qr.js?v=316"></script>
+<script src="js/app.js?v=317"></script>
+<script src="js/qr.js?v=317"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=316"></script>
-<script src="js/features.js?v=316"></script>
+<script src="js/cutlist.js?v=317"></script>
+<script src="js/features.js?v=317"></script>
 </body>
 </html>
 
