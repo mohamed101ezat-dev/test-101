@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='336';
+const APP_VER='337';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -831,7 +831,8 @@ function drawItems(){if(isGen())curIT='rd';fillCatSelects();$('catBar').classLis
   drawItemList()}
 /* v336: اتباع من الصنف كام الشهر ده وآخر سعر */
 let itMV=-1,itMM={};function itMonth(){if(itMV===DV)return itMM;itMM={};const d=new Date(),m0=new Date(d.getFullYear(),d.getMonth(),1).getTime(),rows=[];S.invoices.forEach(r=>{if(r.type!=='inv'||r.ts<m0)return;(r.rows||[]).forEach(x=>{if(x.n&&!x.rt)rows.push([nm(x.n),x,r.ts])})});
-  S.items.forEach(it=>{const k=nm(it.name);let c0=0,q=0,v=0,lp=null,lt=0;rows.forEach(([n,x,ts])=>{if(n===k||n.startsWith(k+' ')){c0+=+x.c||0;q+=+x.q||0;v+=+x.v||0;if(ts>lt){lt=ts;lp=+x.p||0}}});itMM[it.id]={c:c0,q:rd2(q),v:rd2(v),lp}});itMV=DV;return itMM}
+const szOk=(it,n,k)=>{if(it.type!=='rd'||!(+it.w>0&&+it.h>0))return true;const a=(n.slice(k.length).match(/d+(?:.d+)?/g)||[]).map(Number);return a.includes(+it.w)&&a.includes(+it.h)};
+  S.items.forEach(it=>{const k=nm(it.name);let c0=0,q=0,v=0,lp=null,lt=0;rows.forEach(([n,x,ts])=>{if((!x.t||x.t===it.type)&&(n===k||n.startsWith(k+' '))&&szOk(it,n,k)){c0+=+x.c||0;q+=+x.q||0;v+=+x.v||0;if(ts>lt){lt=ts;lp=+x.p||0}}});itMM[it.id]={c:c0,q:rd2(q),v:rd2(v),lp}});itMV=DV;return itMM}
 const itSub=it=>{const m=itMonth()[it.id];if(!m||!m.v)return'<div class="its mute">مااتباعش منه الشهر ده'+(+it.cp>0?'':' · <b>من غير سعر شراء</b>')+'</div>';return'<div class="its mute">الشهر ده: '+(m.q?fq(m.q)+' م² · ':'')+m.c+' قطعة · '+f(m.v)+(m.lp!=null?' · آخر سعر '+f(m.lp):'')+(+it.cp>0?' · ربح تقريبي '+f(rd2(m.v-(m.q||m.c)*it.cp)):' · <b>من غير سعر شراء</b>')+'</div>'};
 function drawItemList(){const cf=itCols(),g='2fr '+cf.map(()=>'1fr').join(' ')+' 34px';
   $('items').innerHTML=itemsList().map(it=>`<div class="itw"><div class="it" style="grid-template-columns:${g}"><input data-k="${it.id}" data-f="name" value="${esc(it.name)}" readonly>${cf.map(x=>`<input data-k="${it.id}" data-f="${x[0]}" type="text" inputmode="decimal" value="${(x[0]==='p'?priceOf(it,itCat):it[x[0]])||''}" readonly>`).join('')}<button class="del" data-d="${it.id}" aria-label="حذف">×</button></div>${itSub(it)}</div>`).join('')||'<p class="mute">'+(S.items.length?'مفيش أصناف بالبحث ده.':'لسه مفيش أصناف. اكتب اسم الصنف وسعره فوق واضغط ➕، أو استوردهم من Excel في الإعدادات ← الحفظ والنسخ.')+'</p>'}
