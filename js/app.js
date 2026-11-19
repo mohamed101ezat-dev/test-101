@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='334';
+const APP_VER='335';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1511,8 +1511,8 @@ function chkItems(){const now=Date.now(),day=864e5,ag=t=>t?Math.floor((now-t)/da
   let lk=false;try{lk=lkReady()}catch(_){}add(lk,lk?'🔒 البرنامج عليه رقم سري':'🔒 مفيش رقم سري: أي حد ماسك الموبايل يقدر يمسح أو يعدّل','lock');
   const pm=pfAll().filter(x=>x.on!==false);const full=[];pm.forEach(x=>x.accs.forEach((a,i)=>{if(a.on!==false&&accFull(a))full.push(x.n+' · '+accLbl(a,x,i))}));const nonum=pm.filter(x=>!pmPick(x));
   add(!full.length&&!nonum.length,full.length?'💳 وصلت الليميت: '+full.join('، '):nonum.length?'💳 طرق مالهاش رقم شغّال: '+nonum.map(x=>x.n).join('، '):'💳 أرقام التحويل كلها تمام','pay');
-  const np=S.customers.filter(c=>!c.phone&&balOf(c)>0).length;add(!np,np?'👥 '+plN(np,'مديون')+' من غير رقم، فمش هتعرف تبعتلهم تذكير':'👥 كل المديونين ليهم رقم',null);
-  const fr=fracList().length;add(!fr,fr?'🧮 '+plN(fr,'عميل')+' حسابهم فيه كسور':'🧮 مفيش كسور في الحسابات','data');
+  const np=S.customers.filter(c=>!c.phone&&balOf(c)>0).length;add(!np,np?'👥 مديونين من غير رقم: '+np+'، فمش هتعرف تبعتلهم تذكير':'👥 كل المديونين ليهم رقم',null);
+  const fr=fracList().length;add(!fr,fr?'🧮 حسابات فيها كسور: '+fr+' (سوّيها من الحفظ والنسخ)':'🧮 مفيش كسور في الحسابات','data');
   return L}
 function chkDraw(){const L=chkItems();$('chkList').innerHTML=L.map(x=>'<div class="chk '+(x.ok?'ok':'bad')+'"'+(x.go?' data-chkgo="'+x.go+'"':'')+'><span>'+(x.ok?'✅':'⚠️')+'</span><span>'+esc(x.t)+'</span>'+(x.go?'<span class="sa">‹</span>':'')+'</div>').join('')}
 document.addEventListener('click',e=>{const g=e.target.closest&&e.target.closest('[data-chkgo]');if(g)stGo(g.dataset.chkgo)});
@@ -1651,7 +1651,7 @@ function stGo(k){stCur=k||'';$('stHome').classList.toggle('hide',!!stCur);docume
 function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t)+(supOv()>0?' ⏰':''):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · ⚠️ '+n:''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
   W_('shop',shopN());W_('des','المقاسات والخطوط والأعمدة · '+PAPERS[paperKey()].n);W_('desc',(pget('fancyInv',true)?'التصميم الملون':'تصميم بسيط')+' · الألوان والقوالب');
   const n=liveNotes().length;W_('notes',n?n+(n>1?' ملاحظات':' ملاحظة'):'مفيش ملاحظات');
-  try{const L=chkItems(),b=L.filter(x=>!x.ok).length;W_('chk',b?'⚠️ '+plN(b,'حاجة')+' محتاجة منك':'✅ كله تمام')}catch(_){}
+  try{const L=chkItems(),b=L.filter(x=>!x.ok).length;W_('chk',b?'⚠️ محتاج منك: '+b:'✅ كله تمام')}catch(_){}
   W_('inv',[pget('autoWa',false)&&'واتساب بعد الحفظ',pget('editInv',true)&&'تعديل',pget('dupInv',true)&&'تكرار',pget('qtOn',true)&&'عروض أسعار',pget('pdfOn',true)&&'PDF وطباعة',pget('qrOn',true)&&'QR',pget('saveImgOn',false)&&'حفظ كصورة'].filter(Boolean).join(' · ')||'كل الخيارات مقفولة');
   W_('pay',ps.length?ps.map(x=>x.n+' '+fq(x.p)+'%').join(' · '):'مفيش طرق دفع');
   W_('msg','فاتورة · دفعة · تذكير'+($('autoWa').checked?' · إرسال تلقائي':''));
@@ -1756,7 +1756,7 @@ $('pmList').addEventListener('click',e=>{const r=e.target.closest('.pmc2');if(!r
   const b=e.target.closest('[data-pmx]');if(!b)return;if(r.querySelector('[data-pm=n]').value.trim()&&!ok2(b))return;r.remove();pmSave();pmDraw()});
 $('pmAdd').onclick=()=>{$('pmList').insertAdjacentHTML('beforeend',pmCard({n:'',p:0,num:'',ic:'',on:true}));const ins=$('pmList').querySelectorAll('[data-pm=n]');ins[ins.length-1].focus()};
 $('pmQ').addEventListener('click',e=>{const b=e.target.closest('[data-pq]');if(!b)return;const q=PM_Q[+b.dataset.pq];const a=pfAll();a.push(pmNorm({n:q[0],p:q[2],num:'',ic:q[1]==='💳'?'':q[1],on:true,accs:[{id:accId(),lb:'',num:'',p:q[2],on:true}]}));svk('pfPre2',JSON.stringify(a));pmDraw();$('pfPre').innerHTML=preHtml();spRefresh();calc()});
-function pmCust(){const l=S.customers.filter(c=>c.pfr&&Object.keys(c.pfr).length).sort((a,b)=>a.name.localeCompare(b.name,'ar'));const names=new Set(pfAll().map(x=>x.n)),orph=l.reduce((s,c)=>s+Object.keys(c.pfr).filter(n=>!names.has(n)).length,0);setTimeout(()=>{const e=$('pmOrph');if(e){e.classList.toggle('hide',!orph);e.textContent='🧹 امسح '+plN(orph,'نسبة')+' لطرق اتمسحت أو اتغير اسمها'}},0);
+function pmCust(){const l=S.customers.filter(c=>c.pfr&&Object.keys(c.pfr).length).sort((a,b)=>a.name.localeCompare(b.name,'ar'));const names=new Set(pfAll().map(x=>x.n)),orph=l.reduce((s,c)=>s+Object.keys(c.pfr).filter(n=>!names.has(n)).length,0);setTimeout(()=>{const e=$('pmOrph');if(e){e.classList.toggle('hide',!orph);e.textContent='🧹 امسح نسب الطرق اللي اتمسحت أو اتغير اسمها ('+orph+')'}},0);
   $('pmCust').innerHTML=l.map(c=>Object.entries(c.pfr).map(([n,p])=>`<div class="pmc"><span><b>${esc(c.name)}</b> <span class="mute">${esc(n)}${pfAll().some(x=>x.n===n)?'':' <b style="color:var(--danger)">(الطريقة دي مش موجودة)</b>'}</span></span><span style="display:flex;align-items:center;gap:6px"><b class="num">${fq(p)}%</b><button type="button" class="del" data-pcx="${c.id}" data-pcn="${esc(n)}" aria-label="مسح">×</button></span></div>`).join('')).join('')||'<p class="mute" style="margin-top:6px">لسه مفيش. أول ما تسجل دفعة لعميل بنسبة غير العامة هتظهر هنا.</p>'}
 $('pmOrph').onclick=()=>{const names=new Set(pfAll().map(x=>x.n));let n=0;S.customers.forEach(c=>{if(!c.pfr)return;const m={...c.pfr};let ch=false;Object.keys(m).forEach(k=>{if(!names.has(k)){delete m[k];ch=true;n++}});if(ch){c.pfr=m;put('customers',c)}});pmCust();toast('✓ اتمسحت '+plN(n,'نسبة'))};
 $('pmCust').addEventListener('click',e=>{const b=e.target.closest('[data-pcx]');if(!b)return;const c=getC(b.dataset.pcx);if(!c||!c.pfr)return;const m={...c.pfr};delete m[b.dataset.pcn];c.pfr=m;put('customers',c);pmCust();calc()});
@@ -2614,8 +2614,10 @@ function tfOpen(){const L=pfAll().filter(x=>x.on!==false);if(!tfInit){L.forEach(
 $('tfBtn').onclick=tfOpen;
 /* v333: تسوية الكسور: بنعدّل الرصيد الافتتاحي بالفرق علشان الحساب يبقى رقم صحيح */
 const fracList=()=>S.customers.map(c=>({c,b:balRaw(c)})).filter(x=>Math.abs(x.b-Math.round(x.b))>0.001||(x.b!==0&&Math.abs(x.b)<1));
-function fracDraw(){const e=$('fracInfo');if(!e)return;const l=fracList();e.textContent=l.length?plN(l.length,'عميل')+' حسابهم فيه كسور':'مفيش كسور ✓';$('fracFix').disabled=!l.length}
-$('fracFix').onclick=e=>{const l=fracList();if(!l.length)return;if(!ok2(e.currentTarget))return;l.forEach(({c,b})=>{const t=Math.abs(b)<1?0:Math.round(b);c.open=rd2((c.open||0)+(t-b));put('customers',c)});DV++;fracDraw();try{drawDash()}catch(_){}toast('✓ اتسوّت كسور '+plN(l.length,'عميل'))};tfPlaces();TFP.forEach(k=>$(k).addEventListener('change',()=>{svk(k,$(k).checked?'1':'0');tfPlaces();try{drawDebt()}catch(e){}try{drawCusts()}catch(e){}}));
+/* v335: بنعدّل الرصيد الافتتاحي، وبعدين بنعيد حساب الفواتير (اللي بتتقرب لوحدها) ونعدّل تاني لو لسه فيه فرق */
+function fracSettle(cs){for(let k=0;k<3;k++){let ch=false;cs.forEach(c=>{const b=balRaw(c),t=Math.abs(b)<1?0:Math.round(b);if(Math.abs(t-b)>0.001){c.open=rd2((c.open||0)+(t-b));put('customers',c);ch=true}try{reflow(c.id)}catch(_){}});DV++;if(!ch)break}}
+function fracDraw(){const e=$('fracInfo');if(!e)return;const l=fracList();e.textContent=l.length?'حسابات فيها كسور: '+l.length:'مفيش كسور ✓';$('fracFix').disabled=!l.length}
+$('fracFix').onclick=e=>{const l=fracList();if(!l.length)return;if(!ok2(e.currentTarget))return;fracSettle(l.map(x=>x.c));fracDraw();try{drawDash()}catch(_){}toast('✓ اتسوّت الكسور في '+l.length+' حساب')};tfPlaces();TFP.forEach(k=>$(k).addEventListener('change',()=>{svk(k,$(k).checked?'1':'0');tfPlaces();try{drawDebt()}catch(e){}try{drawCusts()}catch(e){}}));
 /* v327: رابط احتياطي على Firebase Hosting (لو GitHub وقع أو الموبايل اتغير) */
 $('mirCp').onclick=async()=>{try{await navigator.clipboard.writeText($('mirUrl').value);$('mirMsg').textContent='✅ اتنسخ. ابعته لنفسك على واتساب علشان يبقى معاك'}catch(e){$('mirUrl').select();$('mirMsg').textContent='الرابط متعلّم، انسخه بإيدك'}};$('tfOpen2').onclick=()=>{tfOpen();setTimeout(()=>$('tfQ').focus(),50)};
 $('tfX').onclick=()=>$('tfOv').classList.add('hide');
