@@ -1561,3 +1561,7 @@ html:not(#zz) .pmq button,html:not(#zz) .dbtf .tfm{display:inline-flex;align-ite
 
 /* v336: الخزنة */
 .drr{padding:8px;border-radius:8px;font-weight:700;text-align:center}.drr.ok{background:color-mix(in srgb,#16a34a 14%,var(--card));color:#15803d}.drr.bad{background:color-mix(in srgb,#dc2626 14%,var(--card));color:#b91c1c}.drr.up{background:color-mix(in srgb,#2563eb 12%,var(--card));color:#1d4ed8}
+
+/* v339: الأصناف للعرض لحد ما تدوس */
+html:not(#zz) #t-it .itw input[readonly]{background:transparent!important;border-color:transparent!important;box-shadow:none!important;cursor:pointer}
+html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(--card)!important}
