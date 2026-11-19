@@ -1545,3 +1545,19 @@ html:not(#zz) .pmq button,html:not(#zz) .dbtf .tfm{display:inline-flex;align-ite
 #chkList .chk.ok{background:color-mix(in srgb,#16a34a 6%,var(--card))}
 #chkList .chk span:nth-child(2){flex:1}#chkList .chk[data-chkgo]{cursor:pointer}
 .card.dz{border-color:color-mix(in srgb,#dc2626 40%,var(--line))}
+
+/* v336: الأصناف */
+#t-it .itadd{padding:8px}#t-it .itadd #nform{margin-top:4px}
+#t-it .itool summary{cursor:pointer;font-size:13px;font-weight:700}#t-it .itool input{height:30px;min-height:30px;margin:0}#t-it .itool button{min-height:30px;padding:2px 10px;font-size:12px;margin:0}
+#t-it .itw{margin-bottom:4px}#t-it .itw input[readonly]{background:transparent;border-color:transparent;cursor:pointer}#t-it .itw.ed input{background:var(--card);border-color:#16a34a}
+#t-it .its{font-size:11px;padding:0 6px 4px}
+
+/* v336: المصروفات */
+.exw{font-size:12px;color:var(--danger);margin:4px 0;font-weight:700}
+.exbw{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.exb{display:grid;grid-template-columns:minmax(70px,1fr) 2fr auto 34px;align-items:center;gap:6px;font-size:12px;color:var(--ink)}
+.exb i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#f59e0b,#ef4444)}
+.exb small{text-align:left}
+
+/* v336: الخزنة */
+.drr{padding:8px;border-radius:8px;font-weight:700;text-align:center}.drr.ok{background:color-mix(in srgb,#16a34a 14%,var(--card));color:#15803d}.drr.bad{background:color-mix(in srgb,#dc2626 14%,var(--card));color:#b91c1c}.drr.up{background:color-mix(in srgb,#2563eb 12%,var(--card));color:#1d4ed8}

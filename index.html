@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=335">
+<link rel="stylesheet" href="css/style.css?v=336">
 
 
 
@@ -270,7 +270,14 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="seg s" style="max-width:220px" id="seg"><button data-it="rd">📦 جاهز</button><button data-it="mq" class="on">✂️ مقطع</button></div>
   <div class="ro" id="catBar" style="gap:6px;margin:6px 0"><span class="mute">سعر فئة:</span><select id="icat" class="catsel" style="max-width:150px"></select><button class="lnk" id="catMgrBtn" style="flex:none">🗂️ إدارة الفئات</button></div>
   <div id="catMgr" class="card hide"></div>
-  <div id="nform" class="it"></div>
+  <div class="card itadd"><b>➕ صنف جديد</b><div id="nform" class="it"></div></div>
+  <details class="card itool"><summary>🧮 أدوات الأسعار (زيادة الأسعار · أسعار الشراء)</summary>
+    <div class="mute" style="font-size:12px;margin:4px 0">بتشتغل على الأصناف اللي ظاهرة تحت (النوع والفئة والبحث).</div>
+    <div class="ro" style="gap:6px;flex-wrap:wrap"><span style="flex:none">غيّر أسعار البيع</span><input id="itPct" inputmode="decimal" placeholder="10" style="width:64px;flex:none"><span style="flex:none">%</span><button type="button" class="alt" id="itUp" style="flex:none">⬆ زوّد</button><button type="button" class="alt" id="itDn" style="flex:none">⬇ قلّل</button></div>
+    <div class="ro" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span style="flex:none">سعر الشراء الفاضي =</span><input id="itCpPct" inputmode="decimal" placeholder="70" style="width:64px;flex:none"><span style="flex:none">% من البيع</span><button type="button" class="alt" id="itCpGo" style="flex:none">املاه</button></div>
+    <div class="mute" style="font-size:12px;margin-top:4px">سعر الشراء هو اللي بيخلّي البرنامج يحسب ربحك الحقيقي. الأحسن تكتبه بإيدك لكل صنف، والنسبة دي للبداية بس.</div>
+    <div class="info" id="itToolMsg"></div></details>
+  <div class="mute" id="itHint" style="font-size:12px;margin:2px 0">دوس على أي صنف علشان تعدّله. تحت كل صنف: اتباع منه كام الشهر ده.</div>
   <div class="rowc"><input id="iq" placeholder="ابحث في الأصناف" style="flex:1"><select id="isort" style="width:auto;flex:none"><option value="use">الأكثر استخداماً</option><option value="name">بالاسم</option></select></div>
   <div id="ihead" class="mute"></div><div id="items" style="margin-top:4px"></div>
 </section>
@@ -285,7 +292,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="sgh">الفاتورة</div>
   <div class="sgl"><button type="button" class="sti" data-sp="shop"><span class="si">🏪</span><span class="stt"><b>بيانات المحل</b><small id="ss_shop"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="des"><span class="si">📐</span><span class="stt"><b>تصميم ومقاسات الفاتورة</b><small id="ss_des"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="desc"><span class="si">🎨</span><span class="stt"><b>شكل الفاتورة والألوان</b><small id="ss_desc"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="inv"><span class="si">🧾</span><span class="stt"><b>خيارات وطباعة</b><small id="ss_inv"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="notes"><span class="si">📝</span><span class="stt"><b>ملاحظات وسطور ثابتة</b><small id="ss_notes"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">الفلوس</div>
-  <div class="sgl"><button type="button" class="sti" data-sp="pay"><span class="si">💳</span><span class="stt"><b>طرق الدفع</b><small id="ss_pay"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="cl"><span class="si">📊</span><span class="stt"><b>الإقفال والتقارير</b><small id="ss_cl"></small></span><span class="sa">‹</span></button></div>
+  <div class="sgl"><button type="button" class="sti" data-sp="pay"><span class="si">💳</span><span class="stt"><b>طرق الدفع</b><small id="ss_pay"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="drw"><span class="si">💵</span><span class="stt"><b>الخزنة (الكاش)</b><small id="ss_drw"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="cl"><span class="si">📊</span><span class="stt"><b>الإقفال والتقارير</b><small id="ss_cl"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">العملاء</div>
   <div class="sgl"><button type="button" class="sti" data-sp="msg"><span class="si"><i class="wai"></i></span><span class="stt"><b>رسائل الواتساب</b><small id="ss_msg"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="rem"><span class="si">🔔</span><span class="stt"><b>تذكير المديونين</b><small id="ss_rem"></small></span><span class="sa">‹</span></button></div>
   <div class="sgl" style="margin-bottom:8px"><button type="button" class="sti" data-sp="chk"><span class="si">✅</span><span class="stt"><b>فحص سريع</b><small id="ss_chk"></small></span><span class="sa">‹</span></button></div>
@@ -295,6 +302,13 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="mute" id="appVer" style="text-align:center;margin:12px 0 4px"></div><div style="text-align:center;margin-bottom:6px"><button type="button" class="alt" id="appUpd" style="font-size:12px;padding:4px 12px;min-height:30px">🔄 حدّث البرنامج دلوقتي</button></div>
 </div>
 <div class="stp hide" data-sp="chk"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>✅ فحص سريع</b></div><div class="card"><div class="mute" style="font-size:12px">كل حاجة مهمة في نظرة واحدة. الأحمر محتاج منك حاجة، ودوس على أي سطر يوديك مكانه.</div><div id="chkList"></div></div></div>
+<div class="stp hide" data-sp="drw"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>💵 الخزنة (الكاش)</b></div>
+<div class="card"><div class="ro" style="gap:6px"><button type="button" class="alt" id="drwPrev" style="flex:none">→</button><b id="drwDay" style="flex:1;text-align:center"></b><button type="button" class="alt" id="drwNext" style="flex:none">←</button></div>
+<div id="drwBody" style="margin-top:6px"></div>
+<label style="margin-top:8px">الكاش اللي في الدرج فعلًا (عدّه واكتبه آخر اليوم)</label><div class="ro" style="gap:6px"><input id="drwAct" inputmode="decimal" placeholder="مثال: 3500" style="flex:1"><button type="button" class="main" id="drwSave" style="flex:none">💾 حفظ</button></div>
+<div id="drwRes" style="margin-top:6px"></div>
+<div class="mute" style="font-size:12px;margin-top:6px">المتوقع = كاش أول اليوم + الكاش اللي دخل من الفواتير والدفعات − المصروفات − اللي اتدفع للموردين كاش. التحويلات (محافظ وإنستا) مش داخلة هنا. كاش أول اليوم = اللي عدّيته آخر اليوم اللي قبله، وتقدر تغيّره.</div>
+<label style="margin-top:6px">كاش أول اليوم</label><input id="drwOpen" inputmode="decimal" placeholder="0"></div></div>
 <div class="stp hide" data-sp="shop"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🏪 بيانات المحل</b></div>
 <div class="card"><b>🏪 اسم المحل</b><div class="mute">بيظهر فوق الفاتورة وفي رسايل الواتساب.</div><input id="shopN" style="margin-top:6px">
   <label for="bizSel" style="margin-top:8px">طريقة البيع</label><select id="bizSel"><option value="gen">بالعدد (أي محل)</option><option value="cut">بالمقاس (زجاج، رخام، ألوميتال)</option></select>
@@ -402,7 +416,8 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <button type="button" class="main" id="exAdd" style="width:100%">💾 حفظ المصروف</button><div class="info" id="exMsg"></div></div>
 <div class="card"><b>🔁 مصروفات ثابتة</b> <span class="mute">بتتسجل لوحدها في ميعادها</span>
   <div id="exfList" style="margin-top:4px"></div>
-  <div class="g2" style="margin-top:6px"><div><input id="exfName" list="exfNames" placeholder="الاسم: قبض، كهربا، إيجار…" autocomplete="off" aria-label="اسم المصروف الثابت"><datalist id="exfNames"><option>قبض العمال</option><option>كهربا</option><option>مياه</option><option>إيجار</option><option>نت وتليفون</option></datalist></div><div><input id="exfAmt" inputmode="decimal" placeholder="المبلغ" autocomplete="off" aria-label="مبلغ المصروف الثابت"></div></div>
+  <div class="g2" style="margin-top:6px"><div><input id="exfName" list="exfNames" placeholder="الاسم: قبض أحمد، كهربا، إيجار…" autocomplete="off" aria-label="اسم المصروف الثابت"><datalist id="exfNames"><option>قبض العمال</option><option>كهربا</option><option>مياه</option><option>إيجار</option><option>نت وتليفون</option></datalist></div><div><input id="exfAmt" inputmode="decimal" placeholder="المبلغ" autocomplete="off" aria-label="مبلغ المصروف الثابت"></div></div>
+  <div class="ro" style="gap:6px;margin-top:6px"><span class="mute" style="flex:none;font-size:12px">النوع</span><select id="exfCat" aria-label="نوع المصروف الثابت" style="flex:1;min-width:0"></select></div>
   <div class="ro" style="gap:6px;margin-top:6px"><select id="exfPer" aria-label="كل قد إيه" style="flex:1;min-width:0"><option value="d">كل يوم</option><option value="w" selected>كل أسبوع</option><option value="m">كل شهر</option></select><select id="exfDay" aria-label="اليوم" style="flex:1;min-width:0"></select><button type="button" class="main" id="exfAdd" style="flex:none">➕ إضافة</button></div>
   <div class="info" id="exfMsg"></div></div>
 <div class="card"><label for="exMon">الشهر</label><input type="month" id="exMon"><div id="exSum" style="margin-top:6px"></div>
@@ -478,7 +493,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <label class="opt hide"><input type="checkbox" id="animChk"> حركة الخلفية</label></div>
 <div class="card"><b>🔤 حجم الخط</b><div class="seg s" id="fzSeg" style="margin-top:6px"><button type="button" data-z="x">أصغر</button><button type="button" data-z="s">صغير</button><button type="button" data-z="m">وسط</button><button type="button" data-z="l">كبير</button><button type="button" data-z="xl">أكبر</button></div>
   <select id="fzSel" class="hide"><option value="x">x</option><option value="s">s</option><option value="m">m</option><option value="l">l</option><option value="xl">xl</option></select></div>
-<div class="card"><b>🧰 أدوات</b><label class="opt"><input type="checkbox" id="calcOn"> زرار الآلة الحاسبة</label><label class="opt"><input type="checkbox" id="backFab"> زرار رجوع صغير تحت في صفحات الإعدادات (بيختفي وانت نازل في الصفحة)</label></div>
+<div class="card"><b>🧰 أدوات</b><label class="opt"><input type="checkbox" id="calcOn"> زرار الآلة الحاسبة</label><label class="opt"><input type="checkbox" id="stkShow"> المخزن في الإعدادات (اقفله لو مش بتستخدمه)</label><label class="opt"><input type="checkbox" id="backFab"> زرار رجوع صغير تحت في صفحات الإعدادات (بيختفي وانت نازل في الصفحة)</label></div>
 </div>
 <div class="stp hide" data-sp="lock"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🔒 القفل والأمان</b></div>
 <div class="card"><b>👷 وضع العامل</b><div class="mute">بيخبّي عن الجهاز ده: الربح وسعر الشراء، والمديونيات وأرصدة العملاء، والإعدادات، وحذف وتعديل الفواتير. للرجوع لازم الرقم السري.</div>
@@ -573,11 +588,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=335"></script>
-<script src="js/qr.js?v=335"></script>
+<script src="js/app.js?v=336"></script>
+<script src="js/qr.js?v=336"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=335"></script>
-<script src="js/features.js?v=335"></script>
+<script src="js/cutlist.js?v=336"></script>
+<script src="js/features.js?v=336"></script>
 </body>
 </html>
 

@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='335';
+const APP_VER='336';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -829,8 +829,12 @@ function drawItems(){if(isGen())curIT='rd';fillCatSelects();$('catBar').classLis
   $('nform').innerHTML='<input id="ni_name" placeholder="اسم الصنف">'+cf.map(x=>`<input data-nf="${x[0]}" type="text" inputmode="decimal" placeholder="${x[1]}">`).join('')+'<button class="main" id="addIt" aria-label="إضافة">➕</button>';
   $('ihead').innerHTML=`<div class="it" style="grid-template-columns:${g}"><span>الاسم</span>${cf.map(x=>`<span style="text-align:center">${x[1]}</span>`).join('')}<span></span></div>`;
   drawItemList()}
+/* v336: اتباع من الصنف كام الشهر ده وآخر سعر */
+let itMV=-1,itMM={};function itMonth(){if(itMV===DV)return itMM;itMM={};const d=new Date(),m0=new Date(d.getFullYear(),d.getMonth(),1).getTime(),rows=[];S.invoices.forEach(r=>{if(r.type!=='inv'||r.ts<m0)return;(r.rows||[]).forEach(x=>{if(x.n&&!x.rt)rows.push([nm(x.n),x,r.ts])})});
+  S.items.forEach(it=>{const k=nm(it.name);let c0=0,q=0,v=0,lp=null,lt=0;rows.forEach(([n,x,ts])=>{if(n===k||n.startsWith(k+' ')){c0+=+x.c||0;q+=+x.q||0;v+=+x.v||0;if(ts>lt){lt=ts;lp=+x.p||0}}});itMM[it.id]={c:c0,q:rd2(q),v:rd2(v),lp}});itMV=DV;return itMM}
+const itSub=it=>{const m=itMonth()[it.id];if(!m||!m.v)return'<div class="its mute">مااتباعش منه الشهر ده'+(+it.cp>0?'':' · <b>من غير سعر شراء</b>')+'</div>';return'<div class="its mute">الشهر ده: '+(m.q?fq(m.q)+' م² · ':'')+m.c+' قطعة · '+f(m.v)+(m.lp!=null?' · آخر سعر '+f(m.lp):'')+(+it.cp>0?' · ربح تقريبي '+f(rd2(m.v-(m.q||m.c)*it.cp)):' · <b>من غير سعر شراء</b>')+'</div>'};
 function drawItemList(){const cf=itCols(),g='2fr '+cf.map(()=>'1fr').join(' ')+' 34px';
-  $('items').innerHTML=itemsList().map(it=>`<div class="it" style="grid-template-columns:${g}"><input data-k="${it.id}" data-f="name" value="${esc(it.name)}">${cf.map(x=>`<input data-k="${it.id}" data-f="${x[0]}" type="text" inputmode="decimal" value="${(x[0]==='p'?priceOf(it,itCat):it[x[0]])||''}">`).join('')}<button class="del" data-d="${it.id}" aria-label="حذف">×</button></div>`).join('')||'<p class="mute">'+(S.items.length?'مفيش أصناف بالبحث ده.':'لسه مفيش أصناف. اكتب اسم الصنف وسعره فوق واضغط ➕، أو استوردهم من Excel في الإعدادات ← الحفظ والنسخ.')+'</p>'}
+  $('items').innerHTML=itemsList().map(it=>`<div class="itw"><div class="it" style="grid-template-columns:${g}"><input data-k="${it.id}" data-f="name" value="${esc(it.name)}" readonly>${cf.map(x=>`<input data-k="${it.id}" data-f="${x[0]}" type="text" inputmode="decimal" value="${(x[0]==='p'?priceOf(it,itCat):it[x[0]])||''}" readonly>`).join('')}<button class="del" data-d="${it.id}" aria-label="حذف">×</button></div>${itSub(it)}</div>`).join('')||'<p class="mute">'+(S.items.length?'مفيش أصناف بالبحث ده.':'لسه مفيش أصناف. اكتب اسم الصنف وسعره فوق واضغط ➕، أو استوردهم من Excel في الإعدادات ← الحفظ والنسخ.')+'</p>'}
 $('seg').onclick=e=>{const t=e.target.dataset.it;if(!t)return;curIT=t;document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b===e.target));drawItems()};
 $('nform').addEventListener('click',e=>{if(e.target.id!=='addIt')return;const name=$('ni_name').value.trim();if(!name){toast('اكتب اسم الصنف الأول');$('ni_name').focus();return}
   /* v189: نفس الاسم بنفس النوع ميتكررش */
@@ -838,7 +842,7 @@ $('nform').addEventListener('click',e=>{if(e.target.id!=='addIt')return;const na
   const o={id:uid(),type:curIT,name,p:0,w:0,h:0};
   document.querySelectorAll('#nform [data-nf]').forEach(i=>{if(i.dataset.nf==='p')setPrice(o,itCat,nv(i.value));else o[i.dataset.nf]=nv(i.value)});S.items.push(o);put('items',o);drawItems()});
 $('items').addEventListener('input',e=>{const t=e.target,k=t.dataset.k;if(!k)return;const it=S.items.find(x=>x.id===k);if(!it)return;if(t.dataset.f==='p')setPrice(it,itCat,nv(t.value));else it[t.dataset.f]=t.dataset.f==='name'?t.value:nv(t.value);touch('items',it)});
-$('items').addEventListener('click',e=>{const k=e.target.dataset.d;if(!k)return;const it=S.items.find(x=>x.id===k);del('items',k);drawItemList();
+$('items').addEventListener('click',e=>{{const i=e.target.closest('input[readonly]');if(i){const w=i.closest('.itw');document.querySelectorAll('#items .itw.ed').forEach(x=>{if(x!==w){x.classList.remove('ed');x.querySelectorAll('input').forEach(y=>y.readOnly=true)}});w.classList.add('ed');w.querySelectorAll('input').forEach(y=>y.readOnly=false);i.focus();try{i.select()}catch(_){}return}}const k=e.target.dataset.d;if(!k)return;const it=S.items.find(x=>x.id===k);del('items',k);drawItemList();
   if(it)toast('اتمسح الصنف: '+it.name,'تراجع',()=>{undel('items',it);drawItemList()})});
 
 /* ---------- ترتيب الأصناف بالأكثر استخداماً ---------- */
@@ -848,6 +852,11 @@ function usage(){if(useV===DV)return useMap;useMap={};const names=[];S.invoices.
 function itemsList(){const q=$('iq').value.trim(),u=curIT==='mq'?usageCat(itCat):usage(),l=S.items.filter(it=>it.type===curIT&&qm(it.name,q));
   l.sort($('isort').value==='name'?(a,b)=>a.name.localeCompare(b.name,'ar'):(a,b)=>(u[b.id]||0)-(u[a.id]||0)||a.name.localeCompare(b.name,'ar'));return l}
 $('iq').oninput=drawItemList;$('isort').onchange=drawItemList;
+/* v336: أدوات الأسعار على الأصناف الظاهرة */
+function itBulk(dir,ev){const p=nv($('itPct').value),m=$('itToolMsg');if(!(p>0)||p>=100&&dir<0){m.textContent='اكتب النسبة (مثلًا 10)';return}const l=itemsList();if(!l.length)return;const b=ev&&ev.currentTarget;if(b&&!ok2(b))return;
+  l.forEach(it=>{const o=priceOf(it,itCat)||0;if(!(o>0))return;const n=Math.round(o*(1+dir*p/100));setPrice(it,itCat,n);put('items',it)});drawItemList();m.textContent='✓ اتغيّر سعر '+l.length+' صنف '+(dir>0?'بزيادة':'بنقص')+' '+p+'%'}
+$('itUp').onclick=e=>itBulk(1,e);$('itDn').onclick=e=>itBulk(-1,e);
+$('itCpGo').onclick=e=>{const p=nv($('itCpPct').value),m=$('itToolMsg');if(!(p>0&&p<100)){m.textContent='اكتب نسبة بين 1 و99 (مثلًا 70)';return}const l=itemsList().filter(it=>!(+it.cp>0)&&(priceOf(it,itCat)||0)>0);if(!l.length){m.textContent='كل الأصناف الظاهرة ليها سعر شراء ✓';return}if(!ok2(e.currentTarget))return;l.forEach(it=>{it.cp=Math.round(priceOf(it,itCat)*p/100);put('items',it)});drawItemList();m.textContent='✓ اتكتب سعر شراء لـ'+l.length+' صنف (تقدر تعدّل أي واحد بإيدك)'};
 
 /* ---------- بحث الأصناف ---------- */
 const dd=$('dd');let ddInp=null,ddRow=null;
@@ -1375,7 +1384,7 @@ const isGen=()=>lsv('biz','')==='gen',defT=()=>isGen()?'rd':'mq';
 function applyBiz(){const g=isGen();document.documentElement.classList.toggle('biz-gen',g);curIT=g?'rd':'mq';document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b.dataset.it===curIT));$('bizSel').value=g?'gen':'cut';
   $('subLbl').textContent=g?'إجمالي الأصناف':'إجمالي الإذن';const l=$('rows').lastElementChild;if(l&&rowBlank(l)&&l.dataset.t!==defT()){l.remove();calc()}if(curTab==='cl'&&g)document.querySelector('#bnav [data-t="new"]').click();try{drawItems()}catch(e){}}
 function bizSet(v){svk('biz',v==='gen'?'gen':'cut');if(v==='gen'&&!lsv('docw',''))svk('docw','فاتورة');applyBiz();loadMsgUI()}
-const SET_K=['tfHdr','tfDb','tfCu','tfSet','biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','dupIgn','ms_inv','ms_pay','ms_rem','ms_rdy',...['inv','pay','rem','rdy'].flatMap(k=>[...'ndtxmpcse'].map(x=>'mo_'+k+'_'+x).concat(['mg_'+k,'mc_'+k])),'paper','gnote','invNotes','pfPre','pfPre2','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
+const SET_K=['excats','drawer','tfHdr','tfDb','tfCu','tfSet','biz','shop','logo','logoOn','shopTxt','custw','docw','tpl_inv','tpl_pay','tpl_rem','tpl_rdy','invdesign','invtpls','invWm','invpal','fancyInv','qrOn','backFab','dupIgn','ms_inv','ms_pay','ms_rem','ms_rdy',...['inv','pay','rem','rdy'].flatMap(k=>[...'ndtxmpcse'].map(x=>'mo_'+k+'_'+x).concat(['mg_'+k,'mc_'+k])),'paper','gnote','invNotes','pfPre','pfPre2','remDays','remOld','remBal','remfirm','remlong','rempay','rt_soft','rt_firm','rt_long','rt_paid','rt_never','rt_old','rt_bal','rt_pay','exfix'],SET_S=new Set(SET_K);
 const setGet=()=>{const o={};SET_K.forEach(k=>{const v=lsv(k,null);if(v!==null)o[k]=v});return o},setKey=o=>hs(JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]])));
 function setApply(){try{tfPlaces()}catch(e){}try{applyBiz();loadLogo();if(!typing($('t-st'))){loadMsgUI();shopTxtLoad();$('paperSel').value=paperKey();$('logoOn').checked=pget('logoOn',true);$('fancyInv').checked=pget('fancyInv',true);if($('backFab'))$('backFab').checked=pget('backFab',false);$('qrOn').checked=pget('qrOn',true)}}catch(e){}}
 let setBusy=null,setT=0,setAt=0;
@@ -1517,6 +1526,19 @@ function chkItems(){const now=Date.now(),day=864e5,ag=t=>t?Math.floor((now-t)/da
 function chkDraw(){const L=chkItems();$('chkList').innerHTML=L.map(x=>'<div class="chk '+(x.ok?'ok':'bad')+'"'+(x.go?' data-chkgo="'+x.go+'"':'')+'><span>'+(x.ok?'✅':'⚠️')+'</span><span>'+esc(x.t)+'</span>'+(x.go?'<span class="sa">‹</span>':'')+'</div>').join('')}
 document.addEventListener('click',e=>{const g=e.target.closest&&e.target.closest('[data-chkgo]');if(g)stGo(g.dataset.chkgo)});
 $('idReset2').onclick=()=>{const b=$('idReset');if(b)b.click()};
+/* v336: الخزنة: الكاش المتوقع في الدرج والعجز أو الزيادة */
+let drwTs=dAgo(0);const drwAll=()=>{try{const o=JSON.parse(lsv('drawer','{}'));return o&&typeof o==='object'?o:{}}catch(_){return{}}};
+function drwCalc(a){const b=dEnd(a),K=dayKey(a),D=drwAll(),cur=D[K]||{};let cin=0;S.invoices.forEach(r=>{if(r.ts<a||r.ts>=b)return;pdBy(r).forEach(([n,v])=>{if(/^(كاش|نقدي)$/.test(String(n).trim()))cin+=+v||0})});
+  const ex=S.expenses.filter(x=>x.ts>=a&&x.ts<b).reduce((s,x)=>s+(+x.amt||0),0),sp=S.purchases.filter(x=>x.type==='pay'&&x.ts>=a&&x.ts<b&&(!x.how||x.how==='كاش')).reduce((s,x)=>s+(+x.amt||0),0);
+  const prevK=dayKey(dAgo(Math.round((dAgo(0)-a)/864e5)+1)),pv=D[prevK],open=cur.open!=null?+cur.open:(pv&&pv.act!=null?+pv.act:0);
+  return{K,open,cin:rd2(cin),ex:rd2(ex),sp:rd2(sp),exp:rd2(open+cin-ex-sp),act:cur.act!=null?+cur.act:null}}
+function drwDraw(){const r=drwCalc(drwTs),ln=(n,v,cl)=>'<div class="ro" style="color:var(--ink)"><span>'+n+'</span><b class="num'+(cl?' '+cl:'')+'">'+f(v)+'</b></div>';
+  $('drwDay').textContent=dayLabel(drwTs);$('drwNext').disabled=drwTs>=dAgo(0);$('drwOpen').value=r.open?fq(r.open):'';$('drwAct').value=r.act!=null?fq(r.act):'';
+  $('drwBody').innerHTML=ln('كاش أول اليوم',r.open)+ln('➕ كاش دخل (فواتير ودفعات)',r.cin)+ln('➖ مصروفات',r.ex)+(r.sp?ln('➖ اتدفع لموردين كاش',r.sp):'')+'<div class="ro" style="color:var(--ink);border-top:1px dashed var(--line);padding-top:4px;margin-top:4px"><b>المفروض يكون في الدرج</b><b class="num">'+f(r.exp)+'</b></div>';
+  const d=r.act!=null?rd2(r.act-r.exp):null;$('drwRes').innerHTML=d==null?'':Math.abs(d)<1?'<div class="drr ok">✅ مظبوط، مفيش عجز ولا زيادة</div>':d<0?'<div class="drr bad">⚠️ عجز '+f(-d)+' جنيه</div>':'<div class="drr up">➕ زيادة '+f(d)+' جنيه</div>'}
+function drwSet(k,v){const D=drwAll(),K=dayKey(drwTs),o=D[K]||{};if(v==null||v==='')delete o[k];else o[k]=rd2(nv(v));D[K]=o;const ks=Object.keys(D).sort();while(ks.length>120)delete D[ks.shift()];svk('drawer',JSON.stringify(D))}
+$('drwSave').onclick=()=>{drwSet('act',$('drwAct').value.trim());drwDraw();try{stSum()}catch(_){}};$('drwOpen').onchange=()=>{drwSet('open',$('drwOpen').value.trim());drwDraw()};
+$('drwPrev').onclick=()=>{drwTs=dAgo(Math.round((dAgo(0)-drwTs)/864e5)+1);drwDraw()};$('drwNext').onclick=()=>{if(drwTs<dAgo(0)){drwTs=dAgo(Math.round((dAgo(0)-drwTs)/864e5)-1);drwDraw()}};
 $('appUpd').onclick=async()=>{const b=$('appUpd');b.disabled=true;b.textContent='⏳ بدوّر على تحديث…';try{flushTouch()}catch(_){}try{await flushIDB()}catch(_){}
   try{const r=await fetch('js/app.js?chk='+Date.now(),{cache:'no-store'}).then(x=>x.text()),m=r.match(/APP_VER='(\d+)'/),nv2=m&&m[1];if(!nv2){b.textContent='مفيش نت، جرّب تاني';b.disabled=false;return}
     if(nv2===APP_VER){b.textContent='✓ إنت على آخر نسخة ('+APP_VER+')';setTimeout(()=>{b.textContent='🔄 حدّث البرنامج دلوقتي';b.disabled=false},3000);return}
@@ -1559,6 +1581,8 @@ function perfWatch(){try{if(localStorage.getItem('anim')!==null||document.docume
   setTimeout(()=>probe(bad=>{if(bad)setTimeout(()=>probe(bad2=>{if(!bad2)return;pset('anim',false);applyAnim();$('animChk').checked=false}),3000)}),2000)}
 function applyCalc(){const on=pget('calcOn',true);$('calcFab').classList.toggle('hide',!on);if(!on)$('calcModal').classList.add('hide')}
 $('calcOn').checked=pget('calcOn',true);$('calcOn').onchange=()=>{pset('calcOn',$('calcOn').checked);applyCalc()};applyCalc();
+/* v336: إخفاء المخزن */
+const applyStk=()=>{const t=document.querySelector('.stile[data-sp="stk"]');if(t)t.classList.toggle('hide',!pget('stkShow',true));$('stkShow').checked=pget('stkShow',true)};$('stkShow').onchange=()=>{pset('stkShow',$('stkShow').checked);applyStk()};applyStk();
 try{if(localStorage.getItem('theme')==='dark'){$('themeChk').checked=true;setTheme(true)}}catch(e){}
 $('themeChk').onchange=()=>setTheme($('themeChk').checked);
 /* شكل 3D: اختيار مستقل عن اللون — بيتحفظ على الجهاز وشغّال مع أي لون */
@@ -1646,12 +1670,13 @@ async function storCheck(){try{const x=await storStat(),top=Math.max(x.ls/x.lsCa
 /* ========== الإعدادات: قايمة رئيسية وصفحة لكل قسم ========== */
 let stCur='';
 function stGo(k){stCur=k||'';$('stHome').classList.toggle('hide',!!stCur);document.querySelectorAll('#t-st .stp').forEach(p=>p.classList.toggle('hide',p.dataset.sp!==(stCur==='desc'?'des':stCur)));{const dz=$('invDes');if(dz)dz.dataset.dm=stCur==='desc'?'col':'sz';const dt=$('desT');if(dt)dt.textContent=stCur==='desc'?'🎨 شكل الفاتورة والألوان':'📐 تصميم ومقاسات الفاتورة'}
-  try{if((stCur==='des'||stCur==='desc')&&window.invDesOpen)invDesOpen();else if(stCur==='msg'){loadMsgUI();msgPrev()}else if(stCur==='pay')pmDraw();else if(stCur==='notes')ntDraw();else if(stCur==='shop'){loadMsgUI();shopTxtLoad()}else if(stCur==='look')fzMark();else if(stCur==='rem')remUI();else if(stCur==='data'){storDraw();fracDraw();try{cbStatus()}catch(_){}}else if(stCur==='chk')chkDraw();else if(stCur==='exp')expOpen();else if(stCur==='sup')supOpen(null);else if(stCur==='stk')stkOpen();else if(stCur==='nf')nfUI();else if(!stCur)stSum()}catch(e){}
+  try{if((stCur==='des'||stCur==='desc')&&window.invDesOpen)invDesOpen();else if(stCur==='msg'){loadMsgUI();msgPrev()}else if(stCur==='pay')pmDraw();else if(stCur==='notes')ntDraw();else if(stCur==='shop'){loadMsgUI();shopTxtLoad()}else if(stCur==='look')fzMark();else if(stCur==='rem')remUI();else if(stCur==='data'){storDraw();fracDraw();try{cbStatus()}catch(_){}}else if(stCur==='chk')chkDraw();else if(stCur==='drw'){drwTs=dAgo(0);drwDraw()}else if(stCur==='exp')expOpen();else if(stCur==='sup')supOpen(null);else if(stCur==='stk')stkOpen();else if(stCur==='nf')nfUI();else if(!stCur)stSum()}catch(e){}
   window.scrollTo(0,0)}
 function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t)+(supOv()>0?' ⏰':''):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · ⚠️ '+n:''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
   W_('shop',shopN());W_('des','المقاسات والخطوط والأعمدة · '+PAPERS[paperKey()].n);W_('desc',(pget('fancyInv',true)?'التصميم الملون':'تصميم بسيط')+' · الألوان والقوالب');
   const n=liveNotes().length;W_('notes',n?n+(n>1?' ملاحظات':' ملاحظة'):'مفيش ملاحظات');
   try{const L=chkItems(),b=L.filter(x=>!x.ok).length;W_('chk',b?'⚠️ محتاج منك: '+b:'✅ كله تمام')}catch(_){}
+  try{const r=drwCalc(dAgo(0));W_('drw','المتوقع في الدرج: '+f(r.exp)+(r.act!=null?(Math.abs(r.act-r.exp)<1?' · مظبوط ✓':r.act<r.exp?' · عجز '+f(rd2(r.exp-r.act)):' · زيادة '+f(rd2(r.act-r.exp))):''))}catch(_){}
   W_('inv',[pget('autoWa',false)&&'واتساب بعد الحفظ',pget('editInv',true)&&'تعديل',pget('dupInv',true)&&'تكرار',pget('qtOn',true)&&'عروض أسعار',pget('pdfOn',true)&&'PDF وطباعة',pget('qrOn',true)&&'QR',pget('saveImgOn',false)&&'حفظ كصورة'].filter(Boolean).join(' · ')||'كل الخيارات مقفولة');
   W_('pay',ps.length?ps.map(x=>x.n+' '+fq(x.p)+'%').join(' · '):'مفيش طرق دفع');
   W_('msg','فاتورة · دفعة · تذكير'+($('autoWa').checked?' · إرسال تلقائي':''));
@@ -1822,7 +1847,8 @@ function exMonTs(){const m=/^(\d{4})-(\d{2})$/.exec($('exMon').value);return m?n
 function puIn(a,b){const l=S.purchases.filter(x=>x.ts>=a&&x.ts<b);return{n:l.length,buy:exTot(l.filter(x=>x.type!=='pay')),pay:exTot(l.filter(x=>x.type==='pay'))}}
 function drawExp(){const[a,b]=monRange(exMonTs()),l=exIn(a,b).sort((x,y)=>y.ts-x.ts),inv=S.invoices.filter(r=>r.ts>=a&&r.ts<b),s=inv.reduce((x,r)=>x+val(r),0),p=inv.reduce((x,r)=>x+pd(r),0),t=exTot(l),pu=puIn(a,b),PF=profitOf(inv);
   const ln=(n,v,bold)=>`<div class="ro" style="color:var(--ink)"><span>${n}</span>${bold?'<b':'<span'} class="num">${f(v)}${bold?'</b>':'</span>'}</div>`;
-  $('exSum').innerHTML=ln('المبيعات',s)+ln('المصروفات',t)+(pu.n?ln('مشتريات الموردين',pu.buy):'')+ln('صافي الشهر (المبيعات − المصروفات)',s-t-pu.buy,1)+ln('الكاش بعد المصروفات',p-t-pu.pay)+(PF.has?ln('ربح الأصناف',PF.pr)+ln('صافي الربح بعد المصروفات',rd2(PF.pr-t),1)+(PF.nk?`<div class="mute" style="font-size:12px">مبيعات بقيمة ${f(PF.nk)} ملهاش سعر شراء.</div>`:''):'');
+  const byC={};l.forEach(x=>{byC[x.cat||'أخرى']=rd2((byC[x.cat||'أخرى']||0)+(+x.amt||0))});const bars=Object.entries(byC).sort((x,y)=>y[1]-x[1]).map(([n,v])=>`<div class="exb"><span>${esc(n)}</span><i style="width:${t?Math.max(3,Math.round(v*100/t)):0}%"></i><b class="num">${f(v)}</b><small class="mute">${t?Math.round(v*100/t):0}%</small></div>`).join('');
+  $('exSum').innerHTML=ln('المبيعات',s)+ln('المصروفات',t)+(pu.n?ln('مشتريات الموردين',pu.buy):'')+ln('الفرق (المبيعات − المصروفات'+(pu.n?' − المشتريات':'')+')',s-t-pu.buy)+'<div class="mute" style="font-size:11px;margin:-2px 0 4px">ده مش ربح: مش طارح تمن البضاعة.</div>'+ln('الكاش بعد المصروفات',p-t-pu.pay)+(PF.has?ln('ربح الأصناف (البيع − الشراء)',PF.pr)+ln('✅ الربح الحقيقي بعد المصروفات',rd2(PF.pr-t),1)+(PF.nk?`<div class="mute" style="font-size:12px">مبيعات بقيمة ${f(PF.nk)} ملهاش سعر شراء، فمش داخلة في الربح.</div>`:''):'<div class="exw">⚠ الربح الحقيقي مش متحسب: الأصناف مالهاش سعر شراء. اكتبه من «الأصناف» (أو «🧮 أدوات الأسعار»)، والفواتير الجديدة هتتحسب.</div>')+(bars?'<div class="exbw"><b style="font-size:13px">المصروفات راحت فين</b>'+bars+'</div>':'');
   $('exRep').classList.toggle('hide',!l.length&&!inv.length&&!pu.n);
   $('exList').innerHTML=l.map(x=>`<div class="rec"><div class="ro" style="color:var(--ink)"><b>${esc(x.cat)}</b><b class="num">${f(x.amt)}</b></div><div class="mute num">${dshort(x.ts)}${x.note?' · '+esc(x.note):''}</div><div class="btns"><button class="alt b-red" data-exd="${esc(x.id)}">حذف</button></div></div>`).join('')||'<p class="mute">مفيش مصروفات في الشهر ده.</p>'}
 /* v250: مصروفات ثابتة {id,name,amt,per:'w'|'m',day,from,last} — بتتحفظ في الإعدادات (exfix) وبتتزامن. كل ميعاد بيتسجل مصروف عادي برقم ثابت fx<id>_<يوم> عشان ما يتكررش بين الأجهزة */
@@ -1834,18 +1860,24 @@ const exfLab=t=>t.per==='d'?'كل يوم':t.per==='w'?'كل '+EXWD[t.day]:'يو�
 function exfDue(list,now){const out=[],t0=new Date(now);t0.setHours(0,0,0,0);const end=t0.getTime();let ch=false;
   list.forEach(t=>{if(t.pz){if(t.last!==end){t.last=end;ch=true}return}const d=new Date(t.last?t.last:t.from);d.setHours(0,0,0,0);if(t.last)d.setDate(d.getDate()+1);let n=0;
     while(d.getTime()<=end&&n++<800){const dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
-      if(t.per==='d'||(t.per==='w'?d.getDay()===t.day:d.getDate()===Math.min(t.day,dim)))out.push({id:'fx'+t.id+'_'+dayKey(d.getTime()),ts:new Date(d.getFullYear(),d.getMonth(),d.getDate(),12).getTime(),amt:t.amt,cat:t.name,note:'ثابت · '+(t.per==='d'?'يومي':t.per==='w'?'أسبوعي':'شهري'),fx:t.id});
+      if(t.per==='d'||(t.per==='w'?d.getDay()===t.day:d.getDate()===Math.min(t.day,dim)))out.push({id:'fx'+t.id+'_'+dayKey(d.getTime()),ts:new Date(d.getFullYear(),d.getMonth(),d.getDate(),12).getTime(),amt:t.amt,cat:t.cat||t.name,note:(t.cat&&t.cat!==t.name?t.name+' · ':'')+'ثابت · '+(t.per==='d'?'يومي':t.per==='w'?'أسبوعي':'شهري'),fx:t.id});
       d.setDate(d.getDate()+1)}
     if(t.last!==end){t.last=end;ch=true}});return{out,ch}}
 function exfRun(){if(!dataReady)return 0;const l=exfLoad();if(!l.length)return 0;const r=exfDue(l,Date.now());let n=0;r.out.forEach(o=>{if(!S.expenses.some(x=>x.id===o.id)){S.expenses.push(o);put('expenses',o);n++}});if(r.ch)exfSave(l);return n}
 function drawExf(list){const l=list||exfLoad(),mo=rd2(l.filter(t=>!t.pz).reduce((s,t)=>s+(t.per==='d'?t.amt*365/12:t.per==='w'?t.amt*52/12:t.amt),0));
-  $('exfList').innerHTML=l.map(t=>'<div class="ro" style="color:var(--ink);gap:6px'+(t.pz?';opacity:.5':'')+'"><span style="flex:1;min-width:0">'+esc(t.name)+' <small class="mute">· '+exfLab(t)+(t.pz?' · ⏸ واقف':'')+'</small></span><b class="num">'+f(t.amt)+'</b><button type="button" class="alt" data-exfp="'+esc(t.id)+'" style="min-height:26px;height:26px;padding:0 8px;font-size:12px;flex:none">'+(t.pz?'▶ شغّل':'⏸ وقّف')+'</button><button class="del" data-exfd="'+esc(t.id)+'" aria-label="حذف '+esc(t.name)+'">×</button></div>').join('')+(l.length?'<div class="mute" style="font-size:12px">الثابت في الشهر تقريبًا '+f(Math.round(mo))+'</div>':'<div class="mute">مفيش. ضيف القبض الأسبوعي أو الإيجار الشهري من تحت.</div>')}
+  $('exfList').innerHTML=l.map(t=>'<div class="ro" style="color:var(--ink);gap:6px'+(t.pz?';opacity:.5':'')+'"><span style="flex:1;min-width:0">'+esc(t.name)+' <small class="mute">· '+(t.cat&&t.cat!==t.name?esc(t.cat)+' · ':'')+exfLab(t)+(t.pz?' · ⏸ واقف':'')+'</small></span><b class="num">'+f(t.amt)+'</b><button type="button" class="alt" data-exfp="'+esc(t.id)+'" style="min-height:26px;height:26px;padding:0 8px;font-size:12px;flex:none">'+(t.pz?'▶ شغّل':'⏸ وقّف')+'</button><button class="del" data-exfd="'+esc(t.id)+'" aria-label="حذف '+esc(t.name)+'">×</button></div>').join('')+(l.length?'<div class="mute" style="font-size:12px">الثابت في الشهر تقريبًا '+f(Math.round(mo))+'</div>':'<div class="mute">مفيش. ضيف القبض الأسبوعي أو الإيجار الشهري من تحت.</div>')}
 function exfDays(){const w=$('exfPer').value==='w',s=$('exfDay');s.classList.toggle('hide',$('exfPer').value==='d');s.innerHTML=w?EXWD.map((n,i)=>'<option value="'+i+'"'+(i===4?' selected':'')+'>يوم '+n+'</option>').join(''):Array.from({length:28},(_,i)=>'<option value="'+(i+1)+'">يوم '+(i+1)+' في الشهر</option>').join('')}
-$('exfPer').onchange=exfDays;exfDays();
+$('exfPer').onchange=exfDays;exfDays();$('exfCat').addEventListener('change',e=>exCatNew(e.target));
 $('exfAdd').onclick=()=>{const name=$('exfName').value.trim(),amt=rd2(nv($('exfAmt').value)),m=$('exfMsg');if(!name){m.textContent='اكتب اسم المصروف';return}if(!(amt>0)){m.textContent='اكتب المبلغ';return}
-  const l=exfLoad(),t0=new Date();t0.setHours(0,0,0,0);l.push({id:uid(),name,amt,per:$('exfPer').value,day:$('exfPer').value==='d'?0:+$('exfDay').value,from:t0.getTime(),last:0});exfSave(l);$('exfName').value='';$('exfAmt').value='';const n=exfRun();drawExf();drawExp();m.textContent=n?'اتضاف، واتسجل مصروف النهارده ✓':'اتضاف ✓ هيتسجل لوحده في ميعاده'};
+  const l=exfLoad(),t0=new Date();t0.setHours(0,0,0,0);l.push({id:uid(),name,cat:$('exfCat').value&&$('exfCat').value!=='__new'?$('exfCat').value:'',amt,per:$('exfPer').value,day:$('exfPer').value==='d'?0:+$('exfDay').value,from:t0.getTime(),last:0});exfSave(l);$('exfName').value='';$('exfAmt').value='';const n=exfRun();drawExf();drawExp();m.textContent=n?'اتضاف، واتسجل مصروف النهارده ✓':'اتضاف ✓ هيتسجل لوحده في ميعاده'};
 $('exfList').onclick=e=>{{const p=e.target.closest('[data-exfp]');if(p){const l=exfLoad(),t=l.find(x=>x.id===p.dataset.exfp);if(t){t.pz=!t.pz;if(!t.pz){const t0=new Date();t0.setHours(0,0,0,0);t.last=t0.getTime()-864e5}exfSave(l);const n=exfRun();drawExf();drawExp();toast(t.pz?'⏸ «'+t.name+'» واقف، مش هيتسجل لحد ما تشغّله':'▶ «'+t.name+'» رجع يشتغل'+(n?' واتسجل النهارده':''))}return}}const b=e.target.closest('[data-exfd]');if(!b||!ok2(b))return;const l=exfLoad(),t=l.find(x=>x.id===b.dataset.exfd);exfSave(l.filter(x=>x.id!==b.dataset.exfd));drawExf();if(t)toast('اتشال «'+t.name+'» من الثابت. اللي اتسجل قبل كده فاضل','تراجع',()=>{const k=exfLoad();k.push(t);exfSave(k);drawExf()})};
-function expOpen(){exfRun();drawExf();const k=dayKey(Date.now());if(!$('exDate').value)$('exDate').value=k;if(!$('exMon').value)$('exMon').value=k.slice(0,7);$('exMsg').textContent='';drawExp()}
+/* v336: أنواع المصروفات (الأساسية + اللي ضفتها) */
+const EXC0=['إيجار','مرتبات','كهربا ومياه','نت وتليفون','نقل','بضاعة ومشتريات','صيانة','أخرى'];
+const exCats=()=>{let a=[];try{a=JSON.parse(lsv('excats','[]'))}catch(_){}const used=[...new Set(S.expenses.map(x=>x.cat).filter(Boolean))];return[...new Set([...EXC0,...(Array.isArray(a)?a:[]),...used])]};
+function exCatFill(){const cur=$('exCat').value,cur2=$('exfCat')?$('exfCat').value:'';const o=exCats().map(n=>'<option>'+esc(n)+'</option>').join('')+'<option value="__new">➕ نوع جديد…</option>';$('exCat').innerHTML=o;if(cur&&cur!=='__new')$('exCat').value=cur;if($('exfCat')){$('exfCat').innerHTML=o;if(cur2&&cur2!=='__new')$('exfCat').value=cur2;else $('exfCat').value='مرتبات'}}
+function exCatNew(sel){if(sel.value!=='__new')return;const n=(prompt('اسم النوع الجديد (مثلًا: قبض العمال)')||'').trim();if(n){let a=[];try{a=JSON.parse(lsv('excats','[]'))}catch(_){}if(!Array.isArray(a))a=[];if(!a.includes(n))a.push(n);svk('excats',JSON.stringify(a));exCatFill();sel.value=n}else{exCatFill()}}
+$('exCat').addEventListener('change',e=>exCatNew(e.target));
+function expOpen(){exCatFill();exfRun();drawExf();const k=dayKey(Date.now());if(!$('exDate').value)$('exDate').value=k;if(!$('exMon').value)$('exMon').value=k.slice(0,7);$('exMsg').textContent='';drawExp()}
 $('exMon').onchange=drawExp;
 $('exRep').onclick=()=>showMonth(exMonTs());
 $('exAdd').onclick=()=>{const amt=rd2(nv($('exAmt').value)),m=$('exMsg'),dv=$('exDate').value,dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(dv);if(!(amt>0)){m.textContent='اكتب المبلغ';return}if(!dm){m.textContent='اختار التاريخ';return}
@@ -2171,7 +2203,7 @@ function skRcv(){const sups=S.suppliers.slice().sort((a,b)=>a.name.localeCompare
 function skRcSave(){const m=$('skMsg'),s=S.suppliers.find(y=>y.id===skRc.sid);if(!s){m.textContent='اختار المورد';return}
   const L=skRc.lines.map(l=>({it:S.items.find(i=>i.id===l.iid),q:rd2(nv(l.q)),c:Math.max(0,rd2(nv(l.c)))})).filter(l=>l.it&&l.q>0);if(!L.length){m.textContent='اختار صنف واكتب كميته';return}
   const ts=Date.now(),ids=[],tot=rd2(L.reduce((a,l)=>a+l.q*l.c,0)),o={id:uid(),sid:s.id,ts,type:'buy',amt:tot,note:(skRc.note?skRc.note+' · ':'')+L.map(l=>skTx(l.it)+' × '+f(l.q)).join('، '),sks:ids};
-  L.forEach(l=>{const st={id:uid(),iid:l.it.id,ts,q:l.q,t:'in',sid:s.id,...(tot>0?{pk:o.id}:{}),...(l.c?{cost:l.c}:{})};ids.push(st.id);skPush(st);skSet(l.it,{...(l.c?{cost:l.c}:{}),sid:s.id})});
+  L.forEach(l=>{const st={id:uid(),iid:l.it.id,ts,q:l.q,t:'in',sid:s.id,...(tot>0?{pk:o.id}:{}),...(l.c?{cost:l.c}:{})};ids.push(st.id);skPush(st);skSet(l.it,{...(l.c?{cost:l.c}:{}),sid:s.id});if(l.c>0&&l.it.type==='rd'&&+l.it.cp!==l.c){l.it.cp=l.c;put('items',l.it)}});
   if(tot>0){const add=[o];if(skRc.paid)add.push({id:uid(),sid:s.id,ts,type:'pay',amt:tot,how:'كاش',note:'سداد استلام بضاعة',pf:o.id});else if(s.terms>0)o.due=ts+s.terms*SKD;add.forEach(y=>{S.purchases.push(y);put('purchases',y)})}
   skRc={sid:s.id,lines:[{iid:'',q:'',c:''}],paid:false,note:''};stkV='home';drawStk();toast('✅ استلمت '+plN(L.length,'صنف')+' من '+s.name+(tot>0?' · '+f(tot):''))}
 $('stkPanel').addEventListener('input',e=>{const t=e.target,ln=t.closest('.skl');if(t.id==='rcNote')skRc.note=t.value;if(!ln)return;const l=skRc.lines[+ln.dataset.i];if(!l)return;if(t.classList.contains('rcQ'))l.q=t.value;if(t.classList.contains('rcC'))l.c=t.value;const e2=$('rcTot');if(e2)e2.textContent=f(skRcTot())});
