@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=333">
+<link rel="stylesheet" href="css/style.css?v=334">
 
 
 
@@ -288,11 +288,13 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="sgl"><button type="button" class="sti" data-sp="pay"><span class="si">💳</span><span class="stt"><b>طرق الدفع</b><small id="ss_pay"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="cl"><span class="si">📊</span><span class="stt"><b>الإقفال والتقارير</b><small id="ss_cl"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">العملاء</div>
   <div class="sgl"><button type="button" class="sti" data-sp="msg"><span class="si"><i class="wai"></i></span><span class="stt"><b>رسائل الواتساب</b><small id="ss_msg"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="rem"><span class="si">🔔</span><span class="stt"><b>تذكير المديونين</b><small id="ss_rem"></small></span><span class="sa">‹</span></button></div>
+  <div class="sgl" style="margin-bottom:8px"><button type="button" class="sti" data-sp="chk"><span class="si">✅</span><span class="stt"><b>فحص سريع</b><small id="ss_chk"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">البرنامج</div>
   <div class="sgl"><button type="button" class="sti" data-sp="look"><span class="si">📱</span><span class="stt"><b>شكل البرنامج</b><small id="ss_look"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="nf"><span class="si">🔔</span><span class="stt"><b>الإشعارات</b><small id="ss_nf"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="lock"><span class="si">🔒</span><span class="stt"><b>القفل والأمان</b><small id="ss_lock"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="data"><span class="si">💾</span><span class="stt"><b>الحفظ والنسخ</b><small id="ss_data"></small></span><span class="sa">‹</span></button></div>
   </div>
-  <div class="mute" id="appVer" style="text-align:center;margin:12px 0 4px"></div>
+  <div class="mute" id="appVer" style="text-align:center;margin:12px 0 4px"></div><div style="text-align:center;margin-bottom:6px"><button type="button" class="alt" id="appUpd" style="font-size:12px;padding:4px 12px;min-height:30px">🔄 حدّث البرنامج دلوقتي</button></div>
 </div>
+<div class="stp hide" data-sp="chk"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>✅ فحص سريع</b></div><div class="card"><div class="mute" style="font-size:12px">كل حاجة مهمة في نظرة واحدة. الأحمر محتاج منك حاجة، ودوس على أي سطر يوديك مكانه.</div><div id="chkList"></div></div></div>
 <div class="stp hide" data-sp="shop"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🏪 بيانات المحل</b></div>
 <div class="card"><b>🏪 اسم المحل</b><div class="mute">بيظهر فوق الفاتورة وفي رسايل الواتساب.</div><input id="shopN" style="margin-top:6px">
   <label for="bizSel" style="margin-top:8px">طريقة البيع</label><select id="bizSel"><option value="gen">بالعدد (أي محل)</option><option value="cut">بالمقاس (زجاج، رخام، ألوميتال)</option></select>
@@ -305,6 +307,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 </div>
 <div class="stp hide" data-sp="des" id="invDes"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b id="desT">📐 تصميم ومقاسات الفاتورة</b></div>
 <div class="card" data-dm="col"><label class="opt"><input type="checkbox" id="fancyInv"> التصميم الملون</label><div class="mute">جداول مدوّرة وألوان وملخص الأصناف. لو قفلته، الفاتورة بتطلع بشكل بسيط والإعدادات اللي تحت مش بتأثر عليها.</div></div>
+<div class="ro" style="gap:6px;margin:6px 0 0"><span class="mute" style="flex:1;font-size:12px">اتلخبطت؟ ارجع للتصميم الأصلي بدوسة.</span><button type="button" class="alt b-red" id="idReset2" style="flex:none;font-size:12px;min-height:30px;padding:2px 10px">↩️ رجّع الأصلي</button></div>
 <button type="button" class="main" id="dzOpen" style="width:100%;margin:6px 0">✋ صمّم الفاتورة بإيدك (اسحب وكبّر ولوّن على الفاتورة نفسها)</button>
 <div class="idprev" id="idPrev" title="دوس عشان تصمّم بإيدك" style="cursor:pointer"></div>
 <details class="card idg" data-dm="col" open><summary>🎨 الألوان</summary><div id="idCol"></div></details>
@@ -356,18 +359,18 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div id="pmList"></div>
 <div class="pmq" id="pmQ"></div><button type="button" class="alt" id="pmAdd">➕ طريقة جديدة</button></div>
 <div class="card tfpl"><b>💳 بيانات التحويل تظهر فين</b><div class="mute" style="font-size:12px">اختار الأماكن اللي يظهر فيها زرار بيانات التحويل.</div>
-  <label class="opt"><input type="checkbox" id="tfHdr"> زرار 💳 اللي فوق (جنب الحاسبة)</label>
+  <label class="opt"><input type="checkbox" id="tfHdr"> زرار 💳 في الشريط اللي فوق</label>
   <label class="opt"><input type="checkbox" id="tfDb"> صفحة المديون («💳 ابعتله»)</label>
   <label class="opt"><input type="checkbox" id="tfCu"> صفحة العميل («💳 ابعتله»)</label>
   <label class="opt"><input type="checkbox" id="tfSet"> زرار «🔍 ابعت بيانات التحويل لعميل» هنا في الإعدادات</label></div>
 <button type="button" class="main" id="tfOpen2" style="width:100%;margin:6px 0">🔍 ابعت بيانات التحويل لعميل</button>
-<div class="card"><b>👥 نسب العملاء المحفوظة</b><div class="mute">البرنامج بيفتكر آخر نسبة اتسجلت لكل عميل. امسح النسبة لو عايز العميل يرجع للنسبة العامة.</div><div id="pmCust"></div></div>
+<div class="card"><b>👥 نسب العملاء المحفوظة</b><div class="mute">البرنامج بيفتكر آخر نسبة اتسجلت لكل عميل. امسح النسبة لو عايز العميل يرجع للنسبة العامة.</div><div id="pmCust"></div><button type="button" class="lnk hide" id="pmOrph" style="color:var(--danger);font-size:12px;margin-top:4px"></button></div>
 </div>
 <div class="stp hide" data-sp="msg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b><i class="wai"></i> رسائل الواتساب</b></div>
 <div class="mute" style="margin:0 4px 4px">كل رسالة إعداداتها لوحدها، مش مرتبطة بالباقي.</div>
 <div class="seg s" id="mTabs" style="margin:2px 0 6px"><button type="button" class="on" data-mt="inv">🧾 فاتورة</button><button type="button" data-mt="pay">💵 دفع</button><button type="button" data-mt="rem">🔔 تذكير</button><button type="button" data-mt="rdy">📦 جاهز</button></div>
 <div class="card mpane" data-mp="inv"><b>🧾 رسالة الفاتورة</b><label>الأسلوب</label><div class="seg s mst" data-for="inv"><button type="button" data-ms="f">😊 ودود</button><button type="button" data-ms="o">🎩 رسمي</button><button type="button" data-ms="s">⚡ مختصر</button></div><div class="mcust mute hide">الرسالة دي معدّلة بإيدك. غيّر الأسلوب أو أي اختيار تحت لو عايز ترجع لنموذج جاهز.</div><label>شكلها عند العميل</label><div class="wab" id="pvInv"></div><label>إيه اللي يظهر في الرسالة دي</label><div class="mopts" data-for="inv"></div><details class="madv"><summary>✍️ جملة الافتتاح والختام بتاعتك</summary><div class="mute" style="margin:4px 0">فاضي = جملة الأسلوب. تقدر تحط {اللقب} {العميل} {المحل}.</div><label>جملة الافتتاح</label><input data-mg="inv"><label>جملة الختام</label><input data-mc="inv"></details><details class="madv"><summary>✏️ عدّل الرسالة كلها بإيدك (اختياري)</summary><textarea id="tplInv" rows="6" style="margin-top:6px"></textarea><div class="vch" data-for="tplInv"></div></details></div><div class="card mpane hide" data-mp="pay"><b>💵 رسالة الدفعة</b><label>الأسلوب</label><div class="seg s mst" data-for="pay"><button type="button" data-ms="f">😊 ودود</button><button type="button" data-ms="o">🎩 رسمي</button><button type="button" data-ms="s">⚡ مختصر</button></div><div class="mcust mute hide">الرسالة دي معدّلة بإيدك. غيّر الأسلوب أو أي اختيار تحت لو عايز ترجع لنموذج جاهز.</div><label>شكلها عند العميل</label><div class="wab" id="pvPay"></div><label>إيه اللي يظهر في الرسالة دي</label><div class="mopts" data-for="pay"></div><details class="madv"><summary>✍️ جملة الافتتاح والختام بتاعتك</summary><div class="mute" style="margin:4px 0">فاضي = جملة الأسلوب. تقدر تحط {اللقب} {العميل} {المحل}.</div><label>جملة الافتتاح</label><input data-mg="pay"><label>جملة الختام</label><input data-mc="pay"></details><details class="madv"><summary>✏️ عدّل الرسالة كلها بإيدك (اختياري)</summary><textarea id="tplPay" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplPay"></div></details></div><div class="card mpane hide" data-mp="rem"><b>🔔 رسالة تذكير الدين</b><label>الأسلوب</label><div class="seg s mst" data-for="rem"><button type="button" data-ms="f">😊 ودود</button><button type="button" data-ms="o">🎩 رسمي</button><button type="button" data-ms="s">⚡ مختصر</button></div><div class="mcust mute hide">الرسالة دي معدّلة بإيدك. غيّر الأسلوب أو أي اختيار تحت لو عايز ترجع لنموذج جاهز.</div><div class="ro" style="gap:6px;margin:6px 0 2px"><label style="flex:1;margin:0;font-size:12px">الكلام بيتغير لوحده حسب التأخير. شوف شكلها لما يبقى</label><select id="remPvT" style="width:auto;flex:none"><option value="soft">قليل</option><option value="firm">متوسط</option><option value="long">طويل</option></select></div><label>شكلها عند العميل</label><div class="wab" id="pvRem"></div><label>إيه اللي يظهر في الرسالة دي</label><div class="mopts" data-for="rem"></div><details class="madv"><summary>⚙️ تفاصيل التذكير</summary><label class="opt"><input type="checkbox" id="remDays"> أضيف «مرّ كام يوم على آخر دفعة» في الرسالة لوحدها</label><label class="opt"><input type="checkbox" id="remOld"> أذكر أقدم فاتورة متأخرة (تاريخها والمتبقي)</label><label class="opt"><input type="checkbox" id="remBal"> أذكر الرصيد السابق لو العميل عليه رصيد قديم</label><div class="ro" style="gap:6px;margin:4px 0 0"><label style="flex:1;margin:0;font-size:12px">الصياغة تبقى أحزم بعد كام يوم (0 = مقفول)</label><input id="remFirm" type="text" inputmode="numeric" style="width:64px;flex:none;text-align:center"></div><div class="ro" style="gap:6px;margin:4px 0 0"><label style="flex:1;margin:0;font-size:12px">«تواصل معنا» بعد كام يوم (0 = مقفول)</label><input id="remLong" type="text" inputmode="numeric" style="width:64px;flex:none;text-align:center"></div><div class="mute" style="margin:6px 0 2px">جمل السداد (فاضي = اللي في الأسلوب). المتغيّرات: {عدد} {التاريخ} {المتبقي} {المبلغ} {البيانات}</div><label>سداد عادي</label><input id="rtSoft"><label>سداد أحزم</label><input id="rtFirm"><label>«تواصل معنا» (بعد المدة الطويلة)</label><input id="rtLong"><label>لو دفع قبل كده</label><input id="rtPaid"><label>لو ما دفعش خالص</label><input id="rtNever"><label>أقدم فاتورة</label><input id="rtOld"><label>الرصيد السابق</label><input id="rtBal"><label>بيانات الدفع</label><input id="rtPay"><button type="button" class="alt" id="rtReset" style="margin-top:6px">↺ رجّع الجمل للأصل</button></details><details class="madv"><summary>✍️ جملة الافتتاح والختام بتاعتك</summary><div class="mute" style="margin:4px 0">فاضي = جملة الأسلوب. تقدر تحط {اللقب} {العميل} {المحل}.</div><label>جملة الافتتاح</label><input data-mg="rem"><label>جملة الختام</label><input data-mc="rem"></details><details class="madv"><summary>✏️ عدّل الرسالة كلها بإيدك (اختياري)</summary><textarea id="tplRem" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplRem"></div></details></div><div class="card mpane hide" data-mp="rdy"><b>📦 رسالة الطلب جاهز</b><label>الأسلوب</label><div class="seg s mst" data-for="rdy"><button type="button" data-ms="f">😊 ودود</button><button type="button" data-ms="o">🎩 رسمي</button><button type="button" data-ms="s">⚡ مختصر</button></div><div class="mcust mute hide">الرسالة دي معدّلة بإيدك. غيّر الأسلوب أو أي اختيار تحت لو عايز ترجع لنموذج جاهز.</div><label>شكلها عند العميل</label><div class="wab" id="pvRdy"></div><label>إيه اللي يظهر في الرسالة دي</label><div class="mopts" data-for="rdy"></div><details class="madv"><summary>✍️ جملة الافتتاح والختام بتاعتك</summary><div class="mute" style="margin:4px 0">فاضي = جملة الأسلوب. تقدر تحط {اللقب} {العميل} {المحل}.</div><label>جملة الافتتاح</label><input data-mg="rdy"><label>جملة الختام</label><input data-mc="rdy"></details><details class="madv"><summary>✏️ عدّل الرسالة كلها بإيدك (اختياري)</summary><textarea id="tplRdy" rows="4" style="margin-top:6px"></textarea><div class="vch" data-for="tplRdy"></div></details></div>
-<div class="card"><b>💳 بيانات الدفع</b><div class="mute">سيبه فاضي وهيشيل الأرقام اللي كتبتها في «طرق الدفع» لوحده. أو اكتب هنا بإيدك وهو اللي يظهر.</div><input id="remPay" placeholder="مثال: فودافون كاش 01000000000 · إنستا باي name@instapay" style="margin-top:6px"></div>
+<div class="card"><b>💳 بيانات الدفع</b><div class="mute"><b>الأحسن تسيبها فاضية:</b> البرنامج بياخد أول رقم شغّال من كل طريقة في «طرق الدفع» وبيغيّره لوحده لو رقم وصل الليميت. لو كتبت هنا بإيدك، اللي هتكتبه هو اللي هيظهر دايمًا.</div><div class="mute" id="remPayAuto" style="font-size:12px;margin-top:4px"></div><input id="remPay" placeholder="مثال: فودافون كاش 01000000000 · إنستا باي name@instapay" style="margin-top:6px"></div>
 <button type="button" class="alt b-red" id="tplReset" style="width:100%;margin-top:4px">↩️ رجوع للرسايل الأصلية</button>
 </div>
 <div class="stp hide" data-sp="rem"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🔔 تذكير المديونين</b></div>
@@ -459,7 +462,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div id="stkSub" class="hide"></div>
 </div>
 <div class="stp hide" data-sp="nf"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🔔 الإشعارات</b></div>
-<div class="card"><b>📱 إشعارات الموبايل</b><div style="margin-top:4px" id="nfStat"></div>
+<div class="card"><b>📱 إشعارات الموبايل</b><div class="info hide" id="nfWarn" style="color:var(--danger);font-weight:700">⚠ التنبيهات اللي تحت متعلّمة، بس الإشعارات نفسها مقفولة، فمفيش حاجة بتوصلك. دوس «تفعيل الإشعارات» ووافق.</div><div style="margin-top:4px" id="nfStat"></div>
   <div class="btns"><button type="button" class="main" id="nfBtn"></button><button type="button" class="alt hide" id="nfTest">🔔 جرّب إشعار</button></div>
   <div class="mute" style="margin-top:6px">بتوصلك من الموبايل والبرنامج في الخلفية. لو البرنامج مقفول، الموبايل هو اللي بيحدد توقيتها، ومش كل الموبايلات بتدعم ده.</div></div>
 <div class="card"><b>🔔 نبّهني عن</b>
@@ -480,7 +483,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="stp hide" data-sp="lock"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🔒 القفل والأمان</b></div>
 <div class="card"><b>👷 وضع العامل</b><div class="mute">بيخبّي عن الجهاز ده: الربح وسعر الشراء، والمديونيات وأرصدة العملاء، والإعدادات، وحذف وتعديل الفواتير. للرجوع لازم الرقم السري.</div>
   <button type="button" class="main" id="wkGo" style="width:100%;margin-top:6px">👷 شغّل وضع العامل على الجهاز ده</button><div class="ro" style="gap:6px;margin-top:8px"><input id="wkNew" placeholder="اسم عامل (اختياري)" style="flex:1"><button type="button" class="alt" id="wkAdd" style="flex:none">➕</button></div><div id="wkL" style="margin-top:6px"></div><div class="mute" style="margin-top:4px">دوس على اسم عشان تختاره، وكل فاتورة تتسجل بالجهاز ده هتتكتب باسمه (👷) في السجل.</div><div class="info" id="wkMsg"></div></div>
-<div class="card"><b>🔒 قفل البرنامج</b>
+<div class="card"><b>🔒 قفل البرنامج</b><div class="mute" style="font-size:12px">اقتراح: فعّل على الأقل «اطلب الرقم السري قبل تعديل أو حذف فاتورة قديمة»، علشان محدش يغيّر حسابات قديمة من غير ما تعرف.</div>
     <label class="opt"><input type="checkbox" id="lkChk"> قفل البرنامج برقم سري</label>
     <div id="lkSet" class="hide"><div class="g2" style="margin-top:6px"><input id="lkP1" type="password" inputmode="numeric" maxlength="6" placeholder="رقم سري (4 إلى 6 أرقام)"><input id="lkP2" type="password" inputmode="numeric" maxlength="6" placeholder="اكتب الرقم تاني"></div>
       <div class="btns"><button class="main" id="lkSave">🔒 تفعيل القفل</button></div></div>
@@ -492,13 +495,13 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
     <div class="info" id="editLkMsg"></div>
     <div id="lkRecSet" class="hide"><button type="button" class="alt" id="lkRecMake" style="width:100%;margin-top:10px"></button><div id="lkRecShow" class="hide" style="margin-top:6px"></div></div></div>
 </div>
-<div class="stp hide" data-sp="data"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>💾 الحفظ والنسخ</b></div>
+<div class="stp hide" data-sp="data" id="dataPg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>💾 الحفظ والنسخ</b></div>
 <div class="card"><b>☁️ الحفظ والمزامنة</b><div id="stor" class="stor"></div>
     <div id="fbStat" style="margin:4px 0 8px;font-size:14px">مش مربوطة بحساب.</div>
     <div class="mute num" id="fbWho" style="margin-bottom:6px;direction:ltr;text-align:right"></div>
     <div id="fbVer" class="hide" style="margin-bottom:6px"><span class="mute">الإيميل لسه ما اتأكدش.</span> <button class="lnk" id="fbVerB">✉️ ابعت رسالة التأكيد</button><div class="info" id="fbVerM"></div></div>
     <div class="btns" style="margin:0"><button class="main" id="fbAuth">🔑 دخول أو إنشاء حساب</button><button class="alt b-red hide" id="fbOff">🚪 تسجيل خروج</button></div>
-    <button class="lnk hide" id="fbDel" style="color:var(--danger);margin-top:8px">🗑️ حذف الحساب</button>
+    
     <a class="lnk" href="privacy.html" target="_blank" rel="noopener" style="display:block;margin-top:4px">سياسة الخصوصية</a></div>
 <div class="card"><b>🌐 رابط احتياطي للبرنامج</b><div class="mute" style="font-size:12px">لو البرنامج ما فتحش أو الموبايل باظ: افتح الرابط ده من أي موبايل أو كمبيوتر، وسجّل دخول بنفس الحساب، وبياناتك هتنزل من السحابة.</div><div class="ro" style="gap:6px;margin-top:6px"><input id="mirUrl" readonly value="https://tabakha-test-101.web.app" dir="ltr" style="flex:1;height:32px;font-size:13px"><button type="button" class="alt" id="mirCp" style="flex:none">📋 نسخ</button></div><div class="info" id="mirMsg"></div></div>
 <div class="card"><b>💾 نسخة احتياطية</b><div class="mute" id="bkInfo" style="margin-top:4px"></div>
@@ -570,11 +573,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=333"></script>
-<script src="js/qr.js?v=333"></script>
+<script src="js/app.js?v=334"></script>
+<script src="js/qr.js?v=334"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=333"></script>
-<script src="js/features.js?v=333"></script>
+<script src="js/cutlist.js?v=334"></script>
+<script src="js/features.js?v=334"></script>
 </body>
 </html>
 

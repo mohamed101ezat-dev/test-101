@@ -1537,3 +1537,11 @@ html:not(#zz) .pmq button,html:not(#zz) .dbtf .tfm{display:inline-flex;align-ite
 /* v333 */
 .dbdue .dd2{position:relative;overflow:hidden;display:inline-flex;align-items:center;cursor:pointer}
 .dbdue .dd2 input[type=date]{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;padding:0;border:0;cursor:pointer}
+
+/* v334: الفحص السريع */
+#chkList{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+#chkList .chk{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:8px;font-size:13px;border:1px solid var(--line);color:var(--ink)}
+#chkList .chk.bad{border-color:#dc2626;background:color-mix(in srgb,#dc2626 7%,var(--card))}
+#chkList .chk.ok{background:color-mix(in srgb,#16a34a 6%,var(--card))}
+#chkList .chk span:nth-child(2){flex:1}#chkList .chk[data-chkgo]{cursor:pointer}
+.card.dz{border-color:color-mix(in srgb,#dc2626 40%,var(--line))}

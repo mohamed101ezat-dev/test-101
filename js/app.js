@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='333';
+const APP_VER='334';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1487,6 +1487,7 @@ const hasPw=u=>(u.providerData||[]).some(p=>p&&p.providerId==='password');
 async function acctPurge(){const fs=firebase.firestore();for(const k of[...BIG,'deleted','backups_meta','backups_data','settings']){const n=k==='backups_data'?20:300;
     for(;;){const sn=await FBDB.base.collection(k).limit(n).get();if(sn.empty)break;const b=fs.batch();sn.docs.forEach(d=>b.delete(d.ref));await b.commit();if(sn.docs.length<n)break}}}
 const delChk=()=>{const u=fbUser();$('delGo').disabled=$('delCf').value.trim()!=='حذف'||(!!u&&hasPw(u)&&!$('delPw').value)};
+(()=>{const p=$('dataPg');if(p&&!$('fbDel')){p.insertAdjacentHTML('beforeend','<div class="card dz"><b>⚠️ منطقة خطر</b><div class="mute" style="font-size:12px">حذف الحساب بيمسح كل بياناتك من السحابة نهائيًا، وبيطلب منك تأكيد.</div><button class="lnk hide" id="fbDel" style="color:var(--danger);margin-top:6px">🗑️ حذف الحساب</button></div>')}})();
 $('fbDel').onclick=()=>{const u=fbUser();if(!u||!FBDB){fbStat('لازم تكون داخل بحسابك ومتصل بالنت عشان تحذفه.');return}$('delCf').value='';$('delPw').value='';$('delMsg').textContent='';$('delPwB').classList.toggle('hide',!hasPw(u));delChk();$('delOv').classList.remove('hide')};
 $('delCf').oninput=delChk;$('delPw').oninput=delChk;$('delNo').onclick=()=>$('delOv').classList.add('hide');$('delBk').onclick=()=>keepCopy();
 $('delGo').onclick=async()=>{const m=$('delMsg'),b=$('delGo'),u=fbUser();if(!u||!FBDB)return;b.disabled=true;$('delNo').disabled=true;
@@ -1501,6 +1502,25 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){if(FBDB)se
 
 /* ---------- تطبيق الموبايل (PWA) ---------- */
 $('appVer').textContent='نسخة التطبيق: '+APP_VER;
+/* v334: بيجيب آخر نسخة على طول (لو فيه نت) */
+/* v334: الفحص السريع */
+function chkItems(){const now=Date.now(),day=864e5,ag=t=>t?Math.floor((now-t)/day):null,L=[];const add=(ok,t,go)=>L.push({ok,t,go});
+  const cb=+lsv('cbAt','0');add(!!FBDB&&cb&&ag(cb)<=2,FBDB?(cb?'☁️ آخر نسخة سحابية: '+stamp(cb):'☁️ لسه مفيش نسخة سحابية'):'☁️ مش داخل بحساب، فمفيش مزامنة ولا نسخ سحابية','data');
+  const mb=+lsv('lastBackup','0');add(mb&&ag(mb)<=7,mb?'💾 آخر نسخة بإيدك: '+stamp(mb)+(ag(mb)>7?' (من أكتر من أسبوع)':''):'💾 عمرك ما حفظت نسخة بإيدك','data');
+  const nf=nfState();add(nf==='on',nf==='on'?'🔔 إشعارات الموبايل شغّالة':nf==='no'?'🔔 الجهاز ده مش بيدعم الإشعارات':'🔔 إشعارات الموبايل مقفولة، فالتنبيهات مش بتوصلك','nf');
+  let lk=false;try{lk=lkReady()}catch(_){}add(lk,lk?'🔒 البرنامج عليه رقم سري':'🔒 مفيش رقم سري: أي حد ماسك الموبايل يقدر يمسح أو يعدّل','lock');
+  const pm=pfAll().filter(x=>x.on!==false);const full=[];pm.forEach(x=>x.accs.forEach((a,i)=>{if(a.on!==false&&accFull(a))full.push(x.n+' · '+accLbl(a,x,i))}));const nonum=pm.filter(x=>!pmPick(x));
+  add(!full.length&&!nonum.length,full.length?'💳 وصلت الليميت: '+full.join('، '):nonum.length?'💳 طرق مالهاش رقم شغّال: '+nonum.map(x=>x.n).join('، '):'💳 أرقام التحويل كلها تمام','pay');
+  const np=S.customers.filter(c=>!c.phone&&balOf(c)>0).length;add(!np,np?'👥 '+plN(np,'مديون')+' من غير رقم، فمش هتعرف تبعتلهم تذكير':'👥 كل المديونين ليهم رقم',null);
+  const fr=fracList().length;add(!fr,fr?'🧮 '+plN(fr,'عميل')+' حسابهم فيه كسور':'🧮 مفيش كسور في الحسابات','data');
+  return L}
+function chkDraw(){const L=chkItems();$('chkList').innerHTML=L.map(x=>'<div class="chk '+(x.ok?'ok':'bad')+'"'+(x.go?' data-chkgo="'+x.go+'"':'')+'><span>'+(x.ok?'✅':'⚠️')+'</span><span>'+esc(x.t)+'</span>'+(x.go?'<span class="sa">‹</span>':'')+'</div>').join('')}
+document.addEventListener('click',e=>{const g=e.target.closest&&e.target.closest('[data-chkgo]');if(g)stGo(g.dataset.chkgo)});
+$('idReset2').onclick=()=>{const b=$('idReset');if(b)b.click()};
+$('appUpd').onclick=async()=>{const b=$('appUpd');b.disabled=true;b.textContent='⏳ بدوّر على تحديث…';try{flushTouch()}catch(_){}try{await flushIDB()}catch(_){}
+  try{const r=await fetch('js/app.js?chk='+Date.now(),{cache:'no-store'}).then(x=>x.text()),m=r.match(/APP_VER='(\d+)'/),nv2=m&&m[1];if(!nv2){b.textContent='مفيش نت، جرّب تاني';b.disabled=false;return}
+    if(nv2===APP_VER){b.textContent='✓ إنت على آخر نسخة ('+APP_VER+')';setTimeout(()=>{b.textContent='🔄 حدّث البرنامج دلوقتي';b.disabled=false},3000);return}
+    b.textContent='⬇️ بنزّل نسخة '+nv2+'…';const g=await navigator.serviceWorker.getRegistration();if(g)await g.update();for(const k of await caches.keys())if(k.startsWith('eltabakha-'))await caches.delete(k);location.reload()}catch(e){b.textContent='معرفتش أحدّث، جرّب تاني';b.disabled=false}};
 $('hdrVer').textContent='v'+APP_VER;
 /* لو البرنامج فاضل مفتوح: بنسأل السيرفر كل ساعة، ومبنعرضش التحديث وفي فاتورة بتتكتب عشان ما تضيعش */
 let verAt=0;async function verCheck(){if(location.protocol.indexOf('http')||!navigator.onLine||Date.now()-verAt<36e5||[...$('rows').children].some(d=>!rowBlank(d)))return;verAt=Date.now();
@@ -1584,7 +1604,9 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)autoBan()}
 
 /* رسائل الواتساب */
 const svk=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}if(SET_S.has(k))setSoon()};
-function loadMsgUI(){$('shopN').value=shopN();$('custW').value=custW();$('docW').value=docW();$('tplInv').value=tplOf('inv');$('tplPay').value=tplOf('pay');$('tplRem').value=tplOf('rem');$('remFirm').value=lsv('remfirm','30');$('remLong').value=lsv('remlong','90');$('remPay').value=lsv('rempay','');RTF.forEach(([id,k])=>{$(id).value=lsv('rt_'+k,'');$(id).placeholder=rtDef(k)});$('tplRdy').value=tplOf('rdy');msUI()}
+function remPayAutoShow(){const e=$('remPayAuto');if(!e)return;const man=lsv('rempay','').trim();e.innerHTML=man?'⚠ مكتوبة بإيدك، فالأرقام التلقائية مش شغّالة. <button type="button" class="lnk" id="remPayClr" style="font-size:12px">امسحها وارجع للتلقائي</button>':'التلقائي دلوقتي: '+esc(pfAll().filter(x=>x.on!==false&&pmW(x,'msg')&&pmPick(x)).map(x=>x.n+' '+accShow(pmPick(x),x)).join(' · ')||'مفيش أرقام في طرق الدفع')}
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#remPayClr')){$('remPay').value='';svk('rempay','');remPayAutoShow();try{msgPrev()}catch(_){}}});
+function loadMsgUI(){setTimeout(remPayAutoShow,0);$('shopN').value=shopN();$('custW').value=custW();$('docW').value=docW();$('tplInv').value=tplOf('inv');$('tplPay').value=tplOf('pay');$('tplRem').value=tplOf('rem');$('remFirm').value=lsv('remfirm','30');$('remLong').value=lsv('remlong','90');$('remPay').value=lsv('rempay','');RTF.forEach(([id,k])=>{$(id).value=lsv('rt_'+k,'');$(id).placeholder=rtDef(k)});$('tplRdy').value=tplOf('rdy');msUI()}
 $('shopN').oninput=()=>svk('shop',$('shopN').value.trim());$('docW').oninput=()=>svk('docw',$('docW').value.trim());$('custW').oninput=()=>svk('custw',$('custW').value.trim());
 [['tplInv','tpl_inv'],['tplPay','tpl_pay'],['tplRem','tpl_rem'],['tplRdy','tpl_rdy']].forEach(([i,k])=>$(i).oninput=()=>svk(k,$(i).value));
 $('fzSel').value=lsv('fz','m')||'m';$('fzSel').onchange=()=>{const v=$('fzSel').value;svk('fz',v);document.documentElement.classList.remove('fz-x','fz-s','fz-l','fz-xl');if(v!=='m')document.documentElement.classList.add('fz-'+v);fixBar()};
@@ -1624,12 +1646,13 @@ async function storCheck(){try{const x=await storStat(),top=Math.max(x.ls/x.lsCa
 /* ========== الإعدادات: قايمة رئيسية وصفحة لكل قسم ========== */
 let stCur='';
 function stGo(k){stCur=k||'';$('stHome').classList.toggle('hide',!!stCur);document.querySelectorAll('#t-st .stp').forEach(p=>p.classList.toggle('hide',p.dataset.sp!==(stCur==='desc'?'des':stCur)));{const dz=$('invDes');if(dz)dz.dataset.dm=stCur==='desc'?'col':'sz';const dt=$('desT');if(dt)dt.textContent=stCur==='desc'?'🎨 شكل الفاتورة والألوان':'📐 تصميم ومقاسات الفاتورة'}
-  try{if((stCur==='des'||stCur==='desc')&&window.invDesOpen)invDesOpen();else if(stCur==='msg'){loadMsgUI();msgPrev()}else if(stCur==='pay')pmDraw();else if(stCur==='notes')ntDraw();else if(stCur==='shop'){loadMsgUI();shopTxtLoad()}else if(stCur==='look')fzMark();else if(stCur==='rem')remUI();else if(stCur==='data'){storDraw();fracDraw()}else if(stCur==='exp')expOpen();else if(stCur==='sup')supOpen(null);else if(stCur==='stk')stkOpen();else if(stCur==='nf')nfUI();else if(!stCur)stSum()}catch(e){}
+  try{if((stCur==='des'||stCur==='desc')&&window.invDesOpen)invDesOpen();else if(stCur==='msg'){loadMsgUI();msgPrev()}else if(stCur==='pay')pmDraw();else if(stCur==='notes')ntDraw();else if(stCur==='shop'){loadMsgUI();shopTxtLoad()}else if(stCur==='look')fzMark();else if(stCur==='rem')remUI();else if(stCur==='data'){storDraw();fracDraw();try{cbStatus()}catch(_){}}else if(stCur==='chk')chkDraw();else if(stCur==='exp')expOpen();else if(stCur==='sup')supOpen(null);else if(stCur==='stk')stkOpen();else if(stCur==='nf')nfUI();else if(!stCur)stSum()}catch(e){}
   window.scrollTo(0,0)}
 function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ssIt').textContent=plN(S.items.length,'صنف');{const t=supTot();$('ssSup').textContent=plN(S.suppliers.length,'مورد')+(t>0?' · ليهم '+f(t)+(supOv()>0?' ⏰':''):'')}{const m=stkAll(),n=stkLow(m);$('ssStk').textContent=m.size?plN(m.size,'صنف')+(n?' · ⚠️ '+n:''):'لسه فاضي'}let ps=[];try{ps=pfPresets()}catch(e){}
   W_('shop',shopN());W_('des','المقاسات والخطوط والأعمدة · '+PAPERS[paperKey()].n);W_('desc',(pget('fancyInv',true)?'التصميم الملون':'تصميم بسيط')+' · الألوان والقوالب');
   const n=liveNotes().length;W_('notes',n?n+(n>1?' ملاحظات':' ملاحظة'):'مفيش ملاحظات');
-  W_('inv',[pget('editInv',true)&&'تعديل',pget('dupInv',true)&&'تكرار',pget('pdfOn',true)&&'PDF وطباعة',pget('saveImgOn',false)&&'حفظ كصورة'].filter(Boolean).join(' · ')||'كل الخيارات مقفولة');
+  try{const L=chkItems(),b=L.filter(x=>!x.ok).length;W_('chk',b?'⚠️ '+plN(b,'حاجة')+' محتاجة منك':'✅ كله تمام')}catch(_){}
+  W_('inv',[pget('autoWa',false)&&'واتساب بعد الحفظ',pget('editInv',true)&&'تعديل',pget('dupInv',true)&&'تكرار',pget('qtOn',true)&&'عروض أسعار',pget('pdfOn',true)&&'PDF وطباعة',pget('qrOn',true)&&'QR',pget('saveImgOn',false)&&'حفظ كصورة'].filter(Boolean).join(' · ')||'كل الخيارات مقفولة');
   W_('pay',ps.length?ps.map(x=>x.n+' '+fq(x.p)+'%').join(' · '):'مفيش طرق دفع');
   W_('msg','فاتورة · دفعة · تذكير'+($('autoWa').checked?' · إرسال تلقائي':''));
   W_('rem',pget('remOn',true)?'بعد '+dz(Math.round(+lsv('remDays','7'))||7)+' من غير دفع':'مقفول');
@@ -1733,8 +1756,9 @@ $('pmList').addEventListener('click',e=>{const r=e.target.closest('.pmc2');if(!r
   const b=e.target.closest('[data-pmx]');if(!b)return;if(r.querySelector('[data-pm=n]').value.trim()&&!ok2(b))return;r.remove();pmSave();pmDraw()});
 $('pmAdd').onclick=()=>{$('pmList').insertAdjacentHTML('beforeend',pmCard({n:'',p:0,num:'',ic:'',on:true}));const ins=$('pmList').querySelectorAll('[data-pm=n]');ins[ins.length-1].focus()};
 $('pmQ').addEventListener('click',e=>{const b=e.target.closest('[data-pq]');if(!b)return;const q=PM_Q[+b.dataset.pq];const a=pfAll();a.push(pmNorm({n:q[0],p:q[2],num:'',ic:q[1]==='💳'?'':q[1],on:true,accs:[{id:accId(),lb:'',num:'',p:q[2],on:true}]}));svk('pfPre2',JSON.stringify(a));pmDraw();$('pfPre').innerHTML=preHtml();spRefresh();calc()});
-function pmCust(){const l=S.customers.filter(c=>c.pfr&&Object.keys(c.pfr).length).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
-  $('pmCust').innerHTML=l.map(c=>Object.entries(c.pfr).map(([n,p])=>`<div class="pmc"><span><b>${esc(c.name)}</b> <span class="mute">${esc(n)}</span></span><span style="display:flex;align-items:center;gap:6px"><b class="num">${fq(p)}%</b><button type="button" class="del" data-pcx="${c.id}" data-pcn="${esc(n)}" aria-label="مسح">×</button></span></div>`).join('')).join('')||'<p class="mute" style="margin-top:6px">لسه مفيش. أول ما تسجل دفعة لعميل بنسبة غير العامة هتظهر هنا.</p>'}
+function pmCust(){const l=S.customers.filter(c=>c.pfr&&Object.keys(c.pfr).length).sort((a,b)=>a.name.localeCompare(b.name,'ar'));const names=new Set(pfAll().map(x=>x.n)),orph=l.reduce((s,c)=>s+Object.keys(c.pfr).filter(n=>!names.has(n)).length,0);setTimeout(()=>{const e=$('pmOrph');if(e){e.classList.toggle('hide',!orph);e.textContent='🧹 امسح '+plN(orph,'نسبة')+' لطرق اتمسحت أو اتغير اسمها'}},0);
+  $('pmCust').innerHTML=l.map(c=>Object.entries(c.pfr).map(([n,p])=>`<div class="pmc"><span><b>${esc(c.name)}</b> <span class="mute">${esc(n)}${pfAll().some(x=>x.n===n)?'':' <b style="color:var(--danger)">(الطريقة دي مش موجودة)</b>'}</span></span><span style="display:flex;align-items:center;gap:6px"><b class="num">${fq(p)}%</b><button type="button" class="del" data-pcx="${c.id}" data-pcn="${esc(n)}" aria-label="مسح">×</button></span></div>`).join('')).join('')||'<p class="mute" style="margin-top:6px">لسه مفيش. أول ما تسجل دفعة لعميل بنسبة غير العامة هتظهر هنا.</p>'}
+$('pmOrph').onclick=()=>{const names=new Set(pfAll().map(x=>x.n));let n=0;S.customers.forEach(c=>{if(!c.pfr)return;const m={...c.pfr};let ch=false;Object.keys(m).forEach(k=>{if(!names.has(k)){delete m[k];ch=true;n++}});if(ch){c.pfr=m;put('customers',c)}});pmCust();toast('✓ اتمسحت '+plN(n,'نسبة'))};
 $('pmCust').addEventListener('click',e=>{const b=e.target.closest('[data-pcx]');if(!b)return;const c=getC(b.dataset.pcx);if(!c||!c.pfr)return;const m={...c.pfr};delete m[b.dataset.pcn];c.pfr=m;put('customers',c);pmCust();calc()});
 /* رسايل الواتساب: زراير بتحط البيانات في الرسالة + معاينة زي الواتساب */
 const VARS={tplInv:[['بيانات_الدفع','بيانات الدفع'],['العميل','اسم العميل'],['اللقب','اللقب'],['المحل','اسم المحل'],['الفاتورة','رقم الفاتورة'],['الكود','الكود'],['التاريخ','التاريخ'],['الإجمالي','الإجمالي'],['المدفوع','المدفوع'],['المتبقي','المتبقي'],['الخصم','الخصم'],['سبب_الخصم','سبب الخصم'],['طريقة_الدفع','طريقة الدفع'],['عمولة_الدفع','عمولة الدفع']],
@@ -1808,19 +1832,19 @@ const exfSave=l=>svk('exfix',JSON.stringify(l));
 const exfLab=t=>t.per==='d'?'كل يوم':t.per==='w'?'كل '+EXWD[t.day]:'يوم '+t.day+' كل شهر';
 /* بترجع المصروفات المستحقة من آخر مرة لحد النهارده، وبتحدّث last في نفس القايمة. مفيش تسجيل بأثر رجعي قبل تاريخ الإضافة */
 function exfDue(list,now){const out=[],t0=new Date(now);t0.setHours(0,0,0,0);const end=t0.getTime();let ch=false;
-  list.forEach(t=>{const d=new Date(t.last?t.last:t.from);d.setHours(0,0,0,0);if(t.last)d.setDate(d.getDate()+1);let n=0;
+  list.forEach(t=>{if(t.pz){if(t.last!==end){t.last=end;ch=true}return}const d=new Date(t.last?t.last:t.from);d.setHours(0,0,0,0);if(t.last)d.setDate(d.getDate()+1);let n=0;
     while(d.getTime()<=end&&n++<800){const dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
       if(t.per==='d'||(t.per==='w'?d.getDay()===t.day:d.getDate()===Math.min(t.day,dim)))out.push({id:'fx'+t.id+'_'+dayKey(d.getTime()),ts:new Date(d.getFullYear(),d.getMonth(),d.getDate(),12).getTime(),amt:t.amt,cat:t.name,note:'ثابت · '+(t.per==='d'?'يومي':t.per==='w'?'أسبوعي':'شهري'),fx:t.id});
       d.setDate(d.getDate()+1)}
     if(t.last!==end){t.last=end;ch=true}});return{out,ch}}
 function exfRun(){if(!dataReady)return 0;const l=exfLoad();if(!l.length)return 0;const r=exfDue(l,Date.now());let n=0;r.out.forEach(o=>{if(!S.expenses.some(x=>x.id===o.id)){S.expenses.push(o);put('expenses',o);n++}});if(r.ch)exfSave(l);return n}
-function drawExf(list){const l=list||exfLoad(),mo=rd2(l.reduce((s,t)=>s+(t.per==='d'?t.amt*365/12:t.per==='w'?t.amt*52/12:t.amt),0));
-  $('exfList').innerHTML=l.map(t=>'<div class="ro" style="color:var(--ink);gap:6px"><span style="flex:1;min-width:0">'+esc(t.name)+' <small class="mute">· '+exfLab(t)+'</small></span><b class="num">'+f(t.amt)+'</b><button class="del" data-exfd="'+esc(t.id)+'" aria-label="حذف '+esc(t.name)+'">×</button></div>').join('')+(l.length?'<div class="mute" style="font-size:12px">الثابت في الشهر تقريبًا '+f(Math.round(mo))+'</div>':'<div class="mute">مفيش. ضيف القبض الأسبوعي أو الإيجار الشهري من تحت.</div>')}
+function drawExf(list){const l=list||exfLoad(),mo=rd2(l.filter(t=>!t.pz).reduce((s,t)=>s+(t.per==='d'?t.amt*365/12:t.per==='w'?t.amt*52/12:t.amt),0));
+  $('exfList').innerHTML=l.map(t=>'<div class="ro" style="color:var(--ink);gap:6px'+(t.pz?';opacity:.5':'')+'"><span style="flex:1;min-width:0">'+esc(t.name)+' <small class="mute">· '+exfLab(t)+(t.pz?' · ⏸ واقف':'')+'</small></span><b class="num">'+f(t.amt)+'</b><button type="button" class="alt" data-exfp="'+esc(t.id)+'" style="min-height:26px;height:26px;padding:0 8px;font-size:12px;flex:none">'+(t.pz?'▶ شغّل':'⏸ وقّف')+'</button><button class="del" data-exfd="'+esc(t.id)+'" aria-label="حذف '+esc(t.name)+'">×</button></div>').join('')+(l.length?'<div class="mute" style="font-size:12px">الثابت في الشهر تقريبًا '+f(Math.round(mo))+'</div>':'<div class="mute">مفيش. ضيف القبض الأسبوعي أو الإيجار الشهري من تحت.</div>')}
 function exfDays(){const w=$('exfPer').value==='w',s=$('exfDay');s.classList.toggle('hide',$('exfPer').value==='d');s.innerHTML=w?EXWD.map((n,i)=>'<option value="'+i+'"'+(i===4?' selected':'')+'>يوم '+n+'</option>').join(''):Array.from({length:28},(_,i)=>'<option value="'+(i+1)+'">يوم '+(i+1)+' في الشهر</option>').join('')}
 $('exfPer').onchange=exfDays;exfDays();
 $('exfAdd').onclick=()=>{const name=$('exfName').value.trim(),amt=rd2(nv($('exfAmt').value)),m=$('exfMsg');if(!name){m.textContent='اكتب اسم المصروف';return}if(!(amt>0)){m.textContent='اكتب المبلغ';return}
   const l=exfLoad(),t0=new Date();t0.setHours(0,0,0,0);l.push({id:uid(),name,amt,per:$('exfPer').value,day:$('exfPer').value==='d'?0:+$('exfDay').value,from:t0.getTime(),last:0});exfSave(l);$('exfName').value='';$('exfAmt').value='';const n=exfRun();drawExf();drawExp();m.textContent=n?'اتضاف، واتسجل مصروف النهارده ✓':'اتضاف ✓ هيتسجل لوحده في ميعاده'};
-$('exfList').onclick=e=>{const b=e.target.closest('[data-exfd]');if(!b||!ok2(b))return;const l=exfLoad(),t=l.find(x=>x.id===b.dataset.exfd);exfSave(l.filter(x=>x.id!==b.dataset.exfd));drawExf();if(t)toast('اتشال «'+t.name+'» من الثابت. اللي اتسجل قبل كده فاضل','تراجع',()=>{const k=exfLoad();k.push(t);exfSave(k);drawExf()})};
+$('exfList').onclick=e=>{{const p=e.target.closest('[data-exfp]');if(p){const l=exfLoad(),t=l.find(x=>x.id===p.dataset.exfp);if(t){t.pz=!t.pz;if(!t.pz){const t0=new Date();t0.setHours(0,0,0,0);t.last=t0.getTime()-864e5}exfSave(l);const n=exfRun();drawExf();drawExp();toast(t.pz?'⏸ «'+t.name+'» واقف، مش هيتسجل لحد ما تشغّله':'▶ «'+t.name+'» رجع يشتغل'+(n?' واتسجل النهارده':''))}return}}const b=e.target.closest('[data-exfd]');if(!b||!ok2(b))return;const l=exfLoad(),t=l.find(x=>x.id===b.dataset.exfd);exfSave(l.filter(x=>x.id!==b.dataset.exfd));drawExf();if(t)toast('اتشال «'+t.name+'» من الثابت. اللي اتسجل قبل كده فاضل','تراجع',()=>{const k=exfLoad();k.push(t);exfSave(k);drawExf()})};
 function expOpen(){exfRun();drawExf();const k=dayKey(Date.now());if(!$('exDate').value)$('exDate').value=k;if(!$('exMon').value)$('exMon').value=k.slice(0,7);$('exMsg').textContent='';drawExp()}
 $('exMon').onchange=drawExp;
 $('exRep').onclick=()=>showMonth(exMonTs());
@@ -2213,7 +2237,7 @@ $('nfBell').onclick=()=>{$('remL').classList.add('hide');bellUI();$('nfOv').clas
 $('nfOv').addEventListener('click',e=>{if(e.target===$('nfOv')){$('nfOv').classList.add('hide');return}const r=e.target.closest('[data-nk]');if(r){$('nfOv').classList.add('hide');nfGo(r.dataset.nk);return}if(e.target.closest('#autoBan button,#remBan button,#ordBan,#bkBanner button')&&e.target.id!=='nfX')setTimeout(()=>{$('nfOv').classList.add('hide');bellUI()},0)});
 if(window.MutationObserver){const mo=new MutationObserver(()=>bellUI());['autoBan','remBan','ordBan','bkBanner'].forEach(i=>mo.observe($(i),{attributes:true,attributeFilter:['class']}))}
 function nfBoot(){if(nfState()==='on')nfBg();const g=/^#go=(\w+)/.exec(location.hash);if(g){history.replaceState(null,'',location.pathname);setTimeout(()=>nfGo(g[1]),300)}}
-function nfUI(){const s=nfState();$('nfStat').textContent={on:'شغالة ✓',off:'مقفولة',denied:'الإذن متمنع. افتح إذن الإشعارات للبرنامج من إعدادات المتصفح.',no:'الجهاز ده مش بيدعم الإشعارات. على الآيفون لازم تضيف البرنامج للشاشة الرئيسية الأول.'}[s];$('nfBtn').textContent=s==='on'?'إيقاف الإشعارات':'تفعيل الإشعارات';$('nfBtn').classList.toggle('hide',s==='no'||s==='denied');$('nfTest').classList.toggle('hide',s!=='on')}
+function nfUI(){const s=nfState();try{const w=$('nfWarn');if(w)w.classList.toggle('hide',s==='on'||s==='no')}catch(_){}$('nfStat').textContent={on:'شغالة ✓',off:'مقفولة',denied:'الإذن متمنع. افتح إذن الإشعارات للبرنامج من إعدادات المتصفح.',no:'الجهاز ده مش بيدعم الإشعارات. على الآيفون لازم تضيف البرنامج للشاشة الرئيسية الأول.'}[s];$('nfBtn').textContent=s==='on'?'إيقاف الإشعارات':'تفعيل الإشعارات';$('nfBtn').classList.toggle('hide',s==='no'||s==='denied');$('nfTest').classList.toggle('hide',s!=='on')}
 $('nfBtn').onclick=async()=>{if(nfState()==='on')pset('nfOn',false);else if(await Notification.requestPermission()==='granted'){pset('nfOn',true);nfBg()}nfSave();nfUI()};
 $('nfTest').onclick=()=>nfSys({k:'stk',m:'ده إشعار تجربة. دوس عليه يفتح المخزون'});
 if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.go)nfGo(e.data.go)});
