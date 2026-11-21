@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='363';
+const APP_VER='364';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2119,7 +2119,7 @@ $('supDel').onclick=e=>{const m=$('spMsg');if(S.purchases.some(x=>x.sid===supCur
 /* المخزون الكامل: S.stock {id,iid,ts,q,t?,why?,sid?,cost?,note?}، q موجب وارد وسالب صرف، t='adj' يعني تسوية جرد.
    الصنف الجاهز بيتخصم لوحده من الفواتير من أول حركة ليه، والمقطع بيتصرف بإيدك لأن عدد القطع مش عدد ألواح.
    بيانات المخزون لكل صنف على الصنف نفسه: item.inv = {mn حد التنبيه, cost سعر الشراء, loc المكان, sid المورد} */
-const SKD=864e5;let stkV='home',stkId=null,stkF='all',stkAct=null,stkRs='قطّعت',stkMF='all';
+const SKD=864e5;let stkV='home',stkId=null,stkF='all',stkTy='',stkAct=null,stkRs='قطّعت',stkMF='all';
 function stkAll(){const m=new Map();S.stock.forEach(x=>{const it=S.items.find(i=>i.id===x.iid);if(!it)return;const o=m.get(x.iid)||{from:x.ts,bal:0,it};o.from=Math.min(o.from,x.ts);o.bal=rd2(o.bal+(+x.q||0));m.set(x.iid,o)});
   const IT=new Map(S.items.map(i=>[i.id,i])),PM=new Map(),par=it=>{if(!PM.has(it.id))PM.set(it.id,skPar(it));return PM.get(it.id)};
   S.invoices.forEach(r=>{if(r.type==='pay')return;(r.rows||[]).forEach(x=>{const it=IT.get(x.i);if(!it)return;const sg=x.rt?-1:1,o=m.get(x.i);
@@ -2163,10 +2163,14 @@ function skHome(){const A=skInfo().filter(x=>!(x.it.type==='rd'&&!x.tr&&skPar(x.
   $('skSum').innerHTML='<div class="skh">'+(A.length?'عندك '+plN(A.length,'صنف'):'مفيش أصناف لسه')+(val>0?' <small>· قيمتهم حوالي '+f(Math.round(val))+' ج</small>':'')+'</div>'+(st?'<div class="skst">'+st+'</div>':(A.length&&nNew<A.length?'<div class="skst ok">✅ كله تمام</div>':''))+(()=>{const wn=skWasteWarn();return wn.length?'<div class="skst"><b class="dn">⚠ هادر أعلى من '+wasteMax()+'%: '+esc(wn.join('، '))+'</b></div>':''})()+(()=>{const w=skWasteSum(30);return w.m>0?'<div class="mute" style="font-size:12px;margin-top:2px">🗑 هادر آخر 30 يوم: '+fq(w.m)+' م²'+(w.v?' (حوالي '+f(w.v)+' ج)':'')+'</div>':''})();
   const sb=$('skStart');sb.classList.toggle('hide',!(A.length&&nNew>=Math.ceil(A.length/2)));
   if(!sb.classList.contains('hide'))sb.innerHTML='<b>👋 ابدأ من هنا</b><div class="mute" style="margin:4px 0 8px">'+plN(nNew,'صنف')+' لسه ما اتعدّوش. دوس «✍️ عدّ المخزن» واكتب عندك كام لوح أو قطعة من كل صنف مرة واحدة، وبعد كده البرنامج بيحسب لوحده.</div><button type="button" class="main" data-sg="cnt" style="width:100%">✍️ عدّ المخزن دلوقتي</button>';
-  const F=[['all','الكل',A.length],['out','❌ خلص',nOut],['low','⚠️ قرب يخلص',nLow],['new','مش متعدّ',nNew]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
+  /* v364: المخزن نفس جدول الأصناف: تبويب للجاهز وتبويب للمقطع، وكل واحد بحاله */
+  const nR=A.filter(x=>x.it.type==='rd').length,nM=A.filter(x=>x.it.type==='mq').length;if(stkTy!=='rd'&&stkTy!=='mq'||(stkTy==='rd'&&!nR&&nM)||(stkTy==='mq'&&!nM&&nR))stkTy=nR||!nM?'rd':'mq';
+  $('stkTy').innerHTML='<button type="button" data-sty="rd" class="'+(stkTy==='rd'?'on':'')+'">📦 جاهز <small>'+nR+'</small></button><button type="button" data-sty="mq" class="'+(stkTy==='mq'?'on':'')+'">✂️ مقطع <small>'+nM+'</small></button>';
+  const AT=A.filter(x=>x.it.type===stkTy),cT=k=>AT.filter(x=>x.st===k).length;
+  const F=[['all','الكل',AT.length],['out','❌ خلص',cT('out')],['low','⚠️ قرب يخلص',cT('low')],['new','مش متعدّ',cT('new')]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
   if(!F.some(x=>x[0]===stkF))stkF='all';
   $('stkFil').innerHTML=F.length>1?F.map(([k,l,n])=>`<button type="button" data-sf="${k}"${k===stkF?' class="on"':''}>${l} <small>${n}</small></button>`).join(''):'';
-  const O={out:0,low:1,ok:2,idle:2,new:3},l=A.filter(x=>(stkF==='all'||x.st===stkF||(stkF==='ok'&&x.st==='idle'))&&qm(x.it.name,q)).sort((a,b)=>O[a.st]-O[b.st]||a.it.name.localeCompare(b.it.name,'ar'));
+  const O={out:0,low:1,ok:2,idle:2,new:3},l=AT.filter(x=>(stkF==='all'||x.st===stkF||(stkF==='ok'&&x.st==='idle'))&&qm(x.it.name,q)).sort((a,b)=>a.it.name.localeCompare(b.it.name,'ar')||((+a.it.w||0)*(+a.it.h||0))-((+b.it.w||0)*(+b.it.h||0)));
   $('stkRows').innerHTML=l.length?l.map(x=>{const kd=x.it.type==='mq'?skKids(x.it):[],sub=[x.tr&&x.left!=null?'يكفي حوالي '+x.left+' يوم':'',kd.length?'منه جاهز '+kd.map(k=>esc(szOf(k)||k.name)).join('، '):'',skInv(x.it).loc?'📍 '+esc(skInv(x.it).loc):''].filter(Boolean).join(' · ');
     const ic=x.st==='out'?'❌':x.st==='low'?'⚠️':'';
     return`<div class="skr ${x.st==='idle'?'ok':x.st}" data-sg="one" data-id="${esc(x.it.id)}" role="button" tabindex="0">${ic?'<span class="sks">'+ic+'</span>':''}<div class="skn"><span>${skNm(x.it)}</span>${sub?'<small>'+sub+'</small>':''}${(()=>{const l=skSzLine(x);return l?'<div class="skzs">'+esc(l)+'</div>':''})()}</div><div class="skb">${x.tr?skBalTx(x.it,x):'<small class="skz">مش متعدّ</small>'}</div></div>`}).join(''):`<div class="card mute">${S.items.length?'مفيش صنف بالشكل ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.'}</div>`}
@@ -2339,6 +2343,7 @@ function skDo(k){const it=S.items.find(i=>i.id===stkId),A=k==='apply'?null:it;
 $('stkPanel').addEventListener('click',e=>{const t=e.target;let b;
   if(t.closest('[data-szx]')){t.closest('.skszr').remove();return}
   if(b=t.closest('[data-sz]')){const w=$('skSzs');if(w)w.insertAdjacentHTML('beforeend',skSzRow({id:uid(),w:'',h:'',c:''}));return}
+  if(b=t.closest('[data-sty]')){stkTy=b.dataset.sty;stkF='all';drawStk();return}
   if(b=t.closest('[data-sf]')){stkF=b.dataset.sf;drawStk();return}
   if(b=t.closest('[data-sg]')){const k=b.dataset.sg;if(k==='rcAdd'){skRc.lines.push({iid:'',q:'',c:''});skRcv();return}if(k==='one'){stkId=b.dataset.id;stkAct=null}stkV=k;drawStk();$('stkPanel').scrollIntoView({block:'start'});return}
   if(b=t.closest('[data-ac]')){stkAct=stkAct===b.dataset.ac?null:b.dataset.ac;skOne();return}

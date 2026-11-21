@@ -1606,3 +1606,6 @@ html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(
 
 /* v359: كشف الحساب من صفحة المديون */
 .dbst{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;font-size:13px}.dbst input[type=date]{height:32px;min-height:32px;padding:0 6px;margin:0;font-size:13px;flex:1;min-width:120px}.dbst .ab{min-height:32px}.dbst small{flex-basis:100%;font-size:11px}.dbh .cn[data-dfull]{text-decoration:none}
+
+/* v364: المخزن بتبويبات جاهز/مقطع وصفوف مضغوطة */
+#stkTy{margin:0 0 6px}#t-st .skr{padding:5px 10px;margin-bottom:3px;border-radius:9px}#t-st .skr .skn small{font-size:11px}
