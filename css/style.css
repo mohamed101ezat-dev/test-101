@@ -1609,3 +1609,6 @@ html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(
 
 /* v364: المخزن بتبويبات جاهز/مقطع وصفوف مضغوطة */
 #stkTy{margin:0 0 6px}#t-st .skr{padding:5px 10px;margin-bottom:3px;border-radius:9px}#t-st .skr .skn small{font-size:11px}
+
+/* v365: زرار المخزن اتنقل لصفحة الأصناف */
+.stile[data-sp="stk"]{display:none!important}#t-it .sth{display:flex;align-items:center;gap:8px}
