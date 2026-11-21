@@ -1615,3 +1615,4 @@ html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(
 
 /* v367: استلام بضاعة */
 .rcl{display:block;border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin-bottom:6px}.rcr{display:flex;gap:6px;align-items:center}.rcr input{flex:1;min-width:0;height:34px;margin:0}.rcr.rc4{margin-top:4px}.rcr.rc4 input{width:25%;text-align:center}.rcl .rcv{margin-top:3px}
+.rcl .rcr.rc4 input{width:auto;flex:1 1 0;padding:0 4px;font-size:13px}.rcl .rcN{font-size:14px}
