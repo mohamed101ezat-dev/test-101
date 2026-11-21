@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='362';
+const APP_VER='363';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2734,7 +2734,7 @@ function iAgg(a,b){const recs=S.invoices.filter(r=>r.ts>=a&&r.ts<b),G=new Map();
     else if(iSub==='r'){if(r.type==='inv')(r.rows||[]).forEach(x=>{if(x.k==null){nk=rd2(nk+(+x.v||0));return}{const m=itKey(x),ty=m.ok?m.ty:'u';add(ty+'|'+m.k,rd2((+x.v||0)-(+x.k||0)),(x.rt?-1:1)*(+x.c||0),ty,(x.rt?-1:1)*(+x.q||0),m.k,ty==='rd'?itSzKey(x):'')}})}
     else if(iSub==='i'){if(r.type==='inv')(r.rows||[]).forEach(x=>{/* v189: المرتجع بيتخصم من مبيعات الصنف */{const m=itKey(x),ty=m.ok?m.ty:'u';add(ty+'|'+m.k,+x.v||0,(x.rt?-1:1)*(+x.c||0),ty,(x.rt?-1:1)*(+x.q||0),m.k,ty==='rd'?itSzKey(x):'',x.k!=null?rd2((+x.v||0)-(+x.k||0)):null)}})}});
   return{G,tot,cnt,nk,n:recs.length,inv:recs.filter(r=>r.type==='inv').length}}
-const PNAME={d:'النهارده',ys:'أمس',d2:'قبل أمس',d3:'قبل 3 أيام',d4:'قبل 4 أيام',d5:'قبل 5 أيام',d6:'قبل 6 أيام',w3:'آخر 3 أيام',w:'آخر 7 أيام',w30:'آخر 30 يوم'},SNAME={s:'المبيعات',p:'المدفوع',d:'المديونيات',t:'المرتجع',i:'الأصناف',w:'طرق الدفع',o:'الطلبيات',r:'الربح',x:'المصروفات والصافي'};
+const PNAME={d:'النهارده',ys:'أمس',d2:'قبل أمس',d3:'قبل 3 أيام',d4:'قبل 4 أيام',d5:'قبل 5 أيام',d6:'قبل 6 أيام',w3:'آخر 3 أيام',w:'آخر 7 أيام',w30:'آخر 30 يوم'},SNAME={s:'المبيعات',p:'المدفوع',d:'المديونيات',t:'المرتجع',i:'الأصناف',w:'طرق الدفع',o:'الطلبيات',r:'الربح',x:'المصروفات والصافي',z:'ملخص الفترة'};
 const perLab=R=>(PNAME[iPer]?PNAME[iPer]+' · ':'')+rLab(R);
 let iMoreOpen=false;
 /* v248: شاشة التقرير — الأرقام بتظهر على طول لكل فترة، وكل سطر بيفتح ورقة تفاصيله */
@@ -2758,7 +2758,7 @@ function drawInfo(){
   $('iCmpL').textContent='';
   const row=(k,em,l,sm,v,cls)=>'<button type="button" class="rrow" data-rk="'+k+'"><span class="rl">'+em+' '+l+(sm?' <small>· '+esc(sm)+'</small>':'')+'</span>'+(v!==''?'<b'+(cls?' class="'+cls+'"':'')+'>'+v+'</b>':'')+'<i>‹</i></button>';
   const ti=top(I.G)[0],tw=top(W.G).slice(0,2).map(([k,o])=>k+' '+f(o.v)).join(' · ');
-  let m=row('s','🧾','الفواتير',plN(T.n,'فاتورة')+(T.c?' · '+plN(T.c,'عميل'):''),f(T.s))+row('p','💵','الفلوس اللي دخلت',tw||'',f(T.p),'cr');
+  let m=(T.n||T.p||exA?row('z','📊','ملخص الفترة','بعت · دخل · صرفت · الصافي',''):'')+row('s','🧾','الفواتير',plN(T.n,'فاتورة')+(T.c?' · '+plN(T.c,'عميل'):''),f(T.s))+row('p','💵','الفلوس اللي دخلت',tw||'',f(T.p),'cr');
   if(exA)m+=row('x','💸','المصروفات',pu?'منها مشتريات موردين '+f(pu):'',f(exA),'dr');
   if(P.cnt)m+=row('r','📈','الربح',WV0>0?'بعد المصروفات والهادر':'بعد المصروفات',f(rd2(P.tot-T.ex-WV0)));
   if(rt)m+=row('t','↩️','المرتجع','',f(rt));
@@ -2776,18 +2776,33 @@ function repGo(){
     cd=r=>r.type==='pay'?'دفعة'+(r.code?' '+r.code:''):(r.code||'#'+r.no),
     recs=S.invoices.filter(r=>r.ts>=R.a&&r.ts<R.b).sort((x,y)=>y.ts-x.ts);
   let tb=null,sum=[],tot=0,note='',rows=[],ITG=null,dLab='الأرصدة لحد دلوقتي';
-  if(sb==='s'){const l=recs.filter(r=>r.type==='inv');tot=rd2(l.reduce((a,r)=>a+val(r),0));rows=l.map(r=>[fm(r.ts),r.cname,r.code||'#'+r.no,f(val(r))]);
-    tb={th:['التاريخ','العميل','فاتورة','القيمة'],w:[.17,.41,.17,.25]};sum=[['عدد الفواتير',String(l.length)],['إجمالي المبيعات',f(tot),1],['المدفوع',f(T0())]]}
-  else if(sb==='p'){const l=recs.filter(r=>rd2(pd(r)||0)!==0),G=new Map();tot=rd2(l.reduce((a,r)=>a+pd(r),0));
-    rows=l.map(r=>{const m=pdBy(r).filter(([k,v])=>rd2(v||0)!==0);m.forEach(([k,v])=>G.set(k,rd2((G.get(k)||0)+v)));return[fm(r.ts),r.cname,cd(r),f(pd(r)),m.map(([k,v])=>k+(m.length>1?' '+f(v):'')).join(' + ')]});
-    tb={th:['التاريخ','العميل','الكود','المبلغ','طريقة الدفع'],w:[.13,.27,.21,.17,.22]};sum=[['عدد العمليات',String(l.length)],['إجمالي المدفوع',f(tot),1],...[...G].sort((x,y)=>y[1]-x[1]).map(([k,v])=>['منه '+k,f(v)])]}
+  /* v363: تجميع بالأيام مع إجمالي كل يوم */
+  const dk=t=>{const d=new Date(t);return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()},dl=t=>{const d=new Date(t);return WD[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)},HB='#dbe7f5',
+    byDay=l=>{const m=new Map();l.forEach(r=>{const k=dk(r.ts);(m.get(k)||m.set(k,[]).get(k)).push(r)});return[...m.values()]};
+  if(sb==='s'){const l=recs.filter(r=>r.type==='inv'),rs=r=>Math.max(0,rd2(val(r)-pd(r)));tot=rd2(l.reduce((a,r)=>a+val(r),0));const rest=rd2(l.reduce((a,r)=>a+rs(r),0)),R2=[];
+    byDay(l).forEach(g=>{R2.push(Object.assign([dl(g[0].ts),plN(g.length,'فاتورة'),f(g.reduce((a,r)=>a+val(r),0)),f(g.reduce((a,r)=>a+pd(r),0)),f(g.reduce((a,r)=>a+rs(r),0))],{bg:HB}));g.forEach(r=>R2.push(Object.assign([r.cname,r.code||'#'+r.no,f(val(r)),f(pd(r)),rs(r)>0?f(rs(r)):'—'],rs(r)>0?{bg:'#fde9e8'}:{})))});
+    rows=l.length?[0]:[];tb={th:[],w:[]};ITG=[{th:['العميل','فاتورة','القيمة','المدفوع','المتبقي'],w:[.32,.17,.18,.17,.16],rows:R2}];
+    sum=[['عدد الفواتير',String(l.length)],['إجمالي المبيعات',f(tot),1],['المدفوع',f(T0())],['لسه ما اتدفعش',f(rest)]]}
+  else if(sb==='p'){const l=recs.filter(r=>rd2(pd(r)||0)!==0),G=new Map();tot=rd2(l.reduce((a,r)=>a+pd(r),0));let col=0;const R2=[];
+    l.forEach(r=>{pdBy(r).filter(([k,v])=>rd2(v||0)!==0).forEach(([k,v])=>G.set(k,rd2((G.get(k)||0)+v)));if(r.type==='pay')col=rd2(col+pd(r))});
+    byDay(l).forEach(g=>{R2.push(Object.assign([dl(g[0].ts),plN(g.length,'عملية'),'',f(g.reduce((a,r)=>a+pd(r),0))],{bg:HB}));g.forEach(r=>{const m=pdBy(r).filter(([k,v])=>rd2(v||0)!==0);R2.push([r.cname,cd(r),m.map(([k,v])=>k+(m.length>1?' '+f(v):'')).join(' + '),f(pd(r))])})});
+    const T1=[['الإجمالي',f(tot)],...[...G].sort((x,y)=>y[1]-x[1]).map(([k,v])=>['منه '+k,f(v)])];if(col)T1.push(['منها تحصيل ديون (دفعات)',f(col)]);
+    T1[0].bg='#dcefe1';rows=l.length?[0]:[];tb={th:[],w:[]};ITG=[{title:'💵 الفلوس اللي دخلت',th:['البند','المبلغ'],w:[.62,.38],rows:T1},{title:'التفاصيل بالأيام',th:['العميل','الكود','طريقة الدفع','المبلغ'],w:[.3,.2,.28,.22],rows:R2}];
+    sum=[['عدد العمليات',String(l.length)],['إجمالي المدفوع',f(tot),1]]}
   else if(sb==='d'){const as=dbAsOf(R),l=dbRep(as);dLab=as<=Date.now()?'الأرصدة لحد '+dshort(as-1):'الأرصدة لحد دلوقتي';tot=rd2(l.reduce((a,x)=>a+x.b,0));
     rows=l.map(x=>[x.c.name,f(x.b),x.lp?fm(x.lp)+' · '+agoTxt(x.lp):'لسه ما دفعش',x.lt?fm(x.lt)+' · '+agoTxt(x.lt):'—']);
     tb={th:['العميل','عليه','آخر دفعة','آخر معاملة'],w:[.30,.16,.27,.27]};sum=[['عدد المديونين',String(l.length)],['إجمالي المديونيات',f(tot),1]]}
   else if(sb==='t'){let n=0;recs.filter(r=>r.type==='inv'&&hasRet(r)).forEach(r=>(r.rows||[]).filter(x=>x.rt).forEach(x=>{const v=rd2(Math.abs(+x.v||0));n++;tot=rd2(tot+v);rows.push([fm(r.ts),r.cname,String(x.n||'').trim()||'—',f(v)])}));
     tb={th:['التاريخ','العميل','الصنف','القيمة'],w:[.17,.33,.30,.20]};sum=[['عدد البنود',String(n)],['إجمالي المرتجع',f(tot),1]]}
-  else if(sb==='x'){const l=exIn(R.a,R.b).sort((x,y)=>y.ts-x.ts),pu=puIn(R.a,R.b).buy,sl=rd2(recs.filter(r=>r.type==='inv').reduce((a,r)=>a+val(r),0));tot=exTot(l);rows=l.map(x=>[fm(x.ts),x.cat,x.note||'',f(x.amt)]);
-    tb={th:['التاريخ','النوع','ملاحظة','المبلغ'],w:[.15,.3,.33,.22]};sum=[['المبيعات',f(sl)],['− المصروفات',f(tot)],...(pu?[['− مشتريات الموردين',f(pu)]]:[]),['= الفرق (مش ربح: مش طارح تمن البضاعة)',f(rd2(sl-tot-pu)),1]]}
+  else if(sb==='x'){const l=exIn(R.a,R.b).sort((x,y)=>y.ts-x.ts),pu=puIn(R.a,R.b).buy,sl=rd2(recs.filter(r=>r.type==='inv').reduce((a,r)=>a+val(r),0));tot=exTot(l);const C=new Map(),R2=[];l.forEach(x=>{const o=C.get(x.cat)||{n:0,v:0};o.n++;o.v=rd2(o.v+(+x.amt||0));C.set(x.cat,o)});
+    byDay(l).forEach(g=>{R2.push(Object.assign([dl(g[0].ts),'',f(g.reduce((a,x)=>a+(+x.amt||0),0))],{bg:HB}));g.forEach(x=>R2.push([x.cat,x.note||'',f(x.amt)]))});
+    rows=l.length?[0]:[];tb={th:[],w:[]};ITG=[{title:'💸 المصروفات حسب النوع',th:['النوع','العدد','المبلغ'],w:[.5,.2,.3],rows:[...C].sort((x,y)=>y[1].v-x[1].v).map(([k,o])=>[k,String(o.n),f(o.v)])},{title:'التفاصيل بالأيام',th:['النوع','ملاحظة','المبلغ'],w:[.3,.45,.25],rows:R2}];
+    sum=[['المبيعات',f(sl)],['− المصروفات',f(tot)],...(pu?[['− مشتريات الموردين',f(pu)]]:[]),['= الفرق (مش ربح: مش طارح تمن البضاعة)',f(rd2(sl-tot-pu)),1]]}
+  else if(sb==='z'){const inv=recs.filter(r=>r.type==='inv'),sl=rd2(inv.reduce((a,r)=>a+val(r),0)),inc=rd2(recs.reduce((a,r)=>a+pd(r),0)),exv=exTot(exIn(R.a,R.b)),pu=puIn(R.a,R.b).buy,nd=rd2(inv.reduce((a,r)=>a+Math.max(0,val(r)-pd(r)),0));let cash=0;
+    recs.forEach(r=>pdBy(r).forEach(([n,v])=>{if(/^(كاش|نقدي)$/.test(String(n).trim()))cash+=+v||0}));cash=rd2(cash);const net=rd2(inc-exv-pu);
+    rows=[0];tb={th:['البند','المبلغ'],w:[.62,.38]};
+    ITG=[{title:'📊 ملخص الفترة',th:['البند','المبلغ'],w:[.62,.38],rows:[Object.assign(['🧾 بعت ('+plN(inv.length,'فاتورة')+')',f(sl)],{bg:'#e8f1fb'}),Object.assign(['💵 دخل (مدفوع)',f(inc)],{bg:'#e6f4e6'}),['   منه كاش',f(cash)],['   منه تحويلات',f(rd2(inc-cash))],Object.assign(['💸 صرفت',f(exv)],{bg:'#fde9e8'}),...(pu?[['   منها مشتريات موردين',f(pu)]]:[]),['📒 اتضاف مديونيات جديدة',f(nd)]]}];
+    sum=[['الصافي (دخل − مصروفات)',f(net),1]]}
   else if(sb==='o'){const l=recs.filter(r=>r.type==='inv'&&ordSt(r)!=='d');tot=rd2(l.reduce((a,r)=>a+val(r),0));rows=l.map(r=>[fm(r.ts),r.cname,r.code||'#'+r.no,ordSt(r)==='p'?'تحت التجهيز':'جاهز',f(val(r))]);
     tb={th:['التاريخ','العميل','فاتورة','الحالة','القيمة'],w:[.14,.29,.15,.22,.20]};sum=[['عدد الطلبيات',String(l.length)],['إجمالي القيمة',f(tot),1]]}
   else{const A=iAgg(R.a,R.b);tot=A.tot;rows=[...A.G].sort((x,y)=>y[1].v-x[1].v).map(([k,o])=>[o.n||k,sb==='w'?String(o.c):f(o.c),f(o.v)]);
