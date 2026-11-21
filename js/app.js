@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='366';
+const APP_VER='367';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2346,7 +2346,7 @@ $('stkPanel').addEventListener('click',e=>{const t=e.target;let b;
   if(b=t.closest('[data-sz]')){const w=$('skSzs');if(w)w.insertAdjacentHTML('beforeend',skSzRow({id:uid(),w:'',h:'',c:''}));return}
   if(b=t.closest('[data-sty]')){stkTy=b.dataset.sty;stkF='all';drawStk();return}
   if(b=t.closest('[data-sf]')){stkF=b.dataset.sf;drawStk();return}
-  if(b=t.closest('[data-sg]')){const k=b.dataset.sg;if(k==='rcAdd'){skRc.lines.push({iid:'',q:'',c:''});skRcv();return}if(k==='one'){stkId=b.dataset.id;stkAct=null}stkV=k;drawStk();$('stkPanel').scrollIntoView({block:'start'});return}
+  if(b=t.closest('[data-sg]')){const k=b.dataset.sg;if(k==='rcAdd'){skRc.lines.push(rcNew());skRcv();return}if(k==='one'){stkId=b.dataset.id;stkAct=null}stkV=k;drawStk();$('stkPanel').scrollIntoView({block:'start'});return}
   if(b=t.closest('[data-ac]')){stkAct=stkAct===b.dataset.ac?null:b.dataset.ac;skOne();return}
   if(b=t.closest('[data-qq]')){const i=$('skQty');i.value=rd2((nv(i.value)||0)+ +b.dataset.qq);i.dispatchEvent(new Event('input'));return}
   if(b=t.closest('[data-rs]')){stkRs=b.dataset.rs;t.closest('.spc').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));return}
@@ -2362,28 +2362,36 @@ $('stkPanel').addEventListener('click',e=>{const t=e.target;let b;
 $('stkPanel').addEventListener('change',e=>{if(e.target.id!=='skPm')return;const it=S.items.find(i=>i.id===stkId);if(!it)return;skSizes(it).forEach(z=>{const i=skQz('.skzc',z.id);if(!i||!i.value)return;const v=nv(i.value);i.value=e.target.checked?String(Math.round(v/skZA(z)*100)/100):String(Math.round(v*skZA(z)*100)/100)});const t=$('skTot');if(t)t.textContent=''});
 $('stkPanel').addEventListener('input',e=>{if(e.target.classList&&(e.target.classList.contains('skzn')||e.target.classList.contains('skzc')||e.target.id==='skPm')){const it=S.items.find(i=>i.id===stkId),t=$('skTot');if(!it||!t)return;const T=skZTot(it,skSizes(it));t.textContent=T.L.length?'حوالي '+fq(T.m2)+' م²'+(T.tc>0?' · الإجمالي '+f(T.tc)+(T.m2>0?' · المتر بـ'+f(Math.round(T.tc/T.m2*100)/100):''):''):'';return}
   if(e.target.id==='skQty'||e.target.id==='skCost'){const q=rd2(nv(($('skQty')||{}).value)),c=rd2(nv(($('skCost')||{}).value)),t=$('skTot');if(t)t.textContent=q>0&&c>0?'الإجمالي '+f(rd2(q*c)):''}});
-let skRc={sid:'',lines:[{iid:'',q:'',c:''}],paid:false,note:''};
-function skRcTot(){return rd2(skRc.lines.reduce((a,l)=>a+(rd2(nv(l.q))>0&&rd2(nv(l.c))>0?rd2(nv(l.q))*rd2(nv(l.c)):0),0))}
-const rcZ=l=>{const it=S.items.find(i=>i.id===l.iid);if(!it||it.type!=='mq'||!skSizes(it).length)return'';if(!skSzOn(it))return'<span class="mute" style="font-size:11px">اعمل جرد افتتاحي للصنف ده الأول (✍️ عدّ)</span>';return'<select class="rcZ" aria-label="المقاس"><option value="">المقاس</option>'+skSizes(it).map(z=>'<option value="'+esc(z.id)+'"'+(z.id===l.z?' selected':'')+'>'+skZN(z)+'</option>').join('')+'<option value="__new">➕ مقاس جديد…</option></select>'};
-function skRcv(){const sups=S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')),its=S.items.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar'));
-  const io=sel=>'<option value="">اختار الصنف</option>'+its.map(i=>`<option value="${esc(i.id)}"${i.id===sel?' selected':''}>${esc(skTx(i))}</option>`).join('');
-  skSub(skBack+`<div class="card"><div class="mute">📥 استلام بضاعة: المورد بيبعتلك كذا صنف مرة واحدة. سجّلهم كلهم هنا، والإجمالي بيتسجل في حسابه.</div><select id="rcSup" aria-label="المورد" style="margin-top:6px"><option value="">اختار المورد</option>${sups.map(s=>`<option value="${esc(s.id)}"${s.id===skRc.sid?' selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
-  <div class="card" id="rcLines">${skRc.lines.map((l,i)=>`<div class="skl" data-i="${i}"><select class="rcI" aria-label="الصنف">${io(l.iid)}</select>${rcZ(l)}<input class="rcQ" inputmode="decimal" placeholder="الكمية" value="${esc(l.q)}" autocomplete="off" aria-label="الكمية"><input class="rcC" inputmode="decimal" placeholder="سعر الوحدة" value="${esc(l.c)}" autocomplete="off" aria-label="سعر الوحدة"><button type="button" class="xd" data-rx="${i}" aria-label="شيل السطر">×</button></div>`).join('')}<button type="button" class="alt" data-sg="rcAdd" style="width:100%;margin-top:6px">➕ صنف تاني</button></div>
-  <div class="card"><div class="ro" style="color:var(--ink)"><span>الإجمالي</span><span class="num" id="rcTot">${f(skRcTot())}</span></div><label class="opt"><input type="checkbox" id="rcPaid"${skRc.paid?' checked':''}> دفعت كاش دلوقتي</label><input id="rcNote" placeholder="ملاحظة (اختياري)" value="${esc(skRc.note)}" autocomplete="off" aria-label="ملاحظة" style="margin-top:4px"><button type="button" class="main" data-do="rcv" style="width:100%;margin-top:6px">✅ سجّل الاستلام</button><div class="info" id="skMsg" aria-live="polite"></div></div>`)}
-function skRcSave(){const m=$('skMsg'),s=S.suppliers.find(y=>y.id===skRc.sid);if(!s){m.textContent='اختار المورد';return}
-  const L=skRc.lines.map(l=>{const it=S.items.find(i=>i.id===l.iid);return{it,z:it&&it.type==='mq'?skSizes(it).find(v=>v.id===l.z)||null:null,q:rd2(nv(l.q)),c:Math.max(0,rd2(nv(l.c)))}}).filter(l=>l.it&&l.q>0);if(!L.length){m.textContent='اختار صنف واكتب كميته';return}
-  {const bad=L.find(l=>l.it.type==='mq'&&skSizes(l.it).length&&(!skSzOn(l.it)||!l.z));if(bad){m.textContent=!skSzOn(bad.it)?'اعمل جرد افتتاحي بالمقاسات لـ«'+bad.it.name+'» الأول (من المخزن ← الصنف ← ✍️ عدّ)':'اختار مقاس «'+bad.it.name+'»';return}}
-  const ts=Date.now(),ids=[],tot=rd2(L.reduce((a,l)=>a+l.q*l.c,0)),o={id:uid(),sid:s.id,ts,type:'buy',amt:tot,note:(skRc.note?skRc.note+' · ':'')+L.map(l=>skTx(l.it)+(l.z?' '+skZN(l.z):'')+' × '+f(l.q)).join('، '),sks:ids};
-  L.forEach(l=>{const st={id:uid(),iid:l.it.id,ts,q:l.q,t:'in',sid:s.id,...(l.z?{sz:l.z.id}:{}),...(tot>0?{pk:o.id}:{}),...(l.c?{cost:l.c}:{})};ids.push(st.id);skPush(st);if(l.z)skAfterIn(l.it,[{z:l.z,c:l.c}],s.id);else{skSet(l.it,{...(l.c?{cost:l.c}:{}),sid:s.id});if(l.c>0&&l.it.type==='rd'&&+l.it.cp!==l.c){l.it.cp=l.c;put('items',l.it)}}});
-  if(tot>0){const add=[o];if(skRc.paid)add.push({id:uid(),sid:s.id,ts,type:'pay',amt:tot,how:'كاش',note:'سداد استلام بضاعة',pf:o.id});else if(s.terms>0)o.due=ts+s.terms*SKD;add.forEach(y=>{S.purchases.push(y);put('purchases',y)})}
-  skRc={sid:s.id,lines:[{iid:'',q:'',c:''}],paid:false,note:''};stkV='home';drawStk();toast('✅ استلمت '+plN(L.length,'صنف')+' من '+s.name+(tot>0?' · '+f(tot):''))}
-$('stkPanel').addEventListener('input',e=>{const t=e.target,ln=t.closest('.skl');if(t.id==='rcNote')skRc.note=t.value;if(!ln)return;const l=skRc.lines[+ln.dataset.i];if(!l)return;if(t.classList.contains('rcQ'))l.q=t.value;if(t.classList.contains('rcC'))l.c=t.value;const e2=$('rcTot');if(e2)e2.textContent=f(skRcTot())});
-$('stkPanel').addEventListener('change',e=>{const t=e.target,ln=t.closest('.skl');if(t.id==='rcSup')skRc.sid=t.value;if(t.id==='rcPaid')skRc.paid=t.checked;if(ln&&t.classList.contains('rcI')){const l=skRc.lines[+ln.dataset.i];l.iid=t.value;l.z='';const it=S.items.find(i=>i.id===t.value);if(it&&!rd2(nv(l.c))&&skCost(it))l.c=String(skCost(it));skRcv()}});
-$('stkPanel').addEventListener('change',e=>{const t=e.target;if(!t.classList||!t.classList.contains('rcZ'))return;const ln=t.closest('.skl'),l=ln&&skRc.lines[+ln.dataset.i],it=l&&S.items.find(i=>i.id===l.iid);if(!l||!it)return;
-  if(t.value==='__new'){const s=(prompt('مقاس اللوح الجديد بالسم، مثلًا 183x244')||'').match(/(\d+(?:\.\d+)?)\D+(\d+(?:\.\d+)?)/);if(s){const z={id:uid(),w:+s[1],h:+s[2],c:0};skSet(it,{sizes:[...(skInv(it).sizes||[]),z]});l.z=z.id}else l.z=''}
-  else{l.z=t.value;const z=skSizes(it).find(v=>v.id===l.z);if(z&&z.c>0&&!rd2(nv(l.c)))l.c=String(z.c)}
-  skRcv()});
-$('stkPanel').addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;skRc.lines.splice(+b.dataset.rx,1);if(!skRc.lines.length)skRc.lines.push({iid:'',q:'',c:''});skRcv()});
+/* v367: وصلت بضاعة زي الفاتورة: النوع والسمك + عدد الألواح + الطول × العرض (متر) + سعر المتر. النوع الجديد بيتسجل لوحده، والمقاس بيتسجل ويتعدّ بعدين بالأرقام بس */
+const rcNew=()=>({n:'',q:'',w:'',h:'',p:''});
+let skRc={sid:'',lines:[rcNew()],paid:false,note:''};
+const rcCm=v=>{v=nv(v);return v>0?(v>20?v:v*100):0},rcArea=l=>{const w=rcCm(l.w),h=rcCm(l.h);return w>0&&h>0?w*h/1e4:0},rcLine=l=>{const ar=rcArea(l),q=rd2(nv(l.q)),p=rd2(nv(l.p));return{ar,m2:rd2(ar*q),sheet:rd2(ar*p),tot:rd2(ar*q*p)}};
+function skRcTot(){return rd2(skRc.lines.reduce((a,l)=>a+rcLine(l).tot,0))}
+const rcPrevTx=l=>{const x=rcLine(l);return x.ar>0?'اللوح '+fq(rd2(x.ar))+' م²'+(rd2(nv(l.q))>0?' · '+fq(x.m2)+' م² كلهم':'')+(x.tot>0?' · '+f(x.tot)+' ج':''):'اكتب الطول والعرض (بالمتر)'};
+function skRcv(){const sups=S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')),names=S.items.filter(i=>i.type==='mq').map(i=>i.name);
+  skSub(skBack+`<div class="card"><div class="mute">📥 اكتب اللي وصل زي الفاتورة. النوع الجديد بيتسجل لوحده في المخزن، وبعدين تعدّه بالأرقام بس. ولو لوح موجود عندك من قبل سجّله هنا من غير مورد وبسعر 0.</div><select id="rcSup" aria-label="المورد (اختياري)" style="margin-top:6px"><option value="">من غير مورد</option>${sups.map(s=>`<option value="${esc(s.id)}"${s.id===skRc.sid?' selected':''}>${esc(s.name)}</option>`).join('')}</select></div>
+  <datalist id="rcNames">${names.map(n=>'<option value="'+esc(n)+'">').join('')}</datalist>
+  <div class="card" id="rcLines">${skRc.lines.map((l,i)=>`<div class="skl rcl" data-i="${i}"><div class="rcr"><input class="rcN" list="rcNames" placeholder="النوع والسمك (مثلًا زجاج شفاف 4مم)" value="${esc(l.n)}" autocomplete="off" aria-label="النوع والسمك"><button type="button" class="xd" data-rx="${i}" aria-label="شيل السطر">×</button></div><div class="rcr rc4"><input class="rcQ" inputmode="decimal" placeholder="عدد الألواح" value="${esc(l.q)}" autocomplete="off" aria-label="عدد الألواح"><input class="rcW" inputmode="decimal" placeholder="الطول م" value="${esc(l.w)}" autocomplete="off" aria-label="الطول بالمتر"><input class="rcH" inputmode="decimal" placeholder="العرض م" value="${esc(l.h)}" autocomplete="off" aria-label="العرض بالمتر"><input class="rcP" inputmode="decimal" placeholder="سعر المتر" value="${esc(l.p)}" autocomplete="off" aria-label="سعر المتر"></div><div class="mute rcv" style="font-size:12px">${rcPrevTx(l)}</div></div>`).join('')}<button type="button" class="alt" data-sg="rcAdd" style="width:100%;margin-top:6px">➕ نوع أو مقاس تاني</button></div>
+  <div class="card"><div class="ro" style="color:var(--ink)"><span>الإجمالي</span><span class="num" id="rcTot">${f(skRcTot())}</span></div><label class="opt"><input type="checkbox" id="rcPaid"${skRc.paid?' checked':''}> دفعت كاش دلوقتي (للمورد)</label><input id="rcNote" placeholder="ملاحظة (اختياري)" value="${esc(skRc.note)}" autocomplete="off" aria-label="ملاحظة" style="margin-top:4px"><button type="button" class="main" data-do="rcv" style="width:100%;margin-top:6px">✅ سجّل الاستلام</button><div class="info" id="skMsg" aria-live="polite"></div></div>`)}
+function skRcSave(){const m=$('skMsg'),s=S.suppliers.find(y=>y.id===skRc.sid)||null;
+  const L=skRc.lines.map(l=>({n:String(l.n||'').trim(),q:rd2(nv(l.q)),w:rcCm(l.w),h:rcCm(l.h),p:Math.max(0,rd2(nv(l.p)))})).filter(l=>l.n&&l.q>0);
+  if(!L.length){m.textContent='اكتب اسم النوع وعدد الألواح';return}
+  {const bad=L.find(l=>!(l.w>0&&l.h>0));if(bad){m.textContent='اكتب طول وعرض اللوح لـ«'+bad.n+'» (بالمتر)';return}}
+  const ts=Date.now(),ids=[],notes=[];let tot=0;
+  const done=L.map(l=>{let it=S.items.find(i=>i.type==='mq'&&nkey(i.name)===nkey(l.n));if(!it){it={id:uid(),type:'mq',name:l.n,p:0,w:0,h:0};S.items.push(it);put('items',it)}
+    let z=skSizes(it).find(v=>(Math.abs(+v.w-l.w)<1&&Math.abs(+v.h-l.h)<1)||(Math.abs(+v.w-l.h)<1&&Math.abs(+v.h-l.w)<1));
+    if(!z){z={id:uid(),w:l.w,h:l.h,c:0};skSet(it,{sizes:[...(skInv(it).sizes||[]),z]})}
+    if(!skSzOn(it)){const old=S.stock.some(y=>y.iid===it.id),was=old?stkAll().get(it.id):null;skSet(it,{szOn:true,szT:ts});
+      if(old&&was&&was.bal>0){skPush({id:uid(),iid:it.id,ts,q:rd2(was.bal),t:'adj',why:'نقل الرصيد القديم',sz:z.id});notes.push('رصيد «'+it.name+'» القديم اتنقل على المقاس ده، راجعه من عدّ المخزن')}}
+    const ar=z.w*z.h/1e4,c=rd2(ar*l.p);tot=rd2(tot+c*l.q);return{it,z,q:l.q,c}});
+  const o=s&&tot>0?{id:uid(),sid:s.id,ts,type:'buy',amt:tot,note:(skRc.note?skRc.note+' · ':'')+done.map(d=>skTx(d.it)+' '+skZN(d.z)+' × '+f(d.q)).join('، '),sks:ids}:null;
+  done.forEach(d=>{const st={id:uid(),iid:d.it.id,ts,q:d.q,t:'in',sz:d.z.id,...(d.c?{cost:d.c}:{}),...(s?{sid:s.id}:{}),...(o?{pk:o.id}:{})};ids.push(st.id);skPush(st);skAfterIn(d.it,[{z:d.z,c:d.c}],s?s.id:'')});
+  if(o){const add=[o];if(skRc.paid)add.push({id:uid(),sid:s.id,ts,type:'pay',amt:tot,how:'كاش',note:'سداد استلام بضاعة',pf:o.id});else if(s.terms>0)o.due=ts+s.terms*SKD;add.forEach(y=>{S.purchases.push(y);put('purchases',y)})}
+  skRc={sid:s?s.id:'',lines:[rcNew()],paid:false,note:''};stkV='home';stkTy='mq';drawStk();toast('✅ استلمت '+plN(done.length,'صنف')+(s?' من '+s.name:'')+(tot>0?' · '+f(tot):'')+(notes.length?' · '+notes[0]:''))}
+$('stkPanel').addEventListener('input',e=>{const t=e.target,ln=t.closest('.skl');if(t.id==='rcNote')skRc.note=t.value;if(!ln||!ln.classList.contains('rcl'))return;const l=skRc.lines[+ln.dataset.i];if(!l)return;
+  const K={rcN:'n',rcQ:'q',rcW:'w',rcH:'h',rcP:'p'};for(const k in K)if(t.classList.contains(k))l[K[k]]=t.value;const pv=ln.querySelector('.rcv');if(pv)pv.textContent=rcPrevTx(l);const e2=$('rcTot');if(e2)e2.textContent=f(skRcTot())});
+$('stkPanel').addEventListener('change',e=>{const t=e.target;if(t.id==='rcSup')skRc.sid=t.value;if(t.id==='rcPaid')skRc.paid=t.checked});
+$('stkPanel').addEventListener('click',e=>{const b=e.target.closest('[data-rx]');if(!b)return;skRc.lines.splice(+b.dataset.rx,1);if(!skRc.lines.length)skRc.lines.push(rcNew());skRcv()});
 $('supRcv').onclick=()=>{skRc.sid=supCur||'';stGo('stk');stkV='rcv';drawStk()};
 $('stkPanel').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('skr')){e.preventDefault();e.target.click()}});
 
