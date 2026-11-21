@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='359';
+const APP_VER='360';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -707,23 +707,28 @@ function drawDet(){const c=getC(selC),l=rowsOf(c);
    <input id="cdq" placeholder="ابحث: مبلغ أو صنف أو كود أو مرتجع" title="المبلغ ممكن تقريبي: 700 · 600-800 · 7000+" value="${esc(cdq)}" style="margin:6px 0 2px"><div id="cdTbl">${tblHtml(c)}</div></div>
   ${cuFilesHtml(c)}
   <div class="ro" style="justify-content:flex-start;gap:14px"><button class="lnk" data-arch="1">${c.arch?'↩ إلغاء الأرشفة':'📦 أرشفة'}</button><button class="lnk" data-delc="1" style="color:var(--danger)">🗑️ حذف العميل</button></div><div class="info" id="dcMsg" style="color:var(--danger)"></div>`;pwMount('cu')}
-/* v358: كشف حساب مدمج: كل فواتير ودفعات الفترة في ورقة واحدة (إجمالي الأصناف + الفواتير بتواريخها + المدفوعات + الرصيد) */
-function stmtMerge(){const c=getC(selC);if(!c)return;const[a,b]=perRange(),L=ledger(c).slice().sort((x,y)=>x.ts-y.ts).filter(r=>r.ts>=a&&r.ts<=b),ss=sumOf(c);
+/* v360: كشف حساب زي كشف البنك: جدول واحد بالتاريخ (عليه / دفع / رصيد جاري) وأصناف كل فاتورة تحتها + إجمالي الأصناف + الرصيد دلوقتي */
+function stmtMerge(){const c=getC(selC);if(!c)return;const[a,b]=perRange(),all=ledger(c).slice().sort((x,y)=>x.ts-y.ts),ss=sumOf(c),L=all.filter(r=>r.ts>=a&&r.ts<=b);
   if(!L.length){toast('مفيش معاملات في الفترة دي');return}
-  const lab=per==='c'?(pF||'...')+' إلى '+(pT||'...'):per==='mo'?moLab():'من الأول لحد النهارده',G=new Map(),inv=[],pays=[];let itT=0,invT=0;
+  const lab=per==='c'?(pF||'...')+' إلى '+(pT||'...'):per==='mo'?moLab():'من الأول لحد النهارده',G=new Map(),rows=[];let run=ss.open,lastP=0;
+  rows.push(Object.assign(['','رصيد أول الفترة','','',bsg(run)],{bg:'#eceff3'}));
   L.forEach(r=>{
-    if(r.type==='inv'){const v=val(r);invT=rd2(invT+v);inv.push([dshort(r.ts),stTag(r),f(v)]);let s=0;
-      (r.rows||[]).forEach(x=>{const sg=x.rt?-1:1,vv=sg*(+x.v||0),sz=(+x.w>0&&+x.h>0&&x.t!=='mq')?' '+fq(Math.min(+x.w,+x.h))+'×'+fq(Math.max(+x.w,+x.h)):'',k=(x.rt?'↩ ':'')+String(x.n||'').trim()+sz,o=G.get(k)||{c:0,q:0,v:0};o.c+=sg*(+x.c||0);o.q=rd2(o.q+sg*(+x.q||0));o.v=rd2(o.v+vv);G.set(k,o);s+=vv});
-      itT=rd2(itT+s);const d=rd2(v-s);if(Math.abs(d)>=1){const o=G.get('خصم / إضافات / رسوم')||{c:0,q:0,v:0};o.v=rd2(o.v+d);G.set('خصم / إضافات / رسوم',o);itT=rd2(itT+d)}}
-    else{inv.push([dshort(r.ts),stTag(r),'-'])}
-    if(pd(r)>0)pdBy(r).forEach(([m,v])=>{if(v>0)pays.push([dshort(r.ts),(r.type==='pay'?'دفعة':'مع الفاتورة')+' · '+m,f(v)])})});
-  const items=[...G].sort((x,y)=>Math.abs(y[1].v)-Math.abs(x[1].v)).map(([k,o])=>[k,f(o.c)+(o.q?' ('+fq(o.q)+' م²)':''),f(o.v)]);
-  const T=[];if(items.length)T.push({title:'📦 الأصناف (إجمالي الفترة)',th:['الصنف','العدد','القيمة'],w:[.5,.26,.24],rows:items.concat([['الإجمالي','',f(itT)]])});
-  T.push({title:'🧾 الفواتير والدفعات بالتاريخ',th:['التاريخ','الكود','القيمة'],w:[.28,.44,.28],rows:inv});
-  if(pays.length)T.push({title:'💵 المدفوعات',th:['التاريخ','الطريقة','المبلغ'],w:[.28,.44,.28],rows:pays});
-  const cv=sheet({wm:1,name:c.name,sub:'كشف حساب مفصّل',date:dshort(Date.now()),meta:['الفترة: '+lab],tables:T,
-    sum:[['الحساب أول الفترة',bsg(ss.open)],['إجمالي المطلوب ('+ss.n+' فاتورة)',f(ss.inv)],['إجمالي المدفوع',f(ss.pay)],['الحساب آخر الفترة',bsg(ss.end),1]]});
-  showImg(cv,'كشف-مفصل-'+sfn(c.name)+'.png','كشف حساب '+c.name,true,c.phone,null)}
+    if(r.type==='inv'){const v=val(r),p=pd(r);run=rd2(run+v-p);let s=0;const its=[];
+      (r.rows||[]).forEach(x=>{const sg=x.rt?-1:1,vv=sg*(+x.v||0),sz=(+x.w>0&&+x.h>0&&x.t!=='mq')?' '+fq(Math.min(+x.w,+x.h))+'×'+fq(Math.max(+x.w,+x.h)):'',nm0=String(x.n||'').trim()+sz,cn=sg*(+x.c||0),qq=sg*(+x.q||0);
+        its.push(['','   '+(x.rt?'↩ ':'')+f(cn)+' × '+nm0+(qq?' ('+fq(qq)+' م²)':'')+' = '+f(vv),'','','']);
+        const k=(x.rt?'↩ ':'')+nm0,o=G.get(k)||{c:0,q:0,v:0};o.c+=cn;o.q=rd2(o.q+qq);o.v=rd2(o.v+vv);G.set(k,o);s+=vv});
+      const d=rd2(v-s);if(Math.abs(d)>=1){its.push(['','   خصم / إضافات / رسوم = '+f(d),'','','']);const o=G.get('خصم / إضافات / رسوم')||{c:0,q:0,v:0};o.v=rd2(o.v+d);G.set('خصم / إضافات / رسوم',o)}
+      rows.push(Object.assign([dshort(r.ts),'🧾 فاتورة '+stTag(r),f(v),p>0?f(p):'',bsg(run)],{bg:'#e8f1fb'}));its.forEach(x=>rows.push(x));
+      if(p>0){lastP=r.ts;rows.push(['','   💵 دفع: '+pdBy(r).filter(y=>y[1]>0).map(y=>y[0]+' '+f(y[1])).join(' + '),'','',''])}}
+    else{const p=pd(r);run=rd2(run-p);if(p>0)lastP=r.ts;rows.push(Object.assign([dshort(r.ts),'💵 دفعة · '+pdBy(r).filter(y=>y[1]>0).map(y=>y[0]).join(' + '),'',f(p),bsg(run)],{bg:'#e6f4e6'}))}});
+  rows.push(Object.assign(['','الحساب آخر الفترة','','',bsg(ss.end)],{bg:'#fde9e8'}));
+  const T=[{th:['التاريخ','البيان','عليه','دفع','الرصيد'],w:[.17,.39,.14,.14,.16],rows}],top=[...G].sort((x,y)=>Math.abs(y[1].v)-Math.abs(x[1].v)),tr=top.slice(0,6).map(([k,o])=>[k,f(o.c)+(o.q?' ('+fq(o.q)+' م²)':''),f(o.v)]),rest=top.slice(6);
+  if(rest.length)tr.push(['باقي الأصناف ('+rest.length+')','',f(rest.reduce((s,x)=>s+x[1].v,0))]);
+  if(tr.length)T.push({title:'📦 إجمالي الأصناف في الفترة',th:['الصنف','العدد','القيمة'],w:[.5,.26,.24],rows:tr});
+  const meta=['الفترة: '+lab];if(lastP)meta.push('آخر دفعة: '+dshort(lastP));if(c.due&&ss.end>0)meta.push('ميعاد السداد: '+dueLabel(c.due));
+  const cv=sheet({wm:1,name:c.name,sub:'كشف حساب',date:dshort(Date.now()),meta,tables:T,
+    sum:[['كان عليه أول الفترة',bsg(ss.open)],['طلب ('+ss.n+' فاتورة)',f(ss.inv)],['دفع',f(ss.pay)],['الحساب دلوقتي',bsg(ss.end),1]]});
+  showImg(cv,'كشف-'+sfn(c.name)+'.png','كشف حساب '+c.name,true,c.phone,null)}
 function stmtImg(){const c=getC(selC),l=rowsOf(c),ss=sumOf(c);const lab=per==='c'?(pF||'...')+' إلى '+(pT||'...'):per==='mo'?moLab():PL[per];
   const cv=sheet({wm:1,name:c.name,sub:'كشف حساب',date:dshort(Date.now()),meta:['الفترة: '+(per==='w'||per==='m'?'آخر ':'')+lab].concat(l.some(({r})=>hasRet(r))?['↩ = الفاتورة فيها مرتجع']:[]),
     tables:[{th:['التاريخ','الكود','القيمة','المدفوع','الحساب'],w:[.2,.3,.17,.17,.16],rows:l.map(({r,run})=>[dshort(r.ts),stTag(r),r.type==='pay'?'-':f(val(r)),f(pd(r)),f(run)])}],
