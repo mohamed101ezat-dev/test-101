@@ -1597,3 +1597,9 @@ html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(
 .dsbar .dsr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}.dsbar .dsr b:first-child{font-size:13px}
 .dsbar .dsb{justify-content:space-between}.dsbar small{color:var(--mute);font-size:11px;flex:1;min-width:0}
 .dsbar .dsa{display:flex;gap:4px}.dsbar .ab{min-height:26px;height:26px;padding:0 8px;font-size:12px;margin:0}
+
+/* v356: شريط المديونين في صف واحد صغير (رجوع + بحث + تذكير الكل) */
+.dbtop{display:flex;align-items:center;gap:6px;padding:5px 8px;margin:0 0 6px}.dbtop input{min-height:32px;height:32px;font-size:13px;padding:0 8px;margin:0}.dbtop .xw{flex:1;min-width:0}.dbtop #bulkRem{flex:none;width:auto;min-height:32px;height:32px;padding:0 10px;font-size:12.5px;margin:0}.dbtop #bulkRem:not(.hide){display:inline-flex}.dbtop #dbBack{flex:none;font-size:18px;padding:0 4px}
+.dbtop #bulkRem{display:inline-flex;align-items:center;gap:4px;line-height:1;height:32px!important;min-height:32px!important;padding:0 10px!important;white-space:nowrap}.dbtop #bulkRem.hide{display:none}.dbtop #bulkRem .wai{position:static;margin:0;width:16px;height:16px;flex:none}
+.dbtop .xw{display:none}.dbtop.open .xw{display:block;flex:1;min-width:0}.dbtop #dbSb{flex:none;height:32px;min-height:32px;width:38px;padding:0;margin:0;font-size:15px}.dbtop.open #dbSb{display:none}
+.dbtop #dbSb{background:transparent!important;border:0!important;box-shadow:none!important;width:32px}
