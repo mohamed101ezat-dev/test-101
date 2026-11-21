@@ -1565,3 +1565,35 @@ html:not(#zz) .pmq button,html:not(#zz) .dbtf .tfm{display:inline-flex;align-ite
 /* v339: الأصناف للعرض لحد ما تدوس */
 html:not(#zz) #t-it .itw input[readonly]{background:transparent!important;border-color:transparent!important;box-shadow:none!important;cursor:pointer}
 html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(--card)!important}
+
+/* v342: الأصناف بالشكل القديم */
+#t-it .itw{margin-bottom:2px}
+#t-it .itpc{display:flex;align-items:center;gap:6px;padding:4px 6px;margin:0 0 4px;border:1px dashed var(--line);border-radius:8px;font-size:12px}
+#t-it .itpc input{width:64px;height:30px;min-height:30px;margin:0}#t-it .itpc button{min-height:30px;padding:2px 10px;font-size:12px;margin:0}
+#t-it .itpm{min-width:26px;min-height:26px;padding:0 4px;font-size:13px;margin:0}
+#t-it .itck{width:20px;height:20px;margin:0}
+#itSelB.on{background:color-mix(in srgb,#16a34a 15%,var(--card));border-color:#16a34a}
+
+/* v343: مقاسات الألواح */
+#stkPanel .skzr input,#stkPanel .skzr2 input{min-width:0;flex:1;height:34px}
+#stkPanel .skszr .szw,#stkPanel .skszr .szh{flex:.7}
+
+/* v344: رصيد لكل مقاس */
+#stkPanel .skzl{display:flex;flex-direction:column;gap:3px;margin:4px 0}
+#stkPanel .skzi{display:flex;align-items:center;gap:8px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;font-size:13px;color:var(--ink)}
+#stkPanel .skzi span{flex:1.2}#stkPanel .skzi small{flex:1.4;color:var(--mute);font-size:11px;text-align:left}#stkPanel .skzi.z0{opacity:.45}
+#stkPanel .skbn{padding:8px;border:1px dashed #f59e0b;border-radius:8px;font-size:13px;color:var(--ink);margin:6px 0;background:color-mix(in srgb,#f59e0b 10%,var(--card))}
+
+/* v344: اختيار المقاس في سطر الفاتورة */
+.row .rsz{max-width:150px;height:26px;min-height:26px;font-size:11px;padding:0 4px;margin:0}
+
+#stkPanel .skzs{font-size:11px;color:var(--mute);line-height:1.6;white-space:normal;margin-top:2px}
+
+/* v345: ترتيب أعمدة كارت المخزن ثابت (الأيقونة/الاسم/الرصيد) حتى لو مفيش أيقونة */
+#t-st .skr .sks{grid-column:1}#t-st .skr .skn{grid-column:2}#t-st .skr .skb{grid-column:3}
+
+/* v347: شريط ملخص اليوم */
+.dsbar{margin:0 0 8px;padding:6px 10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-size:12.5px;display:flex;flex-direction:column;gap:4px}
+.dsbar .dsr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px}.dsbar .dsr b:first-child{font-size:13px}
+.dsbar .dsb{justify-content:space-between}.dsbar small{color:var(--mute);font-size:11px;flex:1;min-width:0}
+.dsbar .dsa{display:flex;gap:4px}.dsbar .ab{min-height:26px;height:26px;padding:0 8px;font-size:12px;margin:0}

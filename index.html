@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" data-theme="light" data-pal="sage">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' data: blob: https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com https://apis.google.com; frame-src https://tabakha-glass-5b9a4.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' data: blob: https://api.telegram.org https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com https://apis.google.com; frame-src https://tabakha-glass-5b9a4.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <script>try{if(localStorage.getItem('lkOn')==='1')document.documentElement.classList.add('locked')}catch(e){}try{var z=localStorage.getItem('fz');if(z==='x'||z==='s'||z==='l'||z==='xl')document.documentElement.classList.add('fz-'+z)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=341">
+<link rel="stylesheet" href="css/style.css?v=355">
 
 
 
@@ -57,6 +57,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="hdr-end"><button type="button" id="nfBell" class="hdr-btn" aria-label="التنبيهات">🔔<span id="nfCnt" class="nf-cnt hide"></span></button><button type="button" id="tfBtn" class="hdr-btn" aria-label="بيانات التحويل" title="بيانات التحويل">💳</button><button type="button" id="calcFab" class="hdr-btn" aria-label="حاسبة">🧮</button><button type="button" id="cloudSt" class="hdr-cloud" aria-label="حالة الحفظ على السحابة"><span class="cs-i">☁️</span><span class="cs-d"></span></button><script>(function(){try{var b=document.getElementById('cloudSt'),on=localStorage.getItem('fbOn')==='1'||localStorage.getItem('fbCfg'),l=localStorage.getItem('cloudLast');var s=!on?'off':(l==='ok'&&navigator.onLine!==false)?'ok':'busy';b.className='hdr-cloud '+s;b.dataset.s=s}catch(e){}})()</script><button id="wkOut" class="hdr-set" aria-label="خروج من وضع العامل" style="font-size:13px;width:auto;padding:0 10px">🔓 مالك</button><button id="hdrSet" class="hdr-set" data-t="st" aria-label="إعدادات">⚙️</button></div>
 </div>
 <div id="busy" class="busy hide" role="status"></div>
+<div id="dsBar" class="dsbar hide"></div>
 <div id="welc" class="auth hide"><div class="auth-in">
   <img src="icon-192.png" alt="" class="auth-ic"><b class="auth-t">فواتير</b>
   <div class="mute auth-sub" id="auSub"></div>
@@ -272,12 +273,13 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div id="catMgr" class="card hide"></div>
   <div class="card itadd"><b>➕ صنف جديد</b><div id="nform" class="it"></div></div>
   <details class="card itool"><summary>🧮 أدوات الأسعار (زيادة الأسعار · أسعار الشراء)</summary>
-    <div class="mute" style="font-size:12px;margin:4px 0">بتشتغل على الأصناف اللي ظاهرة تحت (النوع والفئة والبحث).</div>
+    <div class="mute" style="font-size:12px;margin:4px 0">لصنف واحد: دوس «±» جنب الصنف. لأكتر من صنف: «☑️ حدّد أصناف» وعلّم عليهم. ولو ما علّمتش حاجة، بتشتغل على كل الأصناف الظاهرة (حسب النوع والفئة والبحث).</div>
+    <div class="ro" style="gap:6px"><button type="button" class="alt" id="itSelB" style="flex:none">☑️ حدّد أصناف</button><button type="button" class="alt" id="itSelAll" style="flex:none">☑️ الكل</button><span class="mute" id="itSelN" style="font-size:12px"></span></div>
     <div class="ro" style="gap:6px;flex-wrap:wrap"><span style="flex:none">غيّر أسعار البيع</span><input id="itPct" inputmode="decimal" placeholder="10" style="width:64px;flex:none"><span style="flex:none">%</span><button type="button" class="alt" id="itUp" style="flex:none">⬆ زوّد</button><button type="button" class="alt" id="itDn" style="flex:none">⬇ قلّل</button></div>
     <div class="ro" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span style="flex:none">سعر الشراء الفاضي =</span><input id="itCpPct" inputmode="decimal" placeholder="70" style="width:64px;flex:none"><span style="flex:none">% من البيع</span><button type="button" class="alt" id="itCpGo" style="flex:none">املاه</button></div>
     <div class="mute" style="font-size:12px;margin-top:4px">سعر الشراء هو اللي بيخلّي البرنامج يحسب ربحك الحقيقي. الأحسن تكتبه بإيدك لكل صنف، والنسبة دي للبداية بس.</div>
     <div class="info" id="itToolMsg"></div></details>
-  <div class="mute" id="itHint" style="font-size:12px;margin:2px 0">دوس على أي صنف علشان تعدّله. تحت كل صنف: اتباع منه كام الشهر ده.</div>
+  <div class="mute" id="itHint" style="font-size:12px;margin:2px 0"></div>
   <div class="rowc"><input id="iq" placeholder="ابحث في الأصناف" style="flex:1"><select id="isort" style="width:auto;flex:none"><option value="use">الأكثر استخداماً</option><option value="name">بالاسم</option></select></div>
   <div id="ihead" class="mute"></div><div id="items" style="margin-top:4px"></div>
 </section>
@@ -374,8 +376,8 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="pmq" id="pmQ"></div><button type="button" class="alt" id="pmAdd">➕ طريقة جديدة</button></div>
 <div class="card tfpl"><b>💳 بيانات التحويل تظهر فين</b><div class="mute" style="font-size:12px">اختار الأماكن اللي يظهر فيها زرار بيانات التحويل.</div>
   <label class="opt"><input type="checkbox" id="tfHdr"> زرار 💳 في الشريط اللي فوق</label>
-  <label class="opt"><input type="checkbox" id="tfDb"> صفحة المديون («💳 ابعتله»)</label>
-  <label class="opt"><input type="checkbox" id="tfCu"> صفحة العميل («💳 ابعتله»)</label>
+  
+  
   <label class="opt"><input type="checkbox" id="tfSet"> زرار «🔍 ابعت بيانات التحويل لعميل» هنا في الإعدادات</label></div>
 <button type="button" class="main" id="tfOpen2" style="width:100%;margin:6px 0">🔍 ابعت بيانات التحويل لعميل</button>
 <div class="card"><b>👥 نسب العملاء المحفوظة</b><div class="mute">البرنامج بيفتكر آخر نسبة اتسجلت لكل عميل. امسح النسبة لو عايز العميل يرجع للنسبة العامة.</div><div id="pmCust"></div><button type="button" class="lnk hide" id="pmOrph" style="color:var(--danger);font-size:12px;margin-top:4px"></button></div>
@@ -468,12 +470,12 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div id="stkHome">
 <div class="card sktop"><div id="skSum"></div>
   <div class="skact"><button type="button" class="main" data-sg="rcv">📥 وصلت بضاعة</button><button type="button" class="alt" data-sg="cnt">✍️ عدّ المخزن</button></div>
-  <div class="skmini"><button type="button" class="lnk" data-sg="ord">📋 محتاج أطلب إيه؟</button><button type="button" class="lnk" data-sg="mv">🕘 اللي دخل وخرج</button></div></div>
+  <div class="skmini"><button type="button" class="lnk" data-sg="ord">📋 محتاج أطلب إيه؟</button><button type="button" class="lnk" data-sg="mv">🕘 اللي دخل وخرج</button><button type="button" class="lnk" data-sg="wst">🗑 الهادر</button></div></div>
 <div class="card skstart hide" id="skStart"></div>
 <div class="ro" style="gap:6px;margin:0 0 6px"><input id="stkQ" type="search" placeholder="🔍 دوّر على صنف" autocomplete="off" aria-label="بحث في المخزن" style="flex:1;height:34px"></div>
 <div class="spc" id="stkFil"></div>
 <div id="stkRows"></div>
-<details class="card spdt"><summary>⚙️ نبّهني لما الصنف يقل</summary><label for="stkLim" style="margin-top:6px">نبّهني لما يفضل من الصنف (لأي صنف مالوش رقم خاص بيه)</label><input id="stkLim" inputmode="decimal" autocomplete="off"><div class="mute" style="margin-top:4px">القطع الجاهزة بتنقص لوحدها مع كل فاتورة. الألواح بتعدّها بإيدك من «✍️ عدّ المخزن». وكل صنف ممكن تحط له رقم تنبيه وسعر ومكان ومورد من صفحته.</div><div class="info" id="stkMsg" aria-live="polite"></div></details>
+<details class="card spdt"><summary>⚙️ نبّهني لما الصنف يقل</summary><label for="stkLim" style="margin-top:6px">نبّهني لما يفضل من الصنف (لأي صنف مالوش رقم خاص بيه)</label><input id="stkLim" inputmode="decimal" autocomplete="off"><label for="stkWmax" style="margin-top:6px">نبّهني لو هادر نوع في الشهر عدّى (%)</label><input id="stkWmax" inputmode="decimal" autocomplete="off"><div class="mute" style="margin-top:4px">القطع الجاهزة بتنقص لوحدها مع كل فاتورة. الألواح بتعدّها بإيدك من «✍️ عدّ المخزن». وكل صنف ممكن تحط له رقم تنبيه وسعر ومكان ومورد من صفحته.</div><div class="info" id="stkMsg" aria-live="polite"></div></details>
 </div>
 <div id="stkSub" class="hide"></div>
 </div>
@@ -521,8 +523,18 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
     <a class="lnk" href="privacy.html" target="_blank" rel="noopener" style="display:block;margin-top:4px">سياسة الخصوصية</a></div>
 <div class="card"><b>🌐 رابط احتياطي للبرنامج</b><div class="mute" style="font-size:12px">لو البرنامج ما فتحش أو الموبايل باظ: افتح الرابط ده من أي موبايل أو كمبيوتر، وسجّل دخول بنفس الحساب، وبياناتك هتنزل من السحابة.</div><div class="ro" style="gap:6px;margin-top:6px"><input id="mirUrl" readonly value="https://tabakha-test-101.web.app" dir="ltr" style="flex:1;height:32px;font-size:13px"><button type="button" class="alt" id="mirCp" style="flex:none">📋 نسخ</button></div><div class="info" id="mirMsg"></div></div>
 <div class="card"><b>💾 نسخة احتياطية</b><div class="mute" id="bkInfo" style="margin-top:4px"></div>
-  <div class="btns"><button class="main" id="bkSave">💾 حفظ نسخة</button><button class="alt" id="bkLoad">♻️ استرجاع نسخة</button><input type="file" id="bkFile" accept=".json,application/json" class="hide"></div>
-  <div class="btns"><button class="alt b-out" id="bkShare">📤 مشاركة نسخة (درايف / واتساب)</button></div><div class="info" id="bkMsg"></div>
+  <div class="btns"><button class="main" id="bkSave">💾 حفظ نسخة</button><button class="alt" id="bkLoad">♻️ استرجاع نسخة</button><input type="file" id="bkFile" accept=".json,.txt,application/json,text/plain" class="hide"></div>
+  <div class="btns"><button class="alt b-out" id="bkShare">📤 مشاركة نسخة (درايف / واتساب / تيليجرام)</button></div><div class="info" id="bkMsg"></div>
+  <div class="ro" style="gap:6px;margin-top:6px"><label class="opt" style="flex:none;margin:0"><input type="checkbox" id="bkWaOn"> 📲 واتساب</label><input id="bkWa" type="tel" inputmode="tel" dir="ltr" placeholder="رقم الواتساب (ثابت)" autocomplete="off" aria-label="رقم الواتساب" style="flex:1"></div><div class="mute" style="font-size:12px">لو كتبت الرقم هنا، «مشاركة نسخة» بتفتح شات الرقم ده على طول، والملف بيتحمّل في التنزيلات وانت بترفقه (📎) وتدوس إرسال. ولو سيبته فاضي بتفتح قايمة المشاركة.</div>
+  <div class="card" id="dsBox" style="margin-top:8px"><b>📤 تذكير النسخة اليومية</b><div class="mute" style="font-size:12px">كل يوم لسه ما بعتّش نسخة، بيظهر فوق شريط صغير فيه زرار واحد يبعتلك ملف النسخة الاحتياطية (الداتا نفسها). على واتساب اختار رقمك «أنت» اللي فوق في القايمة.</div>
+  <label class="opt"><input type="checkbox" id="dsOn"> شريط تذكير النسخة فوق</label>
+  <label class="opt"><input type="checkbox" id="dsTg"> ابعت النسخة لتيليجرام لوحدها كل يوم (لو مفعّل تحت)</label><div class="info" id="dsMsg"></div></div>
+  <details class="card spdt" id="tgBox" style="margin-top:8px"><summary>✈️ إرسال النسخة لتيليجرام أوتوماتيك (مجاني)</summary>
+    <div class="mute" style="font-size:12px;margin:6px 0">بعد ما تظبطه، «📤 مشاركة نسخة» بتبعت الملف على تيليجرام بتاعك لوحدها من غير أي خطوة تانية.<br>١) في تيليجرام افتح <b>@BotFather</b> واكتب <b>/newbot</b> واتبع الخطوات، هيدّيك <b>Token</b>.<br>٢) افتح البوت بتاعك وابعتله أي رسالة (مثلًا: أهلاً).<br>٣) الصق الـToken هنا ودوس «🔍 هات الـChat ID»، وبعدها «اختبار».</div>
+    <input id="tgTok" type="password" dir="ltr" placeholder="Token (123456:ABC…)" autocomplete="off" aria-label="Token">
+    <div class="ro" style="gap:6px;margin-top:6px"><input id="tgChat" dir="ltr" placeholder="Chat ID" autocomplete="off" aria-label="Chat ID" style="flex:1"><button type="button" class="alt" id="tgFind" style="flex:none">🔍 هات الـChat ID</button></div>
+    <div class="ro" style="gap:6px;margin-top:6px"><button type="button" class="main" id="tgTest" style="flex:1">✉️ اختبار</button><button type="button" class="alt b-red" id="tgOff" style="flex:none">إيقاف</button></div>
+    <div class="info" id="tgMsg"></div></details>
   <label class="opt"><input type="checkbox" id="bkAl"> تنبيه لو عدّى أسبوع من غير نسخة</label></div>
 <details class="card"><summary>🗄 نسخ تلقائية (على الجهاز والسحابة)</summary>
   <label class="opt"><input type="checkbox" id="snapOn"> نسخة على الجهاز كل يوم (آخر 14 يوم)</label>
@@ -589,11 +601,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=341"></script>
-<script src="js/qr.js?v=341"></script>
+<script src="js/app.js?v=355"></script>
+<script src="js/qr.js?v=355"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=341"></script>
-<script src="js/features.js?v=341"></script>
+<script src="js/cutlist.js?v=355"></script>
+<script src="js/features.js?v=355"></script>
 </body>
 </html>
 
