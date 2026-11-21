@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='360';
+const APP_VER='361';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2734,7 +2734,7 @@ function iAgg(a,b){const recs=S.invoices.filter(r=>r.ts>=a&&r.ts<b),G=new Map();
     else if(iSub==='r'){if(r.type==='inv')(r.rows||[]).forEach(x=>{if(x.k==null){nk=rd2(nk+(+x.v||0));return}{const m=itKey(x),ty=m.ok?m.ty:'u';add(ty+'|'+m.k,rd2((+x.v||0)-(+x.k||0)),(x.rt?-1:1)*(+x.c||0),ty,(x.rt?-1:1)*(+x.q||0),m.k,ty==='rd'?itSzKey(x):'')}})}
     else if(iSub==='i'){if(r.type==='inv')(r.rows||[]).forEach(x=>{/* v189: المرتجع بيتخصم من مبيعات الصنف */{const m=itKey(x),ty=m.ok?m.ty:'u';add(ty+'|'+m.k,+x.v||0,(x.rt?-1:1)*(+x.c||0),ty,(x.rt?-1:1)*(+x.q||0),m.k,ty==='rd'?itSzKey(x):'',x.k!=null?rd2((+x.v||0)-(+x.k||0)):null)}})}});
   return{G,tot,cnt,nk,n:recs.length,inv:recs.filter(r=>r.type==='inv').length}}
-const PNAME={d:'النهارده',ys:'أمس',d2:'قبل أمس',d3:'قبل 3 أيام',d4:'قبل 4 أيام',d5:'قبل 5 أيام',d6:'قبل 6 أيام',w3:'آخر 3 أيام',w:'آخر 7 أيام',w30:'آخر 30 يوم'},SNAME={s:'المبيعات',p:'المدفوع',d:'الديون',t:'المرتجع',i:'الأصناف',w:'طرق الدفع',o:'الطلبيات',r:'الربح',x:'المصروفات والصافي'};
+const PNAME={d:'النهارده',ys:'أمس',d2:'قبل أمس',d3:'قبل 3 أيام',d4:'قبل 4 أيام',d5:'قبل 5 أيام',d6:'قبل 6 أيام',w3:'آخر 3 أيام',w:'آخر 7 أيام',w30:'آخر 30 يوم'},SNAME={s:'المبيعات',p:'المدفوع',d:'المديونيات',t:'المرتجع',i:'الأصناف',w:'طرق الدفع',o:'الطلبيات',r:'الربح',x:'المصروفات والصافي'};
 const perLab=R=>(PNAME[iPer]?PNAME[iPer]+' · ':'')+rLab(R);
 let iMoreOpen=false;
 /* v248: شاشة التقرير — الأرقام بتظهر على طول لكل فترة، وكل سطر بيفتح ورقة تفاصيله */
@@ -2763,23 +2763,27 @@ function drawInfo(){
   if(P.cnt)m+=row('r','📈','الربح',WV0>0?'بعد المصروفات والهادر':'بعد المصروفات',f(rd2(P.tot-T.ex-WV0)));
   if(rt)m+=row('t','↩️','المرتجع','',f(rt));
   if(ti)m+=row('i','📦','الأصناف','الأكتر: '+(ti[1].n||ti[0]),'');
+  const dbl=dbRep(dbAsOf(R)),dbt=rd2(dbl.reduce((a,x)=>a+x.b,0));if(dbl.length)m+=row('d','📒','المديونيات',plN(dbl.length,'عميل')+(dbAsOf(R)<=Date.now()?' · لحد '+dshort(dbAsOf(R)-1):' · لحد دلوقتي'),f(dbt),'dr');
   if(ordOn()){const oc=recs.filter(r=>r.type==='inv'&&ordSt(r)!=='d').length;if(oc)m+=row('o','⏳','طلبيات لسه ما اتسلمتش',plN(oc,'طلبية'),'')}
-  $('iRows').innerHTML=T.n||T.p||exA?'<div class="rstp">التفاصيل · دوس على أي سطر يفتح ورقته <button type="button" class="lnk" data-allz="1" style="font-size:12px">'+(iAllZ?'☑️':'☐')+' كل المقاسات المسجلة</button></div><div class="rbox">'+m+'</div>':'<div class="info" style="margin-top:8px">مفيش معاملات في الفترة دي.</div>'}
+  $('iRows').innerHTML=T.n||T.p||exA||dbl.length?'<div class="rstp">التفاصيل · دوس على أي سطر يفتح ورقته <button type="button" class="lnk" data-allz="1" style="font-size:12px">'+(iAllZ?'☑️':'☐')+' كل المقاسات المسجلة</button></div><div class="rbox">'+m+'</div>':'<div class="info" style="margin-top:8px">مفيش معاملات في الفترة دي.</div>'}
 $('iRows').addEventListener('click',e=>{if(e.target.closest('[data-allz]')){iAllZ=!iAllZ;drawInfo();return}const b=e.target.closest('[data-rk]');if(!b)return;iSub=b.dataset.rk;repGo()});
 /* ورقة التقرير: جدول تفاصيل للفترة والنوع المختارين، بتفتح كصورة تتحفظ أو تتبعت */
+/* v361: المديونيات لحد تاريخ: كل عميل عليه فلوس ساعتها، وآخر دفعة وآخر معاملة قبل التاريخ ده */
+function dbRep(asOf){const out=[];S.customers.forEach(c=>{let b=c.open||0,lp=0,lt=0;ledger(c).forEach(r=>{if(r.ts>=asOf)return;b=rd2(b+net(r));if(r.ts>lt)lt=r.ts;if(((r.type==='pay'&&r.amount>0)||(r.type==='inv'&&r.paid>0))&&r.ts>lp)lp=r.ts});if(b>=1)out.push({c,b:rd2(b),lp,lt})});return out.sort((x,y)=>y.b-x.b)}
+const dbAsOf=R=>Math.min(R.b,Date.now()+1);
 function repGo(){
   const R=iRange(),sb=iSub,fm=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)},CAP=300,
     cd=r=>r.type==='pay'?'دفعة'+(r.code?' '+r.code:''):(r.code||'#'+r.no),
     recs=S.invoices.filter(r=>r.ts>=R.a&&r.ts<R.b).sort((x,y)=>y.ts-x.ts);
-  let tb=null,sum=[],tot=0,note='',rows=[],ITG=null;
+  let tb=null,sum=[],tot=0,note='',rows=[],ITG=null,dLab='الأرصدة لحد دلوقتي';
   if(sb==='s'){const l=recs.filter(r=>r.type==='inv');tot=rd2(l.reduce((a,r)=>a+val(r),0));rows=l.map(r=>[fm(r.ts),r.cname,r.code||'#'+r.no,f(val(r))]);
     tb={th:['التاريخ','العميل','فاتورة','القيمة'],w:[.17,.41,.17,.25]};sum=[['عدد الفواتير',String(l.length)],['إجمالي المبيعات',f(tot),1],['المدفوع',f(T0())]]}
   else if(sb==='p'){const l=recs.filter(r=>rd2(pd(r)||0)!==0),G=new Map();tot=rd2(l.reduce((a,r)=>a+pd(r),0));
     rows=l.map(r=>{const m=pdBy(r).filter(([k,v])=>rd2(v||0)!==0);m.forEach(([k,v])=>G.set(k,rd2((G.get(k)||0)+v)));return[fm(r.ts),r.cname,cd(r),f(pd(r)),m.map(([k,v])=>k+(m.length>1?' '+f(v):'')).join(' + ')]});
     tb={th:['التاريخ','العميل','الكود','المبلغ','طريقة الدفع'],w:[.13,.27,.21,.17,.22]};sum=[['عدد العمليات',String(l.length)],['إجمالي المدفوع',f(tot),1],...[...G].sort((x,y)=>y[1]-x[1]).map(([k,v])=>['منه '+k,f(v)])]}
-  else if(sb==='d'){const lp={};S.invoices.forEach(r=>{if((r.type==='pay'||rd2(pd(r)||0)>0)&&r.ts>(lp[r.cid]||0))lp[r.cid]=r.ts});
-    const l=S.customers.filter(x=>balOf(x)>0).sort((x,y)=>balOf(y)-balOf(x));tot=rd2(l.reduce((a,x)=>a+balOf(x),0));rows=l.map(x=>[x.name,f(balOf(x)),lp[x.id]?fm(lp[x.id]):'—']);
-    tb={th:['العميل','المتبقي عليه','آخر دفعة'],w:[.46,.28,.26]};sum=[['عدد المديونين',String(l.length)],['إجمالي المديونيات',f(tot),1]]}
+  else if(sb==='d'){const as=dbAsOf(R),l=dbRep(as);dLab=as<=Date.now()?'الأرصدة لحد '+dshort(as-1):'الأرصدة لحد دلوقتي';tot=rd2(l.reduce((a,x)=>a+x.b,0));
+    rows=l.map(x=>[x.c.name,f(x.b),x.lp?fm(x.lp)+' · '+agoTxt(x.lp):'لسه ما دفعش',x.lt?fm(x.lt)+' · '+agoTxt(x.lt):'—']);
+    tb={th:['العميل','عليه','آخر دفعة','آخر معاملة'],w:[.30,.16,.27,.27]};sum=[['عدد المديونين',String(l.length)],['إجمالي المديونيات',f(tot),1]]}
   else if(sb==='t'){let n=0;recs.filter(r=>r.type==='inv'&&hasRet(r)).forEach(r=>(r.rows||[]).filter(x=>x.rt).forEach(x=>{const v=rd2(Math.abs(+x.v||0));n++;tot=rd2(tot+v);rows.push([fm(r.ts),r.cname,String(x.n||'').trim()||'—',f(v)])}));
     tb={th:['التاريخ','العميل','الصنف','القيمة'],w:[.17,.33,.30,.20]};sum=[['عدد البنود',String(n)],['إجمالي المرتجع',f(tot),1]]}
   else if(sb==='x'){const l=exIn(R.a,R.b).sort((x,y)=>y.ts-x.ts),pu=puIn(R.a,R.b).buy,sl=rd2(recs.filter(r=>r.type==='inv').reduce((a,r)=>a+val(r),0));tot=exTot(l);rows=l.map(x=>[fm(x.ts),x.cat,x.note||'',f(x.amt)]);
@@ -2804,8 +2808,8 @@ function repGo(){
   if(!rows.length){toast(sb==='d'?'مفيش مديونين ✓':sb==='x'?'مفيش مصروفات متسجلة في الفترة دي':'مفيش بيانات في الفترة دي');return}
   if(rows.length>CAP){note=(note?note+' ':'')+'ظهر أول '+CAP+' من '+rows.length+' بس. اضغط «تصدير Excel» للتفاصيل كاملة.';rows=rows.slice(0,CAP)}
   tb.rows=rows;
-  const lab=perLab(R),cv=sheet({title:'تقرير '+SNAME[sb],name:'',sub:sb==='d'?'الأرصدة لحد دلوقتي':lab,date:stamp(Date.now()),tables:ITG&&ITG.length?ITG:[tb],sum,note});
-  showImg(cv,'تقرير-'+SNAME[sb]+'-'+dshort(R.a).replace(/\//g,'-')+'.png','تقرير '+SNAME[sb]+' · '+(sb==='d'?'لحد دلوقتي':lab),false,'',null);
+  const lab=perLab(R),cv=sheet({title:'تقرير '+SNAME[sb],name:'',sub:sb==='d'?dLab:lab,date:stamp(Date.now()),tables:ITG&&ITG.length?ITG:[tb],sum,note});
+  showImg(cv,'تقرير-'+SNAME[sb]+'-'+dshort(R.a).replace(/\//g,'-')+'.png','تقرير '+SNAME[sb]+' · '+(sb==='d'?dLab:lab),false,'',null);
   function T0(){return rd2(recs.reduce((a,r)=>a+(pd(r)||0),0))}}
 /* تصدير فواتير الفترة المختارة في التقرير كملف CSV بيفتح في إكسل */
 $('iExp').onclick=async()=>{const R=iRange(),l=S.invoices.filter(r=>r.ts>=R.a&&r.ts<R.b).sort((x,y)=>y.ts-x.ts);if(!l.length){toast('مفيش معاملات في الفترة دي');return}
