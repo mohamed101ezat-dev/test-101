@@ -1603,3 +1603,6 @@ html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(
 .dbtop #bulkRem{display:inline-flex;align-items:center;gap:4px;line-height:1;height:32px!important;min-height:32px!important;padding:0 10px!important;white-space:nowrap}.dbtop #bulkRem.hide{display:none}.dbtop #bulkRem .wai{position:static;margin:0;width:16px;height:16px;flex:none}
 .dbtop .xw{display:none}.dbtop.open .xw{display:block;flex:1;min-width:0}.dbtop #dbSb{flex:none;height:32px;min-height:32px;width:38px;padding:0;margin:0;font-size:15px}.dbtop.open #dbSb{display:none}
 .dbtop #dbSb{background:transparent!important;border:0!important;box-shadow:none!important;width:32px}
+
+/* v359: كشف الحساب من صفحة المديون */
+.dbst{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;font-size:13px}.dbst input[type=date]{height:32px;min-height:32px;padding:0 6px;margin:0;font-size:13px;flex:1;min-width:120px}.dbst .ab{min-height:32px}.dbst small{flex-basis:100%;font-size:11px}.dbh .cn[data-dfull]{text-decoration:none}

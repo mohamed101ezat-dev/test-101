@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='358';
+const APP_VER='359';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2559,7 +2559,7 @@ $('monRep').onclick=()=>showMonth(Date.now());
 $('res').addEventListener('click',e=>{if(e.target===$('res'))$('res').classList.add('hide')});
 
 /* النقر على المعاملات في الداشبورد */
-let infoMode=false,dbMode=false,dbSel=null,dbPay=null,iSc='',dbTf=null;
+let infoMode=false,dbMode=false,dbSel=null,dbPay=null,dbSt=null,iSc='',dbTf=null;
 /* دفعة من صفحة المديون: نفس حساب "خصم من المدفوع" اللي في الفاتورة */
 function dbPayGo(btn){const c=getC(dbSel),m=$('dbp_msg');if(!c||!m)return;const r=pwRecord('db',c);
   if(!r){m.textContent='اكتب المبلغ المدفوع';const a=document.querySelector('[data-pw="db"] .spa');if(a)a.focus();return}
@@ -2570,12 +2570,13 @@ function drawDebt(){$('hMain').classList.toggle('hide',dbMode||infoMode);$('info
   $('dbList0').classList.toggle('hide',!!c);$('dbDet').classList.toggle('hide',!c);
   if(c){let run=c.open||0;const rows=ledger(c).slice().sort((a,b)=>a.ts-b.ts).map(r=>{run=rd2(run+(r.type==='pay'?-r.amount:val(r)-r.paid));return{r,run}}).reverse();
     const b=balOf(c),wn=waNum(c.phone),tn=telNum(c.phone);
-    $('dbDet').innerHTML=`<div class="card"><div class="dbh"><button class="lnk" data-dback="1" aria-label="رجوع للمديونين">→</button><div class="cn">${esc(c.name)}</div><span class="dbamt ${bcls(c)}">${b?`<small>${b>0?'عليه':'له'}</small> <b class="num">${f(Math.abs(b))}</b>`:'<b>خالص</b>'}</span><button class="main b-green" data-dpay="1">💵 دفع</button></div>
+    $('dbDet').innerHTML=`<div class="card"><div class="dbh"><button class="lnk" data-dback="1" aria-label="رجوع للمديونين">→</button><div class="cn" data-dfull="1" role="link" tabindex="0" style="cursor:pointer" title="صفحة العميل">👤 ${esc(c.name)}</div><span class="dbamt ${bcls(c)}">${b?`<small>${b>0?'عليه':'له'}</small> <b class="num">${f(Math.abs(b))}</b>`:'<b>خالص</b>'}</span><button class="main b-green" data-dpay="1">💵 دفع</button></div>
       <div class="mute dbsub">${esc(cSub(c,2)+(c.remAt?' · آخر تذكير '+agoTxt(c.remAt):''))}</div>
-      <div class="dbact"><button class="ab b-out" data-dfull="1">👤 صفحة العميل</button>${b>0?`<button class="ab b-out" data-drem="1"><i class="wai"></i> تذكير</button>`:''}${wn?`<a class="ab wa" target="_blank" rel="noopener" href="https://wa.me/${wn}"><i class="wai"></i> رسالة</a>`:''}${tn?`<a class="ab tel" href="tel:${tn}">📞 اتصال</a>`:''}</div>
+      <div class="dbact"><button class="ab b-out" data-dstmt="1">📑 كشف حساب</button>${b>0?`<button class="ab b-out" data-drem="1"><i class="wai"></i> تذكير</button>`:''}${wn?`<a class="ab wa" target="_blank" rel="noopener" href="https://wa.me/${wn}"><i class="wai"></i> رسالة</a>`:''}${tn?`<a class="ab tel" href="tel:${tn}">📞 اتصال</a>`:''}</div>
       
       ${wn?'':'<div class="mute" style="margin-top:4px">مفيش رقم متسجل للعميل · يتضاف من صفحة العملاء</div>'}
       ${b>0?(c.due?`<div class="dbdue${dAgo(0)>=c.due?' late':''}">📅 ميعاد السداد: <b>${dueLabel(c.due)}</b>${dAgo(0)>c.due?` <span>(عدّى من ${dz(Math.round((dAgo(0)-c.due)/864e5))})</span>`:''}<button type="button" class="lnk" data-ddx="1">✖️ إلغاء</button></div>`:''):''}
+      ${dbSt===c.id?`<div class="dbst"><span>من</span><input type="date" id="dsf" aria-label="من تاريخ"><span>إلى</span><input type="date" id="dst" aria-label="إلى تاريخ"><button type="button" class="ab main" data-dsgo="1">عرض</button><button type="button" class="lnk" data-dsx="1" aria-label="إغلاق">✕</button><small class="mute">سيبهم فاضيين = من الأول لحد النهارده</small></div>`:''}
       ${dbPay===c.id?`<div class="dbpay">
         ${pwHtml('db',c)}
         <div class="btns"><button class="main b-green" data-dpgo="1">✅ تسجيل الدفعة</button><button class="alt" data-dpx="1" style="flex:none">✖️ إلغاء</button></div>
@@ -2598,6 +2599,9 @@ $('t-dash').addEventListener('click',e=>{const t=e.target;
   if(t.closest('#dbCard')){const op=!dbMode;infoMode=false;dbMode=op;dbSel=null;dbPay=null;dbTf=null;drawDebt();window.scrollTo(0,0);return}
   if(t.closest('#dbBack')){dbMode=false;dbSel=null;drawDebt();window.scrollTo(0,0);return}
   {const dq=t.closest('[data-dquick]');if(dq){dbSel=dq.dataset.dquick;dbPay=dbSel;delete PW.db;drawDebt();window.scrollTo(0,0);const i=document.querySelector('[data-pw="db"] .spa');if(i)i.focus();return}}
+  if(t.closest('[data-dstmt]')){dbSt=dbSt===dbSel?null:dbSel;drawDebt();return}
+  if(t.closest('[data-dsx]')){dbSt=null;drawDebt();return}
+  if(t.closest('[data-dsgo]')){const a=$('dsf').value,b=$('dst').value,sv=[selC,per,pF,pT];selC=dbSel;per=a||b?'c':'all';pF=a;pT=b;try{stmtMerge()}finally{[selC,per,pF,pT]=sv}return}
   {const df=t.closest('[data-dfull]');if(df){const id=dbSel;document.querySelector('#bnav button[data-t="cu"]').click();selC=id;delete PW.cu;per='all';cdq='';pMo=0;editOpen=false;cuEd=false;cuPm=false;drawCusts();window.scrollTo(0,0);return}}
   {const tm=t.closest('[data-tfm]');if(tm){tfSendC(getC(tm.dataset.tfc),tm.dataset.tfm);return}}
   if(t.closest('[data-tfamt]')){pset('tfAmt',!tfAmtOn());drawDebt();return}
