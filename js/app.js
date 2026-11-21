@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='361';
+const APP_VER='362';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2795,16 +2795,21 @@ function repGo(){
     if(sb==='i'||sb==='r'){/* v352: جاهز (بمقاساته: عدد، سعر القطعة، ربح، متبقي) ثم مقطع ثم غير مسجلة */const GR=[['rd','📦 شغل جاهز'],['mq','✂️ مقطع'],['u','❔ غير مسجلة في الأصناف']],SM=new Map();try{stkAll().forEach((o,id)=>SM.set(id,o))}catch(e){}
       const szk=i=>{const a=+i.w,b=+i.h;return a>0&&b>0?fq(Math.min(a,b))+'×'+fq(Math.max(a,b)):''},bal=(n0,sz)=>{let t=null;S.items.forEach(i=>{if(i.type!=='rd'||nm(i.name)!==nm(n0))return;if(sz&&szk(i)!==sz)return;const o=SM.get(i.id);if(o)t=(t||0)+o.bal});return t};
       const PAL=[['#e8f1fb','#cfe2f7'],['#fdf0dc','#f9deb5'],['#e6f4e6','#cde8cd'],['#f3e9fa','#e3cff2'],['#fde9e8','#f8cfcd'],['#e5f4f4','#c8e6e6']],WS={3:[.46,.24,.30],4:[.36,.14,.2,.30],5:[.30,.12,.17,.23,.18],6:[.26,.1,.14,.2,.16,.14]};
-      ITG=GR.map(([t,ti])=>{const L=[...A.G].filter(([k,o])=>(o.ty||'u')===t).sort((x,y)=>y[1].v-x[1].v),pu=t==='rd'&&sb==='i',hasPr=pu&&L.some(([k,o])=>o.hp),hasSt=t==='rd'&&L.some(([k,o])=>bal(o.n)!=null);
-        const th=['الصنف','العدد'+(t==='mq'?' (م²)':''),...(pu?['سعر القطعة']:[]),sb==='r'?'الربح':'المبلغ',...(hasPr?['الربح']:[]),...(hasSt?['المخزن']:[])],
-          cell=(n,c,v,pr,st,np)=>[n,c,...(pu?[np?'':c>0?f(rd2(v/c)):'—']:[]),f(v),...(hasPr?[pr!=null?f(pr):'—']:[]),...(hasSt?[st!=null?fq(rd2(st)):'—']:[])],rows=[];
-        L.forEach(([k,o],gi)=>{const pl=PAL[gi%PAL.length],mk=(r,bg)=>{r.bg=bg;return r};let zl=[];
-          if(t==='rd'&&(sb==='i'||sb==='r')){const z=new Map(o.z||[]);if(iAllZ)S.items.forEach(i=>{if(i.type==='rd'&&nm(i.name)===nm(o.n)&&szk(i)&&!z.has(szk(i)))z.set(szk(i),{c:0,v:0,pr:0,z0:1})});zl=[...z].sort((p,q)=>(q[1].c-p[1].c)||(q[1].v-p[1].v))}
-          zl.forEach(([s,v])=>rows.push(mk(cell('   \u2066'+s+'\u2069',f(v.c),v.v,o.hp&&!v.z0?v.pr:null,bal(o.n,s)),pl[0])));
-          rows.push(mk(cell((zl.length?'إجمالي ':'')+(o.n||k),f(o.c)+(t==='mq'&&o.q?' ('+fq(o.q)+')':''),o.v,o.hp?o.pr:null,t==='rd'?bal(o.n):null,1),pl[zl.length?1:0]))});
-        return{title:ti,th,w:WS[th.length]||WS[3],rows}}).filter(g=>g.rows.length)}
+      /* v362: أعمدة ثابتة في كل الأقسام، واسم الصنف أول سطر ومقاساته تحته، والصنف بمقاس واحد سطر واحد */
+      const all=[...A.G],pu=sb==='i',hasPr=pu&&all.some(([k,o])=>o.hp),hasSt=all.some(([k,o])=>(o.ty||'u')==='rd'&&bal(o.n)!=null),
+        th=['الصنف','العدد',...(pu?['سعر الوحدة']:[]),sb==='r'?'الربح':'المبلغ',...(hasPr?['الربح']:[]),...(hasSt?['المخزن']:[])],
+        W6={4:[.34,.2,.2,.26],5:[.3,.19,.15,.18,.18],6:[.26,.17,.12,.16,.15,.14]},
+        cell=(n,c,q,v,pr,st,mq)=>[n,f(c)+(mq&&q?' · '+fq(q)+'م²':''),...(pu?[mq?(q>0?f(rd2(v/q)):'—'):(c>0?f(rd2(v/c)):'—')]:[]),f(v),...(hasPr?[pr!=null?f(pr):'—']:[]),...(hasSt?[st!=null?fq(rd2(st)):'—']:[])];
+      ITG=GR.map(([t,ti])=>{const L=all.filter(([k,o])=>(o.ty||'u')===t).sort((x,y)=>y[1].v-x[1].v),rows=[];
+        L.forEach(([k,o],gi)=>{const pl=PAL[gi%PAL.length],mk=(r,bg)=>{r.bg=bg;return r},mq=t==='mq';let zl=[];
+          if(t==='rd'){const z=new Map(o.z||[]);if(iAllZ)S.items.forEach(i=>{if(i.type==='rd'&&nm(i.name)===nm(o.n)&&szk(i)&&!z.has(szk(i)))z.set(szk(i),{c:0,v:0,pr:0,z0:1})});zl=[...z].sort((p,q)=>(q[1].c-p[1].c)||(q[1].v-p[1].v))}
+          const nmx=o.n||k;
+          if(zl.length===1){const[s,v]=zl[0];rows.push(mk(cell(nmx+' ⁦'+s+'⁩',v.c,0,v.v,o.hp&&!v.z0?v.pr:null,bal(o.n,s),0),pl[1]));return}
+          rows.push(mk(cell(nmx,o.c,o.q,o.v,o.hp?o.pr:null,t==='rd'?bal(o.n):null,mq),pl[1]));
+          zl.forEach(([s,v])=>rows.push(mk(cell('      ↳ ⁦'+s+'⁩',v.c,0,v.v,o.hp&&!v.z0?v.pr:null,bal(o.n,s),0),pl[0])))});
+        return{title:ti,th,w:W6[th.length]||[.46,.24,.30],rows}}).filter(g=>g.rows.length)}
     if(sb==='r'){const ex=exTot(exIn(R.a,R.b));{const WV=skWasteRange(R.a,R.b);sum=[['ربح الأصناف',f(tot)],['− مصروفات الفترة',f(ex)],...(WV.v>0?[['− خسارة هادر الألواح ('+fq(WV.m)+' م²)',f(WV.v)]]:[]),['= صافي الربح',f(rd2(tot-ex-WV.v)),1]]}if(A.nk)note='مبيعات بقيمة '+f(A.nk)+' ملهاش سعر شراء، مش داخلة في الربح.'}
-    else sum=[[sb==='w'?'إجمالي المدفوع':'إجمالي مبيعات الأصناف',f(tot),1]]}
+    else{sum=[[sb==='w'?'إجمالي المدفوع':'إجمالي مبيعات الأصناف',f(tot),1]];if(sb==='i'){const ph=[...A.G].reduce((s,[k,o])=>s+(o.hp?o.pr:0),0);if(ph)sum.push(['إجمالي الربح',f(rd2(ph)),1])}}}
   if(!rows.length){toast(sb==='d'?'مفيش مديونين ✓':sb==='x'?'مفيش مصروفات متسجلة في الفترة دي':'مفيش بيانات في الفترة دي');return}
   if(rows.length>CAP){note=(note?note+' ':'')+'ظهر أول '+CAP+' من '+rows.length+' بس. اضغط «تصدير Excel» للتفاصيل كاملة.';rows=rows.slice(0,CAP)}
   tb.rows=rows;
