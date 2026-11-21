@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='376';
+const APP_VER='377';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2137,7 +2137,8 @@ const skCost=it=>+skInv(it).cost||0;
 const SKSW=225,SKSH=321;
 const skSheet=g=>{const v=skInv(g);return[+v.sw>0?+v.sw:SKSW,+v.sh>0?+v.sh:SKSH]};
 const skArea=g=>{const[a,b]=skSheet(g);return a*b/1e4};
-function skPar(it){if(!it||it.type!=='rd')return null;const v=skInv(it).par;if(v==='-')return null;if(v)return S.items.find(x=>x.id===v&&x.type==='mq')||null;const k=nkey(it.name);return k?S.items.find(x=>x.type==='mq'&&nkey(x.name)===k)||null:null}
+/* v377: الجاهز مستقل تمامًا عن الألواح: مفيش خصم تلقائي من اللوح، كل واحد يتعدّ لوحده */
+function skPar(it){return null;const v=skInv(it).par;if(v==='-')return null;if(v)return S.items.find(x=>x.id===v&&x.type==='mq')||null;const k=nkey(it.name);return k?S.items.find(x=>x.type==='mq'&&nkey(x.name)===k)||null:null}
 function skYieldAuto(it,g){const[a,b]=skSheet(g),w=+it.w||0,hh=+it.h||0;if(!(w>0&&hh>0))return 1;return Math.max(1,Math.floor(a/w)*Math.floor(b/hh),Math.floor(a/hh)*Math.floor(b/w))}
 const skYield=(it,g)=>+skInv(it).y>0?+skInv(it).y:skYieldAuto(it,g);
 const skKids=g=>S.items.filter(k=>k.type==='rd'&&(p=>p&&p.id===g.id)(skPar(k)));
