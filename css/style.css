@@ -1616,3 +1616,135 @@ html:not(#zz) #t-it .itw.ed input{border-color:#16a34a!important;background:var(
 /* v367: استلام بضاعة */
 .rcl{display:block;border:1px solid var(--line);border-radius:10px;padding:6px 8px;margin-bottom:6px}.rcr{display:flex;gap:6px;align-items:center}.rcr input{flex:1;min-width:0;height:34px;margin:0}.rcr.rc4{margin-top:4px}.rcr.rc4 input{width:25%;text-align:center}.rcl .rcv{margin-top:3px}
 .rcl .rcr.rc4 input{width:auto;flex:1 1 0;padding:0 4px;font-size:13px}.rcl .rcN{font-size:14px}
+
+/* v369: جدول وصلت بضاعة بنفس شكل الفاتورة */
+/* v79: بنود الفاتورة أصغر — سطر القيمة والكمية في نفس سطر الأزرار، ومسافات أقل */
+#rcRows .row{padding:4px 8px;margin-bottom:3px}
+#rcRows .rg{margin:0 0 1px}
+#rcRows .rg.c5 input,#rcRows .bz input{padding-top:3px;padding-bottom:3px;height:28px}
+#rcRows .rg.c5{gap:3px}
+#rcRows .bz.c5{margin:2px 0 0;gap:3px}
+#rcRows .rf{margin-top:1px;gap:4px;flex-wrap:nowrap}
+#rcRows .rf .qq{order:2;flex:none;font-size:11px;white-space:nowrap}
+#rcRows .rf>span[style*="flex:1"]{order:3;min-width:0}
+#rcRows .rf>span:not([style]):not(.qq){order:4;white-space:nowrap;font-size:12px}
+#rcRows .rf .del{order:5}
+#rcRows .rf .cp,#rcRows .rf .del{height:24px}
+#rcRows .rf .bt{padding:2px 8px;font-size:12px}
+#rcRows .r1.one input{height:28px;padding-top:3px;padding-bottom:3px}
+#rcRows .row .del,#rcRows .row .cp{height:26px}
+/* ===== بنود الفاتورة: جدول زي Excel، كل بند في سطر واحد، وأزرار البند بتظهر للبند المفتوح بس ===== */
+#rcW{--xl:color-mix(in srgb,var(--ink) 30%,transparent);--nw:26px;--vw:62px;margin-bottom:6px}
+#rcRows{counter-reset:rw;border:1px solid var(--xl);border-top:0}
+#rcRows:empty{border:0}
+#rcRows .row{position:relative;counter-increment:rw;padding:0;padding-inline:var(--nw) var(--vw);margin:0;border-radius:0;border-width:0 0 1px;border-color:var(--xl);background:var(--card);box-shadow:none;animation:none}
+#rcRows .row:last-child{border-bottom:0}
+#rcRows .row::before{content:counter(rw);position:absolute;inset-block:0;inset-inline-start:0;width:var(--nw);padding-top:7px;text-align:center;font-size:12px;font-weight:700;color:var(--ink);border-inline-end:1px solid var(--xl)}
+#rcRows .row[data-rt]::before{color:var(--danger)}
+#rcRows .rtb{height:20px;line-height:16px;padding:2px 6px;margin:0}
+#rcRows .rg.c5,#rcRows .r1.one,#rcHd{grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr));gap:0;margin:0}
+#rcRows .rg.c5 input,#rcRows .r1.one input{height:30px;padding:2px;border:0;border-inline-start:1px solid var(--xl);border-radius:0;background:transparent;text-align:center}
+#rcRows .rg.c5 .n,#rcRows .r1.one .n{text-align:start;padding:2px 6px;border-inline-start:0;background-image:none}
+#rcRows .rg.c5 input:not(.n)::placeholder,#rcRows .r1.one input:not(.n)::placeholder{color:transparent}
+#rcRows .r1.one .n{grid-area:1/1}
+#rcRows .r1.one .c{grid-area:1/4}
+#rcRows .r1.one .p{grid-area:1/5}
+#rcRows .r1.one::before,#rcRows .r1.one::after{content:"";align-self:stretch;border-inline-start:1px solid var(--xl)}
+#rcRows .r1.one::before{grid-area:1/2}
+#rcRows .r1.one::after{grid-area:1/3}
+#rcRows .row input:focus{background:var(--card);box-shadow:inset 0 0 0 2px var(--ink);outline:0}
+#rcRows .vc{position:absolute;top:0;inset-inline-end:0;width:var(--vw);height:30px;display:flex;align-items:center;justify-content:center;border-inline-start:1px solid var(--xl);font-size:13px;font-weight:700}
+#rcRows .row[data-rt] .vc{top:20px}
+#rcRows .row .cp{display:none}
+#rcRows .row.act:not(.blank) .cp{display:block;position:absolute;z-index:1;top:0;inset-inline-start:0;width:var(--nw);height:30px;background:var(--card);border-inline-end:1px solid var(--xl);color:var(--ink);font-size:16px}
+#rcRows .row[data-rt].act .cp{top:20px}
+#rcRows .qq{display:none}
+#rcRows .row .del{display:none}
+#rcRows .row.act:not(.blank) .del{display:block;position:absolute;z-index:1;top:0;inset-inline-end:0;width:20px;height:30px;padding:0}
+#rcRows .row.act:not(.blank) .vc{padding-inline-end:18px}
+#rcRows .row.act:not(.blank) .n,#rcRows .row:has(.bt.on) .n{padding-inline-end:30px}
+#rcRows .rf{position:absolute;top:0;height:30px;margin:0;padding:0;inset-inline-end:calc(var(--vw) + (100% - var(--nw) - var(--vw))*2/3 + 2px);display:flex;flex-wrap:nowrap;align-items:center;gap:2px}
+#rcRows .row[data-rt] .rf,#rcRows .row[data-rt] .bz.c5,#rcRows .row[data-rt].act .del{top:20px}
+#rcRows .bz.c5{position:absolute;top:0;z-index:1;inset-inline:var(--nw) var(--vw);display:grid;grid-template-columns:minmax(0,2fr) repeat(4,minmax(0,1fr));gap:0;margin:0;padding:0;pointer-events:none}
+#rcRows .bz.c5.hide{display:none}
+#rcRows .bz input{pointer-events:auto;height:30px;padding:2px;border:0;border-radius:0;border-inline-start:1px solid var(--xl);background:var(--card);box-shadow:inset 0 -2px 0 var(--ink);color:var(--ink);text-align:center}
+#rcRows .bz input::placeholder{color:var(--mute);font-size:11px}
+#rcRows .rf .bt,#rcRows .rf .bt.on{display:none;min-width:24px;height:26px;padding:0;border:0;border-radius:4px;background:none;color:var(--ink);font-size:13px;font-weight:400}
+#rcRows .rf .bt.on,#rcRows .row.act:not(.blank) .rf .bt{display:block}
+#rcRows .rf .lpb{height:22px;padding:0 4px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);font-size:11px;font-weight:400;white-space:nowrap}
+#rcRows .row:not(.act) .rf .lpb{display:none}
+#rcRows .row.act:has(.lpb:not(.hide)) .n{padding-inline-end:76px;text-overflow:ellipsis}
+#rcRows .row .del,#rcRows .row .cp{color:var(--mute)}
+#rcHd{display:none;position:sticky;top:calc(var(--hh) + env(safe-area-inset-top,0px));z-index:5;padding:0;padding-inline:var(--nw) var(--vw);background:color-mix(in srgb,var(--ink) 8%,var(--card));border:1px solid var(--xl);font-size:12px;font-weight:700;text-align:center}
+#rcHd span{padding:5px 0;border-inline-start:1px solid var(--xl)}
+#rcHd span:first-child{border-inline-start:0}
+#rcHd::before{content:"#";position:absolute;inset-block:0;inset-inline-start:0;width:var(--nw);padding-top:5px;border-inline-end:1px solid var(--xl)}
+#rcHd .hv{position:absolute;inset-block:0;inset-inline-end:0;width:var(--vw)}
+#rcW:has(.row) #rcHd{display:grid}
+html.biz-gen #rcHd span:nth-child(2),html.biz-gen #rcHd span:nth-child(3){display:none}
+html.biz-gen #rcRows .r1.one,html.biz-gen #rcHd{grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr))}
+html.biz-gen #rcRows .r1.one .c{grid-area:1/2}
+html.biz-gen #rcRows .r1.one .p{grid-area:1/3}
+html.biz-gen #rcRows .r1.one::before,html.biz-gen #rcRows .r1.one::after{display:none}
+#rcRows input,#rcRows button{min-height:0}
+#rcRows input{border-radius:0!important}
+#t-new #rcRows input{border-radius:0!important}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd{background:var(--accLight);color:color-mix(in srgb,var(--acc) 80%,var(--ink));font-weight:700}
+/* v166: جدول الأصناف بنفس النظام بس بألوان الثيم: خطوط ناعمة، صفوف متبادلة، رأس ملون، وحواف مدورة */
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcW{--xl:color-mix(in srgb,var(--acc) 16%,var(--card))}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd{background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 16%,var(--card)),var(--accLight));color:color-mix(in srgb,var(--acc) 85%,var(--ink));border-color:color-mix(in srgb,var(--acc) 22%,var(--card));border-radius:12px 12px 0 0;overflow:hidden}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd::before{color:color-mix(in srgb,var(--acc) 85%,var(--ink))}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows{border-color:color-mix(in srgb,var(--acc) 22%,var(--card));border-radius:0 0 12px 12px;overflow:hidden;box-shadow:var(--soft)}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row:nth-child(even){background:color-mix(in srgb,var(--acc) 4%,var(--card))}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row::before{color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,transparent)}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .vc{color:color-mix(in srgb,var(--acc) 80%,var(--ink));background:color-mix(in srgb,var(--acc) 7%,transparent)}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row input:not(:focus){color:var(--ink);background-color:transparent!important}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row input::placeholder{color:color-mix(in srgb,var(--acc) 40%,var(--mute))}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row input:focus{background:color-mix(in srgb,var(--acc) 9%,var(--card));box-shadow:inset 0 0 0 2px var(--acc)}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row.act{background:color-mix(in srgb,var(--acc) 8%,var(--card))}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row.act:not(.blank) .cp{background:var(--accLight);color:var(--acc)}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .bz input{box-shadow:inset 0 -2px 0 var(--acc)}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row input,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .row::before,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .vc,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .r1.one::before,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .r1.one::after,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd span,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd::before{border-color:var(--xl)!important}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcRows .vc{height:auto;bottom:0}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd::before{background:linear-gradient(135deg,var(--acc),var(--acc2,var(--acc)))!important;color:#fff!important}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd span,html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd::before{border-color:rgba(255,255,255,.22)!important}
+html[data-theme="dark"]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd,html[data-theme="dark"]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd::before{background:color-mix(in srgb,var(--acc) 30%,var(--card))!important;color:var(--ink)!important}
+html[data-theme]:is([data-pal="sage"],[data-pal="dusk"],[data-pal="latte"],[data-pal="lav"]) #rcHd::before{background:transparent!important}
+/* v167: رقم القيمة في الجدول أخف وأصغر شوية */
+#t-new #rcRows .vc{font-weight:500!important;font-size:var(--t-s)!important}
+#t-new #rcRows .vc .val{font-weight:500!important;font-size:var(--t-s)!important}
+/* v171: إظهار/إخفاء عمود القيمة */
+#rcHd .hv{cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;user-select:none}
+#rcHd .hv .hv-t{font-weight:inherit}
+#rcHd .hv .hv-a{font-style:normal;font-size:15px;line-height:1;opacity:.85}
+#rcW.v-off{--vw:22px}
+#rcW.v-off #rcHd .hv .hv-t{display:none}
+#rcW.v-off #rcHd .hv .hv-a{transform:scaleX(-1)}
+#rcW.v-off #rcRows .vc>.val{visibility:hidden}
+#rcW.v-off #rcRows .row.act:not(.blank) .vc{padding:0}
+/* v173: الصنف الجاهز ملوش زرار 📐، فمنحجزش له مكان في خانة الاسم */
+#rcRows .row.act:not(.blank) .r1.one .n{padding-inline-end:6px}
+#rcRows .n:not(:focus){text-overflow:ellipsis}
+/* الصنف الجاهز ملوش عرض وطول: اسمه ياخد خانتهم كمان عشان يبان كامل */
+html:not(.biz-gen) #rcRows .r1.one .n{grid-area:1/1/2/4}
+html:not(.biz-gen) #rcRows .r1.one::before,html:not(.biz-gen) #rcRows .r1.one::after{display:none}
+/* v174: العدد الفاضي = 1، بيبان «1» باهت لحد ما تكتب رقم */
+html #rcRows .row input.c.c1::placeholder{color:var(--ink)!important;opacity:.45!important;font-size:inherit!important}
+/* v264: جدول الفاتورة بيتلوّن بلون النظام المختار في كل الألوان (مش الأربعة الهادية بس): الرأس بلون النظام وخطوط الجدول من نفس اللون */
+#rcW{--xl:color-mix(in srgb,var(--acc) 30%,var(--line))}
+html[data-theme="light"] #rcHd{background:var(--acc)!important;color:var(--accInk,#fff)!important;border-color:var(--acc)!important}
+html[data-theme="light"] #rcHd span,html[data-theme="light"] #rcHd::before{border-color:rgba(255,255,255,.25)!important}
+html[data-theme="light"] #rcHd::before{background:transparent!important;color:inherit}
+html[data-theme="dark"] #rcHd{background:color-mix(in srgb,var(--acc) 30%,var(--card))!important;color:var(--ink)!important}
+html[data-theme="dark"] #rcHd::before{background:transparent!important}
+#rcRows .row:nth-child(even){background:color-mix(in srgb,var(--acc) 6%,var(--card))}
+/* v265: جدول الفاتورة شكله واحد في كل الألوان — حواف مدورة زي بعض، رأس بلون النظام مسطح، نفس الظل */
+html[data-theme][data-pal] #rcHd{border-radius:12px 12px 0 0;overflow:hidden;border-color:var(--acc)}
+html[data-theme="light"][data-pal] #rcHd,html[data-theme="light"][data-pal] #rcHd::before{background:var(--acc)!important;color:var(--accInk,#fff)!important}
+html[data-theme="light"][data-pal] #rcHd::before{background:transparent!important;color:inherit!important}
+html[data-theme="light"][data-pal] #rcHd span,html[data-theme="light"][data-pal] #rcHd::before{border-color:rgba(255,255,255,.25)!important}
+html[data-theme="dark"][data-pal] #rcHd,html[data-theme="dark"][data-pal] #rcHd::before{background:color-mix(in srgb,var(--acc) 30%,var(--card))!important;color:var(--ink)!important}
+html[data-theme="dark"][data-pal] #rcHd::before{background:transparent!important}
+html[data-theme][data-pal] #rcRows{border-radius:0 0 12px 12px;overflow:hidden;border-color:var(--acc);box-shadow:var(--soft)}
+html[data-theme][data-pal] #rcRows .row:nth-child(even){background:color-mix(in srgb,var(--acc) 6%,var(--card))}
+#rcHd{margin-top:2px}#rcRows .row{flex-wrap:wrap}#rcRows .rg{flex:1 1 0;min-width:0}
