@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='389';
+const APP_VER='390';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2003,10 +2003,10 @@ function spEntry(s,g){const buy=spTy==='buy';$('spEd').classList.toggle('hide',!
   $('spAdd').textContent=spEid?'💾 حفظ':'✅ سجّل';if(spEid)$('spXtra').open=true}
 function spLedger(s,g){let run=0;const all=g.l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse(),rows=all.filter(o=>spLF==='buy'?!o.pay:spLF==='pay'?o.pay:spLF==='pic'?spFl.some(q=>q.pid===o.x.id):true),lim=spAll?rows.length:15;
   $('spLF').classList.toggle('hide',all.length<4);$('spLF').innerHTML=spChips([['all','الكل'],['buy','🛒 شراء'],['pay','💵 دفع'],['pic','📎 بصور']],spLF,'data-lf');
-  $('spList').innerHTML=rows.length?'<tr><th>اليوم</th><th>البيان</th><th>شراء</th><th>دفع</th><th>الرصيد</th><th></th></tr>'+rows.slice(0,lim).map(({x,v,pay,run})=>{
+  $('spList').innerHTML=rows.length?'<tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th><th></th></tr>'+rows.slice(0,lim).map(({x,v,pay,run})=>{
     let sub='';if(pay&&x.how)sub=x.how;else if(!pay){const r=g.rem[x.id];if(r===0)sub='✅ مدفوعة';else if(x.due)sub=(x.due<Date.now()?'⏰ متأخرة ':'⏰ ')+dshort(x.due).slice(5)+(r<v?' · باقي '+f(r):'');else if(r<v)sub='باقي '+f(r)}
     const fc=spFl.filter(q=>q.pid===x.id).length;
-    return`<tr><td class="num">${dshort(x.ts).slice(5)}${fc?`<small data-spf="${esc(x.id)}" style="cursor:pointer">📎${fc>1?fc:''}</small>`:''}</td><td class="tn">${esc(x.note||(pay?'دفعة':'شراء'))}${sub?`<small class="mute">${esc(sub)}</small>`:''}</td><td class="num">${pay?'':f(v)}</td><td class="num">${pay?f(v):''}</td><td class="num"><b>${f(run)}</b></td><td class="nw"><button type="button" class="xd" data-spe="${esc(x.id)}" aria-label="تعديل">✏️</button><button type="button" class="xd" data-spd="${esc(x.id)}" aria-label="حذف">×</button></td></tr>`}).join(''):'<tr><td class="tn mute">'+(all.length?'مفيش حركات بالشكل ده.':'لسه مفيش حركات للمورد ده. سجّل أول شراء من فوق.')+'</td></tr>';
+    return`<tr><td class="num">${dshort(x.ts).slice(5)}${fc?`<small data-spf="${esc(x.id)}" style="cursor:pointer">📎${fc>1?fc:''}</small>`:''}</td><td class="tn">${esc(x.note||(pay?'دفعة':'شراء'))}${sub?`<small class="mute">${esc(sub)}</small>`:''}</td><td class="num ${pay?'spp':'spq'}">${pay?'−':'+'}${f(v)}</td><td class="num"><b>${f(run)}</b></td><td class="nw"><button type="button" class="xd" data-spe="${esc(x.id)}" aria-label="تعديل">✏️</button><button type="button" class="xd" data-spd="${esc(x.id)}" aria-label="حذف">×</button></td></tr>`}).join(''):'<tr><td class="tn mute">'+(all.length?'مفيش حركات بالشكل ده.':'لسه مفيش حركات للمورد ده. سجّل أول شراء من فوق.')+'</td></tr>';
   $('spMore').classList.toggle('hide',rows.length<=15||spAll)}
 function spEditFill(s){const ae=document.activeElement;if(!($('supEdit').contains(ae)&&/INPUT/.test(ae.tagName))){$('supEN').value=s.name;$('supPh').value=s.phone||'';$('supENote').value=s.note||''}
   $('supEC').innerHTML=spChips([['','بدون'],...SPC.map(c=>[c[0],c[1]+' '+c[2]])],s.cat||'','data-ec');
