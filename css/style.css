@@ -2018,3 +2018,26 @@ html[data-theme="dark"] #pu .ok,html[data-theme="dark"] #pu .puok{color:#4ade80!
 #jd .jdnz input{flex:1;min-width:0;height:30px;min-height:30px;text-align:center;margin:0;font-size:13px}
 #jd .jdnz button{flex:none;height:30px;min-height:30px;padding:0 10px;margin:0}
 html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-theme="dark"] :is(#sk2,#jd) .ok{color:#4ade80!important}
+/* v397: المخزن واضح وقابل للتعديل، المربعات بتتداس، الجرد بمسح مقاس وسعر */
+#pu .puk>button{display:flex;flex-direction:column;align-items:center;padding:5px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card);box-shadow:none;margin:0;min-height:0;height:auto;font-weight:400;color:var(--ink)}
+#sk2 .s2r{display:block;padding:8px 10px;margin-bottom:5px;border:1px solid var(--line);border-radius:10px;background:var(--card);opacity:1}
+#sk2 .s2t{display:flex;align-items:baseline;gap:8px}
+#sk2 .s2n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);font-size:15px;font-weight:700}
+#sk2 .s2m{flex:none;font-size:16px;color:var(--ink);font-weight:700}
+#sk2 .s2m.s2no{font-size:13px;font-weight:600;color:var(--acc)}
+#sk2 .s2d{display:flex;flex-wrap:wrap;gap:3px 12px;margin-top:3px;font-size:12.5px;color:var(--ink)}
+#sk2 .s2sub{font-size:12.5px;margin-top:4px;color:var(--ink)}
+#sk2 .s2f label,#sk2 .s2g label{display:flex;flex-direction:column;gap:2px;font-size:11.5px;color:var(--mute);min-width:0;margin:0}
+#sk2 .s2f{margin-top:6px}
+#sk2 .s2g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}
+#sk2 :is(.s2f,.s2g) input{height:34px;min-height:34px;font-size:14px;color:var(--ink);padding:0 6px;margin:0;text-align:center;width:100%}
+#sk2 .s2f input{text-align:start}
+#sk2 .s2one .purw>button{width:100%}
+#sk2 td.nw{width:1%}#sk2 td.nw .xd{width:20px;min-width:0;height:22px;min-height:0;padding:0;font-size:13px}
+#sk2 tr[data-s2p]{cursor:pointer}
+#jd .jdz .xd{flex:none;width:22px;min-width:0;height:26px;min-height:0;padding:0;font-size:14px}
+#jd .jdz>span{display:flex;align-items:baseline;gap:4px;flex-wrap:wrap}
+#jd .jdz>span small{font-size:11.5px;color:var(--mute)}
+#jd .jdb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+#jd .jdp{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);margin:0}
+#jd .jdp input{width:84px;height:30px;min-height:30px;text-align:center;margin:0;font-size:14px}

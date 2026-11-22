@@ -24,19 +24,28 @@ function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);t
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
 function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
 
-function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else{puV='home';b.innerHTML=puHomeH()}}
+function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else if(puV==='owed')b.innerHTML=puOwedH();else if(puV==='month')b.innerHTML=puMonthH();else{puV='home';b.innerHTML=puHomeH()}}
 
 /* ---- الصفحة الرئيسية: الموردين + آخر الفواتير ---- */
 function puHomeH(){const now=new Date(),m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
   const tot=rd2(S.suppliers.reduce((a,s)=>a+puBal(s.id),0)),mo=rd2(S.purchases.filter(x=>x.type==='buy'&&!x.ob&&x.ts>=m0&&puSup(x.sid)).reduce((a,x)=>a+(+x.amt||0),0));
   const sups=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).sort((a,b)=>(b.b>0)-(a.b>0)||b.b-a.b||a.s.name.localeCompare(b.s.name,'ar'));
   const last=S.purchases.filter(x=>x.type==='buy'&&!x.ob&&puSup(x.sid)).sort((a,b)=>b.ts-a.ts).slice(0,8);
-  return`<div class="puk"><div><small>🚚 عليك للموردين</small><b class="num${tot>0?' dn':''}">${f(tot)}</b></div><div><small>🛒 اشتريت الشهر ده</small><b class="num">${f(mo)}</b></div></div>
+  return`<div class="puk"><button type="button" data-pu="owed"><small>🚚 عليك للموردين ›</small><b class="num${tot>0?' dn':''}">${f(tot)}</b></button><button type="button" data-pu="month"><small>🛒 اشتريت الشهر ده ›</small><b class="num">${f(mo)}</b></button></div>
   <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة شراء</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="addsup">➕ مورد</button></div>
   <div class="card puadd" id="puAdd" hidden><div class="purw"><input id="puNS" placeholder="اسم المورد" autocomplete="off" aria-label="اسم المورد"><input id="puNP" inputmode="tel" placeholder="تليفون" autocomplete="off" aria-label="التليفون"><button type="button" class="main" data-pu="savesup">✅</button></div><div class="info" id="puAM"></div></div>
   <div class="pusec">🚚 الموردين</div>
   ${sups.length?sups.map(({s,b,d})=>`<div class="purow" data-pusup="${esc(s.id)}" role="button" tabindex="0"><span class="pun">${esc(s.name)}</span>${d!=null?`<span class="pud${d>=7?' red':''}">⏰ ${puDTx(d)}</span>`:''}<b class="num${b>0?' dn':b<0?' ok':''}">${b?f(Math.abs(b)):'✓'}</b></div>`).join(''):'<div class="card mute">مفيش موردين لسه. دوس «➕ مورد».</div>'}
   ${last.length?`<div class="pusec">🧾 آخر فواتير الشراء</div>`+last.map(x=>{const s=puSup(x.sid);return`<div class="purow sm" data-puinv="${esc(x.id)}" role="button" tabindex="0"><span class="num mute">${puDM(x.ts)}</span><span class="pun">${esc(s?s.name:'—')}${x.ret?' <small class="tag rt">↩ مرتجع</small>':''}${x.ref?' <small class="mute">#'+esc(x.ref)+'</small>':''}</span><b class="num">${f(Math.abs(+x.amt||0))}</b></div>`}).join(''):''}`}
+
+/* ---- عليك للموردين: الموردين اللي ليهم فلوس عندك ---- */
+function puOwedH(){const l=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).filter(o=>o.b>0).sort((a,b)=>b.b-a.b),tot=rd2(l.reduce((a,o)=>a+o.b,0));
+  return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b>🚚 عليك للموردين</b><span class="pub"><b class="num dn">${f(tot)}</b></span></div></div>
+  ${l.length?l.map(({s,b,d})=>`<div class="purow" data-pusup="${esc(s.id)}" role="button" tabindex="0"><span class="pun">${esc(s.name)}</span>${d!=null?`<span class="pud${d>=7?' red':''}">⏰ ${puDTx(d)}</span>`:''}<b class="num dn">${f(b)}</b></div>`).join(''):'<div class="card mute">مفيش حاجة عليك لأي مورد ✅</div>'}`}
+/* ---- اشتريت الشهر ده: فواتير الشراء ---- */
+function puMonthH(){const m0=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime(),l=S.purchases.filter(x=>x.type==='buy'&&!x.ob&&x.ts>=m0&&puSup(x.sid)).sort((a,b)=>b.ts-a.ts),tot=rd2(l.reduce((a,x)=>a+(+x.amt||0),0));
+  return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b>🛒 اشتريت الشهر ده</b><span class="pub"><b class="num">${f(tot)}</b></span></div></div>
+  ${l.length?l.map(x=>{const s=puSup(x.sid);return`<div class="purow sm" data-puinv="${esc(x.id)}" role="button" tabindex="0"><span class="num mute">${puDM(x.ts)}</span><span class="pun">${esc(s.name)}${x.ret?' <small class="tag rt">↩ مرتجع</small>':''}${x.ref?' <small class="mute">#'+esc(x.ref)+'</small>':''}${x.ln?'<small class="mute"> · '+esc(x.ln.map(q=>q.n).join('، '))+'</small>':''}</span><b class="num">${f(Math.abs(+x.amt||0))}</b></div>`}).join(''):'<div class="card mute">مفيش مشتريات الشهر ده.</div>'}`}
 
 /* ---- صفحة المورد: حسابه + كشف ---- */
 function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof spTel==='function'?spTel(s.phone):'',wa=s.phone?waNum(s.phone):'';let run=0;
@@ -101,7 +110,7 @@ $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],
   if(b&&b.dataset.pux!=null){puE.ln.splice(+b.dataset.pux,1);if(!puE.ln.length)puE.ln.push(puNewLn());$('puLns').innerHTML=puE.ln.map((l,i)=>puLnH(l,i)).join('');puLiveTot();return}
   if(b){const k=b.dataset.pu,s=puSup(puSid);
     if(k==='back')return puBack();
-    if(k==='new')return puNewInv(puV==='sup'?puSid:'',false);
+    if(k==='owed')return puGo('owed');if(k==='month')return puGo('month');if(k==='new')return puNewInv(puV==='sup'?puSid:'',false);
     if(k==='ret')return puNewInv(puSid,true);
     if(k==='pay')return puNewPay(puV==='sup'?puSid:'');
     if(k==='addsup'){const a=$('puAdd');a.hidden=!a.hidden;if(!a.hidden)$('puNS').focus();return}
