@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='380';
+const APP_VER='382';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -219,18 +219,18 @@ if(window.visualViewport){visualViewport.addEventListener('resize',kbFix);visual
 document.addEventListener('focusin',()=>setTimeout(kbFix,300));document.addEventListener('focusout',()=>setTimeout(kbFix,300));
 window.addEventListener('resize',fixBar);
 let curTab='new',tabHist=[],navNoHist=false;
-const navClick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;let t=b.dataset.t;if(t==='it'){skCur='it';t='sk'}const hb=t==='sk'?document.querySelector('#bnav [data-t="sk"]'):t==='cu'?$('hdrCu'):t==='cl'?$('hdrCl'):b;if(!navNoHist&&t!==curTab)tabHist.push(curTab);curTab=t;try{sessionStorage.setItem('lastTab',t)}catch(e){}
+const navClick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;let t=b.dataset.t;if(t==='it'){skCur='it';t='sk'}const hb=t==='sk'?document.querySelector('#bnav [data-t="sk"]'):t==='cu'?$('hdrCu'):t==='cl'?$('hdrCl'):b;if(!navNoHist&&t!==curTab)tabHist.push(curTab);if(t==='sk'&&curTab!=='sk'&&!navNoHist)skHist=[];curTab=t;try{sessionStorage.setItem('lastTab',t)}catch(e){}
   document.querySelectorAll('#bnav button,#hdrSet,#hdrCu,#hdrCl').forEach(x=>x.classList.toggle('on',x===hb));
   ['dash','new','cl','cu','it','st','sk'].forEach(k=>$('t-'+k).classList.toggle('hide',k!==t));
   $('saveBar').classList.toggle('hide',t!=='new');document.body.classList.toggle('onNew',t==='new');fixBar();
   if(t==='new'){drawRecent();drawQS()}if(t==='st')stGo('');if(t==='dash')drawDash();if(t==='cu')drawCusts();if(t==='sk')skShow();if(t==='new'&&lastC&&!editId){$('prev').value=balOf(lastC)||'';calc()}};
 $('bnav').onclick=navClick;$('hdrSet').onclick=navClick;$('hdrCu').onclick=navClick;$('hdrCl').onclick=navClick;
 /* v380: تاب المخزن فيه الأصناف والمخزن والموردين، كل واحد في تبويب */
-let skCur='it';
+let skCur='it',skHist=[];
 function skShow(){const P={it:$('t-it'),stk:$('stkPanel'),sup:document.querySelector('.stp[data-sp="sup"]')};Object.keys(P).forEach(k=>{if(P[k])P[k].classList.toggle('hide',k!==skCur)});
   document.querySelectorAll('#skSeg [data-skt]').forEach(x=>x.classList.toggle('on',x.dataset.skt===skCur));
   try{if(skCur==='it')drawItems();else if(skCur==='stk')stkOpen();else supOpen(null)}catch(e){}}
-$('skSeg').onclick=e=>{const b=e.target.closest('[data-skt]');if(!b)return;skCur=b.dataset.skt;skShow();window.scrollTo(0,0)};
+$('skSeg').onclick=e=>{const b=e.target.closest('[data-skt]');if(!b)return;if(b.dataset.skt!==skCur)skHist.push(skCur);skCur=b.dataset.skt;skShow();window.scrollTo(0,0)};
 /* العملاء والأصناف بقوا جوه الإعدادات: زرار الإعدادات يفضل متعلّم وانت فيهم */
 document.addEventListener('click',e=>{if(e.target.closest('[data-goset]')){$('hdrSet').click();window.scrollTo(0,0)}});
 (function(){const nav=$('bnav'),ind=document.createElement('span');ind.className='nav-ind';nav.prepend(ind);let first=true;
@@ -3091,7 +3091,7 @@ lockInit();loadMsgUI();loadLogo();paperLabels();fixBar();document.body.classList
 /* ---------- زرار الرجوع في الموبايل ---------- */
 const OVS=['res','rem','remL','bulk','calcModal','clOv','pinOv','qtOv','dzOv'],OVX={dzOv:'dzX',res:'resx',rem:'remX',remL:'remLX',bulk:'bulkX',calcModal:'calcClose',clOv:'clX',pinOv:'pinNo',qtOv:'qtX'};
 let NS=[],navIgnore=false,exitArm=false,exitT=0,navOK=false;
-const wantNav=()=>{const w=tabHist.map((t,i)=>'t'+i+':'+t);if(curTab==='cu'&&selC&&getC(selC))w.push('cu');if(curTab==='dash'&&dbMode){w.push('db');if(dbSel&&getC(dbSel))w.push('dbs')}if(curTab==='st'&&stCur)w.push('sp');OVS.forEach(id=>{const e=$(id);if(e&&!e.classList.contains('hide'))w.push('o:'+id)});return w};
+const wantNav=()=>{const w=tabHist.map((t,i)=>'t'+i+':'+t);if(curTab==='cu'&&selC&&getC(selC))w.push('cu');if(curTab==='dash'&&dbMode){w.push('db');if(dbSel&&getC(dbSel))w.push('dbs')}if(curTab==='st'&&stCur)w.push('sp');if(curTab==='dash'&&infoMode&&!dbMode)w.push('info');if(curTab==='sk'){skHist.forEach((s,i)=>w.push('k'+i+':'+s));if(skCur==='stk'&&stkV!=='home')w.push('sv');if(skCur==='sup'&&supCur)w.push('su')}OVS.forEach(id=>{const e=$(id);if(e&&!e.classList.contains('hide'))w.push('o:'+id)});return w};
 function syncNav(){if(!navOK||navIgnore)return;const w=wantNav();let p=0;while(p<NS.length&&p<w.length&&NS[p]===w[p])p++;
   if(NS.length>p){const k=NS.length-p;NS=NS.slice(0,p);navIgnore=true;history.go(-k);return}
   for(let i=p;i<w.length;i++){NS.push(w[i]);history.pushState({d:NS.length},'')}}
@@ -3101,6 +3101,10 @@ function closeTop(l){
   else if(l==='dbs'){dbSel=null;drawDebt()}
   else if(l==='db'){dbMode=false;dbSel=null;drawDebt()}
   else if(l==='sp'){stGo('')}
+  else if(l==='info'){infoMode=false;iSc='';drawDebt()}
+  else if(l[0]==='k'){skCur=skHist.pop()||'it';skShow()}
+  else if(l==='sv'){stkV='home';stkAct=null;drawStk()}
+  else if(l==='su'){supOpen(null)}
   else if(l[0]==='o'){const id=l.slice(2),x=$(OVX[id]);if(x)x.click();else if($(id))$(id).classList.add('hide');if($(id))$(id).classList.add('hide')}}
 let _rz;window.addEventListener('resize',()=>{clearTimeout(_rz);_rz=setTimeout(()=>{if(curTab==='new'){drawRecent();drawQS()}},200)});
 window.addEventListener('popstate',e=>{
