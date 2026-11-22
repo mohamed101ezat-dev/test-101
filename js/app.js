@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='402';
+const APP_VER='403';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1902,7 +1902,7 @@ function monRange(ts){const d=new Date(ts);return[new Date(d.getFullYear(),d.get
 function exIn(a,b){return S.expenses.filter(x=>x.ts>=a&&x.ts<b)}
 function exTot(l){return rd2(l.reduce((s,x)=>s+(+x.amt||0),0))}
 function exMonTs(){const m=/^(\d{4})-(\d{2})$/.exec($('exMon').value);return m?new Date(+m[1],+m[2]-1,1).getTime():Date.now()}
-function puIn(a,b){const l=S.purchases.filter(x=>x.ts>=a&&x.ts<b);return{n:l.length,buy:exTot(l.filter(x=>x.type!=='pay')),pay:exTot(l.filter(x=>x.type==='pay'))}}
+function puIn(a,b){const l=S.purchases.filter(x=>x.ts>=a&&x.ts<b&&!x.ob);return{n:l.length,buy:exTot(l.filter(x=>x.type!=='pay')),pay:exTot(l.filter(x=>x.type==='pay'))}}
 function drawExp(){const[a,b]=monRange(exMonTs()),l=exIn(a,b).sort((x,y)=>y.ts-x.ts),inv=S.invoices.filter(r=>r.ts>=a&&r.ts<b),s=inv.reduce((x,r)=>x+val(r),0),p=inv.reduce((x,r)=>x+pd(r),0),t=exTot(l),pu=puIn(a,b),PF=profitOf(inv);
   const ln=(n,v,bold)=>`<div class="ro" style="color:var(--ink)"><span>${n}</span>${bold?'<b':'<span'} class="num">${f(v)}${bold?'</b>':'</span>'}</div>`;
   const WV=skWasteRange(a,b),byC={};l.forEach(x=>{byC[x.cat||'أخرى']=rd2((byC[x.cat||'أخرى']||0)+(+x.amt||0))});const bars=Object.entries(byC).sort((x,y)=>y[1]-x[1]).map(([n,v])=>`<div class="exb"><span>${esc(n)}</span><i style="width:${t?Math.max(3,Math.round(v*100/t)):0}%"></i><b class="num">${f(v)}</b><small class="mute">${t?Math.round(v*100/t):0}%</small></div>`).join('');
@@ -2421,10 +2421,10 @@ $('stkPanel').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&
 
 /* الإشعارات: رسالة فوق لو البرنامج قدامك، وإشعار من الموبايل لو في الخلفية، والضغط عليهم بيفتح الحاجة نفسها.
    nfSave بيسيب آخر تنبيهات في IndexedDB عشان sw.js يعرضها لوحده (periodicsync) والبرنامج مقفول */
-function nfGo(k){({sup:()=>{$('hdrSet').click();stGo('sup')},rem:openRemL,stk:()=>{$('hdrSet').click();stGo('stk')}}[k]||(()=>{}))()}
+function nfGo(k){const sk=()=>document.querySelector('#bnav [data-t="sk"]').click();({sup:()=>{skM='buy';puV='owed';puStack=[['home',null]];sk()},rem:openRemL,stk:()=>{skM='stk';s2V='home';sk()}}[k]||(()=>{}))()}
 function nfList(){const a=[];try{const n=remList().length;if(n&&pget('nfRem',true))a.push({k:'rem',m:'🔔 '+n+(n>1?' مديونين محتاجين':' مديون محتاج')+' تذكير'})}catch(e){}
-  try{const n=stkLow(stkAll());if(false&&n&&pget('nfStk',true))a.push({k:'stk',m:'🧱 '+(n>1?n+' أصناف قربوا يخلصوا من المخزون':'صنف قرب يخلص من المخزون')})}catch(e){}
-  try{if(pget('nfSup',true)){const now=Date.now(),l=S.suppliers.map(s=>({s,g:spAge(s)})).filter(o=>o.g.ov>0||(o.g.nx&&o.g.nx.ts-now<=2*SPDAY)),ov=l.filter(o=>o.g.ov>0).length;if(l.length)a.push({k:'sup',m:'🚚 '+(ov?(ov>1?ov+' موردين ميعاد سدادهم عدّى':'مورد ميعاد سداده عدّى'):(l.length>1?l.length+' موردين ميعاد سدادهم قرب':'مورد ميعاد سداده قرب'))})}}catch(e){}return a}
+  try{if(pget('nfStk',true)){const R=s2Calc(),n=[...R.values()].filter(o=>o.tr&&s2Mn(o.t)>0&&o.bal<=s2Mn(o.t)).length;if(n)a.push({k:'stk',m:'🧱 '+(n>1?n+' أنواع زجاج قربوا يخلصوا':'نوع زجاج قرب يخلص')+' من المخزن'})}}catch(e){}
+  try{if(pget('nfSup',true)){const l=S.suppliers.filter(s=>{const d=puDays(s.id);return d!=null&&d>=7});if(l.length)a.push({k:'sup',m:'🚚 '+(l.length>1?l.length+' موردين عليك ليهم فلوس بقالك أكتر من أسبوع':'مورد عليك له فلوس بقالك أكتر من أسبوع')})}}catch(e){}return a}
 function nfState(){if(!('Notification' in window)||!('serviceWorker' in navigator))return'no';return Notification.permission==='denied'?'denied':Notification.permission==='granted'&&pget('nfOn',false)?'on':'off'}
 async function nfSys(a){if(nfState()!=='on')return;try{await(await navigator.serviceWorker.ready).showNotification('فواتير',{body:a.m,icon:'icon-192.png',badge:'icon-192.png',tag:a.k,lang:'ar',dir:'rtl',data:{go:a.k}})}catch(e){}}
 function nfSave(){if(ddb)kvPut({alertNow:nfState()==='on'?nfList():[]}).catch(()=>{})}

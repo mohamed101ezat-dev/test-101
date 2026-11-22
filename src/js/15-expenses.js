@@ -3,7 +3,7 @@ function monRange(ts){const d=new Date(ts);return[new Date(d.getFullYear(),d.get
 function exIn(a,b){return S.expenses.filter(x=>x.ts>=a&&x.ts<b)}
 function exTot(l){return rd2(l.reduce((s,x)=>s+(+x.amt||0),0))}
 function exMonTs(){const m=/^(\d{4})-(\d{2})$/.exec($('exMon').value);return m?new Date(+m[1],+m[2]-1,1).getTime():Date.now()}
-function puIn(a,b){const l=S.purchases.filter(x=>x.ts>=a&&x.ts<b);return{n:l.length,buy:exTot(l.filter(x=>x.type!=='pay')),pay:exTot(l.filter(x=>x.type==='pay'))}}
+function puIn(a,b){const l=S.purchases.filter(x=>x.ts>=a&&x.ts<b&&!x.ob);return{n:l.length,buy:exTot(l.filter(x=>x.type!=='pay')),pay:exTot(l.filter(x=>x.type==='pay'))}}
 function drawExp(){const[a,b]=monRange(exMonTs()),l=exIn(a,b).sort((x,y)=>y.ts-x.ts),inv=S.invoices.filter(r=>r.ts>=a&&r.ts<b),s=inv.reduce((x,r)=>x+val(r),0),p=inv.reduce((x,r)=>x+pd(r),0),t=exTot(l),pu=puIn(a,b),PF=profitOf(inv);
   const ln=(n,v,bold)=>`<div class="ro" style="color:var(--ink)"><span>${n}</span>${bold?'<b':'<span'} class="num">${f(v)}${bold?'</b>':'</span>'}</div>`;
   const WV=skWasteRange(a,b),byC={};l.forEach(x=>{byC[x.cat||'أخرى']=rd2((byC[x.cat||'أخرى']||0)+(+x.amt||0))});const bars=Object.entries(byC).sort((x,y)=>y[1]-x[1]).map(([n,v])=>`<div class="exb"><span>${esc(n)}</span><i style="width:${t?Math.max(3,Math.round(v*100/t)):0}%"></i><b class="num">${f(v)}</b><small class="mute">${t?Math.round(v*100/t):0}%</small></div>`).join('');
