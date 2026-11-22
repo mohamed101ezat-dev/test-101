@@ -2,7 +2,7 @@
    nfSave بيسيب آخر تنبيهات في IndexedDB عشان sw.js يعرضها لوحده (periodicsync) والبرنامج مقفول */
 function nfGo(k){({sup:()=>{$('hdrSet').click();stGo('sup')},rem:openRemL,stk:()=>{$('hdrSet').click();stGo('stk')}}[k]||(()=>{}))()}
 function nfList(){const a=[];try{const n=remList().length;if(n&&pget('nfRem',true))a.push({k:'rem',m:'🔔 '+n+(n>1?' مديونين محتاجين':' مديون محتاج')+' تذكير'})}catch(e){}
-  try{const n=stkLow(stkAll());if(n&&pget('nfStk',true))a.push({k:'stk',m:'🧱 '+(n>1?n+' أصناف قربوا يخلصوا من المخزون':'صنف قرب يخلص من المخزون')})}catch(e){}
+  try{const n=stkLow(stkAll());if(false&&n&&pget('nfStk',true))a.push({k:'stk',m:'🧱 '+(n>1?n+' أصناف قربوا يخلصوا من المخزون':'صنف قرب يخلص من المخزون')})}catch(e){}
   try{if(pget('nfSup',true)){const now=Date.now(),l=S.suppliers.map(s=>({s,g:spAge(s)})).filter(o=>o.g.ov>0||(o.g.nx&&o.g.nx.ts-now<=2*SPDAY)),ov=l.filter(o=>o.g.ov>0).length;if(l.length)a.push({k:'sup',m:'🚚 '+(ov?(ov>1?ov+' موردين ميعاد سدادهم عدّى':'مورد ميعاد سداده عدّى'):(l.length>1?l.length+' موردين ميعاد سدادهم قرب':'مورد ميعاد سداده قرب'))})}}catch(e){}return a}
 function nfState(){if(!('Notification' in window)||!('serviceWorker' in navigator))return'no';return Notification.permission==='denied'?'denied':Notification.permission==='granted'&&pget('nfOn',false)?'on':'off'}
 async function nfSys(a){if(nfState()!=='on')return;try{await(await navigator.serviceWorker.ready).showNotification('فواتير',{body:a.m,icon:'icon-192.png',badge:'icon-192.png',tag:a.k,lang:'ar',dir:'rtl',data:{go:a.k}})}catch(e){}}

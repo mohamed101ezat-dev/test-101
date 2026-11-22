@@ -6,7 +6,7 @@ lockInit();loadMsgUI();loadLogo();paperLabels();fixBar();document.body.classList
 /* ---------- زرار الرجوع في الموبايل ---------- */
 const OVS=['res','rem','remL','bulk','calcModal','clOv','pinOv','qtOv','dzOv','nfOv','tfOv','delOv','shopOv'],OVX={nfOv:'nfX',tfOv:'tfX',delOv:'delNo',shopOv:'shopAskNo',dzOv:'dzX',res:'resx',rem:'remX',remL:'remLX',bulk:'bulkX',calcModal:'calcClose',clOv:'clX',pinOv:'pinNo',qtOv:'qtX'};
 let NS=[],navIgnore=false,exitArm=false,exitT=0,navOK=false;
-const wantNav=()=>{const w=tabHist.map((t,i)=>'t'+i+':'+t);if(curTab==='cu'&&selC&&getC(selC))w.push('cu');if(curTab==='dash'&&dbMode){w.push('db');if(dbSel&&getC(dbSel))w.push('dbs')}if(curTab==='st'&&stCur)w.push('sp');if(curTab==='dash'&&infoMode&&!dbMode)w.push('info');if(curTab==='sk'){skHist.forEach((s,i)=>w.push('k'+i+':'+s));if(skCur==='stk'&&stkV!=='home')w.push('sv');if(skCur==='sup'&&supCur)w.push('su')}OVS.forEach(id=>{const e=$(id);if(e&&!e.classList.contains('hide'))w.push('o:'+id)});return w};
+const wantNav=()=>{const w=tabHist.map((t,i)=>'t'+i+':'+t);if(curTab==='cu'&&selC&&getC(selC))w.push('cu');if(curTab==='dash'&&dbMode){w.push('db');if(dbSel&&getC(dbSel))w.push('dbs')}if(curTab==='st'&&stCur)w.push('sp');if(curTab==='dash'&&infoMode&&!dbMode)w.push('info');if(curTab==='sk'){skHist.forEach((s,i)=>w.push('k'+i+':'+s));if(skCur==='stk'&&stkV!=='home')w.push('sv');if(skCur==='sup'&&supCur)w.push('su');if(skM==='buy')(window.puStack||[]).forEach((_,i)=>w.push('U'+i))}OVS.forEach(id=>{const e=$(id);if(e&&!e.classList.contains('hide'))w.push('o:'+id)});return w};
 function syncNav(){if(!navOK||navIgnore)return;const w=wantNav();let p=0;while(p<NS.length&&p<w.length&&NS[p]===w[p])p++;
   if(NS.length>p){const k=NS.length-p;NS=NS.slice(0,p);navIgnore=true;history.go(-k);return}
   for(let i=p;i<w.length;i++){NS.push(w[i]);history.pushState({d:NS.length},'')}}
@@ -20,6 +20,7 @@ function closeTop(l){
   else if(l[0]==='k'){const v=skHist.pop()||'it';if(v.slice(0,2)==='m:'){skM=v.slice(2);skMainUI()}else{skCur=v;skShow()}}
   else if(l==='sv'){stkV='home';stkAct=null;drawStk()}
   else if(l==='su'){supOpen(null)}
+  else if(l[0]==='U'){puPop()}
   else if(l[0]==='o'){const id=l.slice(2),x=$(OVX[id]);if(x)x.click();else if($(id))$(id).classList.add('hide');if($(id))$(id).classList.add('hide')}}
 let _rz;window.addEventListener('resize',()=>{clearTimeout(_rz);_rz=setTimeout(()=>{if(curTab==='new'){drawRecent();drawQS()}},200)});
 window.addEventListener('popstate',e=>{

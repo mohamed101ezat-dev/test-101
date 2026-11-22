@@ -1914,3 +1914,59 @@ html[data-theme="dark"] #t-sk .skk .lw b{color:#fbbf24}
 /* v394: الإعدادات من غير خانات فاضية: لو آخر صف فيه زرار واحد ياخد العرض كله، والمربعات المستخبية ما تاخدش مكان */
 #stMain .sgl>.sti:last-child:nth-child(odd){grid-column:1/-1}
 #stMain .stiles{display:none}
+/* v395: 🛒 المشتريات والموردين */
+#pu .puk{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px}
+#pu .puk>div{display:flex;flex-direction:column;align-items:center;padding:5px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+#pu .puk small{font-size:11px;color:var(--mute)}#pu .puk b{font-size:16px;color:var(--ink)}
+#pu .dn{color:var(--danger)!important}#pu .ok{color:#15803d!important}
+#pu .puact{display:flex;gap:5px;margin:0 0 6px;flex-wrap:nowrap}
+#pu .puact>*{flex:1 1 0;min-width:0;height:34px;min-height:34px;padding:0 4px;font-size:13px;white-space:nowrap;margin:0;display:flex;align-items:center;justify-content:center;text-decoration:none}
+#pu .puact>.main{flex:1.5 1 0}
+#pu .puact>a.alt{flex:0 0 38px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+#pu .pusec{font-size:12px;color:var(--mute);margin:8px 2px 4px}
+#pu .purow{display:flex;align-items:center;gap:6px;padding:7px 10px;margin-bottom:4px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;min-width:0}
+#pu .purow.sm{padding:5px 10px;font-size:13px}
+#pu .purow .pun{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+#pu .purow b{font-size:15px;flex:none}
+#pu .pud{flex:none;font-size:11px;padding:1px 6px;border-radius:99px;background:var(--accLight);color:var(--ink)}
+#pu .pud.red,#pu .pudl.red{background:rgba(220,38,38,.12);color:#b42318}
+#pu .card{padding:6px 8px;margin-bottom:6px}
+#pu .puh{display:flex;align-items:center;gap:6px}
+#pu .puh .lnk{flex:none;font-size:16px;padding:0 4px}
+#pu .puh .pun{flex:1;min-width:0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pu .puh .xd{flex:none;font-size:13px;padding:0 4px}
+#pu .pub{flex:none;display:flex;align-items:baseline;gap:4px}#pu .pub small{font-size:11px;color:var(--mute)}#pu .pub b{font-size:17px}
+#pu .pudl{font-size:12px;padding:2px 8px;border-radius:8px;background:var(--accLight);margin:5px 0}
+#pu .pus .puact{margin:6px 0 0}
+#pu .purw{display:flex;align-items:center;gap:5px;margin-top:5px;flex-wrap:nowrap}
+#pu .purw>span{flex:1;min-width:0;font-size:13px;color:var(--ink);white-space:nowrap}
+#pu .purw>input,#pu .purw>select{flex:1;min-width:0;height:32px;min-height:32px;font-size:13px;padding:0 6px;margin:0}
+#pu .purw>input[type=date]{flex:1.1}
+#pu .purw>button{flex:none;height:32px;min-height:32px;padding:0 10px;font-size:13px;margin:0;width:auto}
+#pu .purw>.main{flex:1}
+#pu .putot .purw>input{flex:0 0 110px;text-align:center}
+#pu .putot .purw>b{font-size:17px}
+#pu #puNote{height:32px;font-size:13px;margin-top:5px}
+#pu .puhd,#pu .puln{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(0,1fr)) minmax(0,1.2fr) 20px;gap:3px;align-items:center}
+#pu .puhd{margin-top:6px;font-size:10.5px;color:var(--mute);text-align:center}
+#pu .puln{margin-top:4px}
+#pu .puln input{height:30px;min-height:30px;padding:0 2px;font-size:12.5px;text-align:center;margin:0;min-width:0}
+#pu .puln .pN{text-align:start;padding:0 4px}
+#pu .puln .pV{font-size:12px;text-align:center;white-space:nowrap;overflow:hidden}
+#pu .puln .xd{width:20px;min-width:0;height:24px;min-height:0;padding:0;font-size:13px}
+#pu .puln .pS{grid-column:1/-1;font-size:10.5px;margin-top:-1px}
+#pu .puln .pS:empty{display:none}
+#pu .puplus{width:100%;height:30px;min-height:30px;margin-top:6px;font-size:13px}
+#pu .puok,#pu .pubad{font-size:12.5px;padding:3px 8px;border-radius:8px;margin-top:4px}
+#pu .puok{background:rgba(22,163,74,.12);color:#15803d}#pu .pubad{background:rgba(220,38,38,.12);color:#b42318}
+#pu .puhow{margin:5px 0 0}
+#pu .pul{padding:4px 6px}
+#pu .pul table{font-size:12px;margin:0}
+#pu .pul td,#pu .pul th{padding:3px}
+#pu .pul th{font-size:10.5px;font-weight:500;color:var(--mute)}
+#pu .pul td.tn{max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pu .pul td.tn small{display:block;font-size:10px;overflow:hidden;text-overflow:ellipsis}
+#pu .pul tr[data-pue]{cursor:pointer}
+html[data-theme="dark"] #pu .dn,html[data-theme="dark"] #pu .pud.red,html[data-theme="dark"] #pu .pubad{color:#f87171!important}
+html[data-theme="dark"] #pu .ok,html[data-theme="dark"] #pu .puok{color:#4ade80!important}
+#pu .puhd span{white-space:nowrap;overflow:hidden;font-size:10px}
