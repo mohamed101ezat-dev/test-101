@@ -1840,3 +1840,9 @@ html[data-theme][data-pal] #rcRows .row:nth-child(even){background:color-mix(in 
 /* v383: أدوات الأسعار لوحة صغيرة بتفتح من 🧮 */
 #itTool{padding:6px 8px;margin:0 0 6px}#itTool .itr{gap:6px;margin:0 0 5px;flex-wrap:nowrap;align-items:center}#itTool .itr:last-of-type{margin:0}#itTool span{flex:none;font-size:13px}#itTool input{width:56px;flex:none;height:32px;margin:0;text-align:center}#itTool select{width:auto;flex:none;height:32px;margin:0}#itTool .alt{flex:none;height:32px;min-height:32px;padding:0 10px;margin:0}#itToolB{height:36px;padding:0 10px}#itToolB.on{background:var(--acc);color:#fff}
 #itTool .itr{justify-content:flex-start}
+/* v386: صفحة المورد ما تتوسّعش على الموبايل */
+.spact>.alt{min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:12px;padding:0 3px}
+#spList td.tn{max-width:30vw}
+.card:has(>#spList){overflow-x:auto}
+#t-sk,#skBody,#supOne{max-width:100%;min-width:0}
+.spact{flex-wrap:wrap}.spact>.alt{flex:1 1 auto;overflow:visible;text-overflow:clip;padding:0 8px}
