@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=377">
+<link rel="stylesheet" href="css/style.css?v=380">
 
 
 
@@ -54,7 +54,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="app-header">
   <div class="hdr-logo"><img id="hdrLogo" alt="" class="hide"></div>
   <span class="hdr-ver" id="hdrVer"></span>
-  <div class="hdr-end"><button type="button" id="nfBell" class="hdr-btn" aria-label="التنبيهات">🔔<span id="nfCnt" class="nf-cnt hide"></span></button><button type="button" id="tfBtn" class="hdr-btn" aria-label="بيانات التحويل" title="بيانات التحويل">💳</button><button type="button" id="calcFab" class="hdr-btn" aria-label="حاسبة">🧮</button><button type="button" id="cloudSt" class="hdr-cloud" aria-label="حالة الحفظ على السحابة"><span class="cs-i">☁️</span><span class="cs-d"></span></button><script>(function(){try{var b=document.getElementById('cloudSt'),on=localStorage.getItem('fbOn')==='1'||localStorage.getItem('fbCfg'),l=localStorage.getItem('cloudLast');var s=!on?'off':(l==='ok'&&navigator.onLine!==false)?'ok':'busy';b.className='hdr-cloud '+s;b.dataset.s=s}catch(e){}})()</script><button id="wkOut" class="hdr-set" aria-label="خروج من وضع العامل" style="font-size:13px;width:auto;padding:0 10px">🔓 مالك</button><button id="hdrSet" class="hdr-set" data-t="st" aria-label="إعدادات">⚙️</button></div>
+  <div class="hdr-end"><button type="button" id="hdrCu" class="hdr-btn" data-t="cu" aria-label="العملاء" title="العملاء">👥</button><button type="button" id="hdrCl" class="hdr-btn" data-t="cl" aria-label="CutList" title="CutList"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" style="display:block;margin:0 auto" aria-hidden="true"><rect x="3" y="3" width="8" height="7" rx="1.2"/><rect x="13" y="3" width="8" height="11" rx="1.2"/><rect x="3" y="12" width="8" height="9" rx="1.2"/><rect x="13" y="16" width="8" height="5" rx="1.2"/></svg></button><button type="button" id="nfBell" class="hdr-btn" aria-label="التنبيهات">🔔<span id="nfCnt" class="nf-cnt hide"></span></button><button type="button" id="tfBtn" class="hdr-btn" aria-label="بيانات التحويل" title="بيانات التحويل">💳</button><button type="button" id="calcFab" class="hdr-btn" aria-label="حاسبة">🧮</button><button type="button" id="cloudSt" class="hdr-cloud" aria-label="حالة الحفظ على السحابة"><span class="cs-i">☁️</span><span class="cs-d"></span></button><script>(function(){try{var b=document.getElementById('cloudSt'),on=localStorage.getItem('fbOn')==='1'||localStorage.getItem('fbCfg'),l=localStorage.getItem('cloudLast');var s=!on?'off':(l==='ok'&&navigator.onLine!==false)?'ok':'busy';b.className='hdr-cloud '+s;b.dataset.s=s}catch(e){}})()</script><button id="wkOut" class="hdr-set" aria-label="خروج من وضع العامل" style="font-size:13px;width:auto;padding:0 10px">🔓 مالك</button><button id="hdrSet" class="hdr-set" data-t="st" aria-label="إعدادات">⚙️</button></div>
 </div>
 <div id="busy" class="busy hide" role="status"></div>
 <div id="dsBar" class="dsbar hide"></div>
@@ -263,6 +263,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div id="clHost"></div>
 </section>
 
+<section id="t-sk" class="hide"><div class="seg s skseg" id="skSeg"><button type="button" data-skt="it">📦 الأصناف</button><button type="button" data-skt="stk">🧱 المخزن</button><button type="button" data-skt="sup">🚚 الموردين</button></div><div id="skBody"></div></section>
 <section id="t-it" class="hide">
   <div class="sth"><button type="button" class="lnk" data-goset="1" aria-label="رجوع للإعدادات">→</button><b>📦 الأصناف</b><button type="button" class="ab" id="itStk" style="margin-inline-start:auto">🧱 المخزن</button></div>
   <div class="seg s" style="max-width:220px" id="seg"><button data-it="rd">📦 جاهز</button><button data-it="mq" class="on">✂️ مقطع</button></div>
@@ -592,18 +593,19 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <nav class="bottom-nav" id="bnav">
   <button data-t="new" class="on"><span class="nav-icon">🧾</span><span class="nav-label">فاتورة</span></button>
   <button data-t="dash"><span class="nav-icon">📒</span><span class="nav-label">سجل</span></button>
-  <button data-t="cl"><span class="nav-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" style="display:block;margin:0 auto" aria-hidden="true"><rect x="3" y="3" width="8" height="7" rx="1.2"/><rect x="13" y="3" width="8" height="11" rx="1.2"/><rect x="3" y="12" width="8" height="9" rx="1.2"/><rect x="13" y="16" width="8" height="5" rx="1.2"/></svg></span><span class="nav-label">CutList</span></button>
+  <button data-t="sk"><span class="nav-icon">🧱</span><span class="nav-label">المخزن</span></button>
+  <button data-t="cl" class="hide"><span class="nav-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" style="display:block;margin:0 auto" aria-hidden="true"><rect x="3" y="3" width="8" height="7" rx="1.2"/><rect x="13" y="3" width="8" height="11" rx="1.2"/><rect x="3" y="12" width="8" height="9" rx="1.2"/><rect x="13" y="16" width="8" height="5" rx="1.2"/></svg></span><span class="nav-label">CutList</span></button>
   <button data-t="it" class="hide"><span class="nav-icon">📦</span><span class="nav-label">الأصناف</span></button>
-  <button data-t="cu"><span class="nav-icon">👥</span><span class="nav-label">العملاء</span></button>
+  <button data-t="cu" class="hide"><span class="nav-icon">👥</span><span class="nav-label">العملاء</span></button>
 </nav>
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=377"></script>
-<script src="js/qr.js?v=377"></script>
+<script src="js/app.js?v=380"></script>
+<script src="js/qr.js?v=380"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=377"></script>
-<script src="js/features.js?v=377"></script>
+<script src="js/cutlist.js?v=380"></script>
+<script src="js/features.js?v=380"></script>
 </body>
 </html>
 
