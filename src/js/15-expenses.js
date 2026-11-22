@@ -1,0 +1,46 @@
+/* المصروفات: {id,ts,amt,cat,note}، بتتزامن وتتنسخ زي الفواتير */
+function monRange(ts){const d=new Date(ts);return[new Date(d.getFullYear(),d.getMonth(),1).getTime(),new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
+function exIn(a,b){return S.expenses.filter(x=>x.ts>=a&&x.ts<b)}
+function exTot(l){return rd2(l.reduce((s,x)=>s+(+x.amt||0),0))}
+function exMonTs(){const m=/^(\d{4})-(\d{2})$/.exec($('exMon').value);return m?new Date(+m[1],+m[2]-1,1).getTime():Date.now()}
+function puIn(a,b){const l=S.purchases.filter(x=>x.ts>=a&&x.ts<b);return{n:l.length,buy:exTot(l.filter(x=>x.type!=='pay')),pay:exTot(l.filter(x=>x.type==='pay'))}}
+function drawExp(){const[a,b]=monRange(exMonTs()),l=exIn(a,b).sort((x,y)=>y.ts-x.ts),inv=S.invoices.filter(r=>r.ts>=a&&r.ts<b),s=inv.reduce((x,r)=>x+val(r),0),p=inv.reduce((x,r)=>x+pd(r),0),t=exTot(l),pu=puIn(a,b),PF=profitOf(inv);
+  const ln=(n,v,bold)=>`<div class="ro" style="color:var(--ink)"><span>${n}</span>${bold?'<b':'<span'} class="num">${f(v)}${bold?'</b>':'</span>'}</div>`;
+  const WV=skWasteRange(a,b),byC={};l.forEach(x=>{byC[x.cat||'أخرى']=rd2((byC[x.cat||'أخرى']||0)+(+x.amt||0))});const bars=Object.entries(byC).sort((x,y)=>y[1]-x[1]).map(([n,v])=>`<div class="exb"><span>${esc(n)}</span><i style="width:${t?Math.max(3,Math.round(v*100/t)):0}%"></i><b class="num">${f(v)}</b><small class="mute">${t?Math.round(v*100/t):0}%</small></div>`).join('');
+  $('exSum').innerHTML=ln('المبيعات',s)+ln('المصروفات',t)+(pu.n?ln('مشتريات الموردين',pu.buy):'')+ln('الفرق (المبيعات − المصروفات'+(pu.n?' − المشتريات':'')+')',s-t-pu.buy)+'<div class="mute" style="font-size:11px;margin:-2px 0 4px">ده مش ربح: مش طارح تمن البضاعة.</div>'+ln('الكاش بعد المصروفات',p-t-pu.pay)+(PF.has?ln('ربح الأصناف (البيع − الشراء)',PF.pr)+(WV.v>0?ln('🗑 خسارة هادر الألواح ('+fq(WV.m)+' م²)',-WV.v):'')+ln('✅ الربح الحقيقي بعد المصروفات'+(WV.v>0?' والهادر':''),rd2(PF.pr-t-WV.v),1)+(PF.nk?`<div class="mute" style="font-size:12px">مبيعات بقيمة ${f(PF.nk)} ملهاش سعر شراء، فمش داخلة في الربح.</div>`:''):'<div class="exw">⚠ الربح الحقيقي مش متحسب: الأصناف مالهاش سعر شراء. اكتبه من «الأصناف» (أو «🧮 أدوات الأسعار»)، والفواتير الجديدة هتتحسب.</div>')+(bars?'<div class="exbw"><b style="font-size:13px">المصروفات راحت فين</b>'+bars+'</div>':'');
+  $('exRep').classList.toggle('hide',!l.length&&!inv.length&&!pu.n);
+  $('exList').innerHTML=l.map(x=>`<div class="rec"><div class="ro" style="color:var(--ink)"><b>${esc(x.cat)}</b><b class="num">${f(x.amt)}</b></div><div class="mute num">${dshort(x.ts)}${x.note?' · '+esc(x.note):''}</div><div class="btns"><button class="alt b-red" data-exd="${esc(x.id)}">حذف</button></div></div>`).join('')||'<p class="mute">مفيش مصروفات في الشهر ده.</p>'}
+/* v250: مصروفات ثابتة {id,name,amt,per:'w'|'m',day,from,last} — بتتحفظ في الإعدادات (exfix) وبتتزامن. كل ميعاد بيتسجل مصروف عادي برقم ثابت fx<id>_<يوم> عشان ما يتكررش بين الأجهزة */
+const EXWD=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function exfLoad(){try{const l=JSON.parse(lsv('exfix','[]'));return Array.isArray(l)?l.filter(t=>t&&t.id&&t.amt>0):[]}catch(e){return[]}}
+const exfSave=l=>svk('exfix',JSON.stringify(l));
+const exfLab=t=>t.per==='d'?'كل يوم':t.per==='w'?'كل '+EXWD[t.day]:'يوم '+t.day+' كل شهر';
+/* بترجع المصروفات المستحقة من آخر مرة لحد النهارده، وبتحدّث last في نفس القايمة. مفيش تسجيل بأثر رجعي قبل تاريخ الإضافة */
+function exfDue(list,now){const out=[],t0=new Date(now);t0.setHours(0,0,0,0);const end=t0.getTime();let ch=false;
+  list.forEach(t=>{if(t.pz){if(t.last!==end){t.last=end;ch=true}return}const d=new Date(t.last?t.last:t.from);d.setHours(0,0,0,0);if(t.last)d.setDate(d.getDate()+1);let n=0;
+    while(d.getTime()<=end&&n++<800){const dim=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+      if(t.per==='d'||(t.per==='w'?d.getDay()===t.day:d.getDate()===Math.min(t.day,dim)))out.push({id:'fx'+t.id+'_'+dayKey(d.getTime()),ts:new Date(d.getFullYear(),d.getMonth(),d.getDate(),12).getTime(),amt:t.amt,cat:t.cat||t.name,note:(t.cat&&t.cat!==t.name?t.name+' · ':'')+'ثابت · '+(t.per==='d'?'يومي':t.per==='w'?'أسبوعي':'شهري'),fx:t.id});
+      d.setDate(d.getDate()+1)}
+    if(t.last!==end){t.last=end;ch=true}});return{out,ch}}
+function exfRun(){if(!dataReady)return 0;const l=exfLoad();if(!l.length)return 0;const r=exfDue(l,Date.now());let n=0;r.out.forEach(o=>{if(!S.expenses.some(x=>x.id===o.id)){S.expenses.push(o);put('expenses',o);n++}});if(r.ch)exfSave(l);return n}
+function drawExf(list){const l=list||exfLoad(),mo=rd2(l.filter(t=>!t.pz).reduce((s,t)=>s+(t.per==='d'?t.amt*365/12:t.per==='w'?t.amt*52/12:t.amt),0));
+  $('exfList').innerHTML=l.map(t=>'<div class="ro" style="color:var(--ink);gap:6px'+(t.pz?';opacity:.5':'')+'"><span style="flex:1;min-width:0">'+esc(t.name)+' <small class="mute">· '+(t.cat&&t.cat!==t.name?esc(t.cat)+' · ':'')+exfLab(t)+(t.pz?' · ⏸ واقف':'')+'</small></span><b class="num">'+f(t.amt)+'</b><button type="button" class="alt" data-exfp="'+esc(t.id)+'" style="min-height:26px;height:26px;padding:0 8px;font-size:12px;flex:none">'+(t.pz?'▶ شغّل':'⏸ وقّف')+'</button><button class="del" data-exfd="'+esc(t.id)+'" aria-label="حذف '+esc(t.name)+'">×</button></div>').join('')+(l.length?'<div class="mute" style="font-size:12px">الثابت في الشهر تقريبًا '+f(Math.round(mo))+'</div>':'<div class="mute">مفيش. ضيف القبض الأسبوعي أو الإيجار الشهري من تحت.</div>')}
+function exfDays(){const w=$('exfPer').value==='w',s=$('exfDay');s.classList.toggle('hide',$('exfPer').value==='d');s.innerHTML=w?EXWD.map((n,i)=>'<option value="'+i+'"'+(i===4?' selected':'')+'>يوم '+n+'</option>').join(''):Array.from({length:28},(_,i)=>'<option value="'+(i+1)+'">يوم '+(i+1)+' في الشهر</option>').join('')}
+$('exfPer').onchange=exfDays;exfDays();$('exfCat').addEventListener('change',e=>exCatNew(e.target));
+$('exfAdd').onclick=()=>{const name=$('exfName').value.trim(),amt=rd2(nv($('exfAmt').value)),m=$('exfMsg');if(!name){m.textContent='اكتب اسم المصروف';return}if(!(amt>0)){m.textContent='اكتب المبلغ';return}
+  const l=exfLoad(),t0=new Date();t0.setHours(0,0,0,0);l.push({id:uid(),name,cat:$('exfCat').value&&$('exfCat').value!=='__new'?$('exfCat').value:'',amt,per:$('exfPer').value,day:$('exfPer').value==='d'?0:+$('exfDay').value,from:t0.getTime(),last:0});exfSave(l);$('exfName').value='';$('exfAmt').value='';const n=exfRun();drawExf();drawExp();m.textContent=n?'اتضاف، واتسجل مصروف النهارده ✓':'اتضاف ✓ هيتسجل لوحده في ميعاده'};
+$('exfList').onclick=e=>{{const p=e.target.closest('[data-exfp]');if(p){const l=exfLoad(),t=l.find(x=>x.id===p.dataset.exfp);if(t){t.pz=!t.pz;if(!t.pz){const t0=new Date();t0.setHours(0,0,0,0);t.last=t0.getTime()-864e5}exfSave(l);const n=exfRun();drawExf();drawExp();toast(t.pz?'⏸ «'+t.name+'» واقف، مش هيتسجل لحد ما تشغّله':'▶ «'+t.name+'» رجع يشتغل'+(n?' واتسجل النهارده':''))}return}}const b=e.target.closest('[data-exfd]');if(!b||!ok2(b))return;const l=exfLoad(),t=l.find(x=>x.id===b.dataset.exfd);exfSave(l.filter(x=>x.id!==b.dataset.exfd));drawExf();if(t)toast('اتشال «'+t.name+'» من الثابت. اللي اتسجل قبل كده فاضل','تراجع',()=>{const k=exfLoad();k.push(t);exfSave(k);drawExf()})};
+/* v336: أنواع المصروفات (الأساسية + اللي ضفتها) */
+const EXC0=['إيجار','مرتبات','كهربا ومياه','نت وتليفون','نقل','بضاعة ومشتريات','صيانة','أخرى'];
+const exCats=()=>{let a=[];try{a=JSON.parse(lsv('excats','[]'))}catch(_){}const used=[...new Set(S.expenses.map(x=>x.cat).filter(Boolean))];return[...new Set([...EXC0,...(Array.isArray(a)?a:[]),...used])]};
+function exCatFill(){const cur=$('exCat').value,cur2=$('exfCat')?$('exfCat').value:'';const o=exCats().map(n=>'<option>'+esc(n)+'</option>').join('')+'<option value="__new">➕ نوع جديد…</option>';$('exCat').innerHTML=o;if(cur&&cur!=='__new')$('exCat').value=cur;if($('exfCat')){$('exfCat').innerHTML=o;if(cur2&&cur2!=='__new')$('exfCat').value=cur2;else $('exfCat').value='مرتبات'}}
+function exCatNew(sel){if(sel.value!=='__new')return;const n=(prompt('اسم النوع الجديد (مثلًا: قبض العمال)')||'').trim();if(n){let a=[];try{a=JSON.parse(lsv('excats','[]'))}catch(_){}if(!Array.isArray(a))a=[];if(!a.includes(n))a.push(n);svk('excats',JSON.stringify(a));exCatFill();sel.value=n}else{exCatFill()}}
+$('exCat').addEventListener('change',e=>exCatNew(e.target));
+function expOpen(){exCatFill();exfRun();drawExf();const k=dayKey(Date.now());if(!$('exDate').value)$('exDate').value=k;if(!$('exMon').value)$('exMon').value=k.slice(0,7);$('exMsg').textContent='';drawExp()}
+$('exMon').onchange=drawExp;
+$('exRep').onclick=()=>showMonth(exMonTs());
+$('exAdd').onclick=()=>{const amt=rd2(nv($('exAmt').value)),m=$('exMsg'),dv=$('exDate').value,dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(dv);if(!(amt>0)){m.textContent='اكتب المبلغ';return}if(!dm){m.textContent='اختار التاريخ';return}
+  const o={id:uid(),ts:dv===dayKey(Date.now())?Date.now():new Date(+dm[1],+dm[2]-1,+dm[3],12).getTime(),amt,cat:$('exCat').value,note:$('exNote').value.trim()};
+  S.expenses.push(o);put('expenses',o);$('exAmt').value='';$('exNote').value='';$('exMon').value=dv.slice(0,7);drawExp();m.textContent='اتسجل ✓'};
+$('exList').onclick=e=>{const b=e.target.closest('[data-exd]');if(!b||!ok2(b))return;const id=b.dataset.exd,x=S.expenses.find(y=>y.id===id);del('expenses',id);drawExp();if(x)toast('اتمسح المصروف','تراجع',()=>{undel('expenses',x);drawExp()})};
+
