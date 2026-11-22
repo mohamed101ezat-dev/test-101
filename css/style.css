@@ -1846,3 +1846,37 @@ html[data-theme][data-pal] #rcRows .row:nth-child(even){background:color-mix(in 
 .card:has(>#spList){overflow-x:auto}
 #t-sk,#skBody,#supOne{max-width:100%;min-width:0}
 .spact{flex-wrap:wrap}.spact>.alt{flex:1 1 auto;overflow:visible;text-overflow:clip;padding:0 8px}
+/* v388: صفحة المورد صغيرة ومنظمة */
+#supOne{--g:5px}
+#supOne .card{padding:6px 8px;margin-bottom:6px}
+#supOne .sph1{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+#supOne .sph1 .lnk{flex:none;padding:0 4px;font-size:16px}
+#supOne .spn2{flex:1;font-size:15px;font-weight:700}
+#supOne #supCatB{flex:none;font-size:14px}
+#supOne .sph1 .xd{flex:none;font-size:13px;padding:0 4px}
+#supOne .spb{flex:none;flex-direction:row;align-items:baseline;gap:4px}
+#supOne .spb .num{font-size:17px}
+#supOne .spact{flex-wrap:nowrap;gap:4px;margin-bottom:4px}
+#supOne .spact>.alt{flex:1 1 0;height:28px;font-size:11.5px;padding:0 2px;min-width:0;overflow:hidden;border-radius:8px}
+#supOne .spdue{padding:2px 6px;font-size:11.5px;margin-bottom:4px}
+#supOne .spdt>summary{font-size:12px;padding:1px 0;color:var(--mute)}
+#supOne .spst{margin-top:6px}
+#supEdit>summary{display:none}
+#supEdit:not([open]){display:none}
+#supEdit label{font-size:11.5px;margin:0}
+#supEdit input{height:30px;font-size:13px}
+#supOne .spc button{min-height:26px;height:26px;padding:0 8px;font-size:12px}
+#supOne .spr1{display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
+#supOne .spr1 .spc{flex:none;margin:0;flex-wrap:nowrap}
+#supOne .spr1 input{flex:1;min-width:0;height:32px;font-size:14px;margin:0}
+#supOne .spr1 .main{flex:none;height:32px;padding:0 10px;font-size:13px;width:auto}
+#supOne #spQuick{margin:4px 0 0}
+#supOne #spXtra,#supOne #spStk{margin-top:4px}
+#supOne #spXtra input#spNote{height:30px;font-size:13px}
+#supOne #spLF{margin:0 0 2px}
+#supOne #spList{font-size:12px}
+#supOne #spList td,#supOne #spList th{padding:3px 4px}
+#supOne #spFiles .spc button{min-height:24px;height:24px}
+#supOne #spList .xd{min-width:0;min-height:0;width:22px;height:24px;padding:0;font-size:12px}
+#supOne #spList td.nw{width:1%}
+#supOne #spList td.tn{max-width:34vw}

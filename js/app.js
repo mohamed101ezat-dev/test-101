@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='387';
+const APP_VER='389';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1951,7 +1951,7 @@ function supTot(){return rd2(S.suppliers.reduce((a,s)=>a+supBal(s),0))}
 function supOv(){return rd2(S.suppliers.reduce((a,s)=>a+spAge(s).ov,0))}
 const spChips=(arr,on,att)=>arr.map(([v,t])=>`<button type="button" ${att}="${esc(String(v))}"${String(v)===String(on)?' class="on"':''}>${t}</button>`).join('');
 function supOpen(id){supCur=id;$('supHome').classList.toggle('hide',!!id);$('supOne').classList.toggle('hide',!id);$('supMsg').textContent='';$('spMsg').textContent='';
-  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;spFl=[];spPend=[];spEid=null;spLF='all';$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
+  if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;$('spXtra').open=false;spFl=[];spPend=[];spEid=null;spLF='all';$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
   drawSup();window.scrollTo(0,0)}
 function spMonth(a){const d=new Date(a),x=new Date(d.getFullYear(),d.getMonth(),1).getTime();return[x,new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
 function drawSup(){const s=S.suppliers.find(x=>x.id===supCur);
@@ -1985,7 +1985,7 @@ function spOne(s){const now=Date.now(),g=spAge(s);
   /* أكتر الأصناف اللي بتشتريها منه */
   const it=new Map();g.l.forEach(x=>{if(x.type==='buy'&&x.iid&&+x.q>0){const o=it.get(x.iid)||{q:0};o.q+=+x.q;o.p=(+x.amt||0)/x.q;it.set(x.iid,o)}});const top=[...it.entries()].map(([i,o])=>({n:(S.items.find(y=>y.id===i)||{}).name,q:o.q,p:o.p})).filter(x=>x.n).sort((a,b)=>b.q-a.q).slice(0,4);
   $('supTop').classList.toggle('hide',!top.length);$('supTop').innerHTML=top.length?'<small>بتشتري منه:</small> '+top.map(x=>`<span class="tag">${esc(x.n)} · ${f(x.q)} · ≈${f(Math.round(x.p))}/وحدة</span>`).join(' '):'';
-  spEntry(s,g);spLedger(s,g);spEditFill(s);spFilesDraw();spSchedDraw(g)}
+  spEntry(s,g);spLedger(s,g);spEditFill(s);spFilesDraw();spSchedDraw(g);if($('supSched').children.length)$('supDue').classList.add('hide')}
 /* خانة التسجيل: أزرار جاهزة بدل الكتابة */
 function spEntry(s,g){const buy=spTy==='buy';$('spEd').classList.toggle('hide',!spEid);$('spTy').classList.toggle('hide',!!spEid);$('spTy').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.ty===spTy));
   const q=[];if(!buy&&g.bal>0){q.push(['all','كله '+f(g.bal)]);if(g.bal>=2)q.push(['half','النص '+f(Math.ceil(g.bal/2))]);if(g.ov>0&&g.ov<g.bal)q.push(['ov','المتأخر '+f(g.ov)])}
@@ -2000,7 +2000,7 @@ function spEntry(s,g){const buy=spTy==='buy';$('spEd').classList.toggle('hide',!
   $('spNotes').innerHTML=notes.map(n=>`<button type="button" data-nt="${esc(n)}">${esc(n)}</button>`).join('');
   $('spStk').classList.toggle('hide',!buy||!!spEid);
   const cur=$('spIt').value;$('spIt').innerHTML='<option value="">اختار الصنف</option>'+S.items.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(i=>`<option value="${esc(i.id)}">${esc(i.name)}${szOf(i)?' '+esc(szOf(i)):''}</option>`).join('');$('spIt').value=cur;
-  $('spAdd').textContent=spEid?'💾 حفظ التعديل':buy?'✅ سجّل الشراء':'✅ سجّل الدفعة'}
+  $('spAdd').textContent=spEid?'💾 حفظ':'✅ سجّل';if(spEid)$('spXtra').open=true}
 function spLedger(s,g){let run=0;const all=g.l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse(),rows=all.filter(o=>spLF==='buy'?!o.pay:spLF==='pay'?o.pay:spLF==='pic'?spFl.some(q=>q.pid===o.x.id):true),lim=spAll?rows.length:15;
   $('spLF').classList.toggle('hide',all.length<4);$('spLF').innerHTML=spChips([['all','الكل'],['buy','🛒 شراء'],['pay','💵 دفع'],['pic','📎 بصور']],spLF,'data-lf');
   $('spList').innerHTML=rows.length?'<tr><th>اليوم</th><th>البيان</th><th>شراء</th><th>دفع</th><th>الرصيد</th><th></th></tr>'+rows.slice(0,lim).map(({x,v,pay,run})=>{
@@ -2122,6 +2122,7 @@ $('supSched').onclick=e=>{const r=e.target.closest('[data-sd]');if(!r)return;con
   try{i.showPicker()}catch(er){i.focus();i.click()}};
 $('spList').addEventListener('click',e=>{const b=e.target.closest('[data-spf]');if(!b)return;const l=spFl.filter(f=>f.pid===b.dataset.spf);if(l.length)spView(l,0)});
 $('spkNext').onclick=()=>{const id=$('spkNext').dataset.sup;if(id)supOpen(id)};
+$('supPen').onclick=()=>{const d=$('supEdit');d.open=!d.open;if(d.open){d.scrollIntoView({block:'nearest'})}};
 $('supDel').onclick=e=>{const m=$('spMsg');if(S.purchases.some(x=>x.sid===supCur)){m.textContent='احذف حركات المورد الأول';return}if(spFl.length){m.textContent='احذف صور المورد الأول';return}if(!ok2(e.target))return;const s=S.suppliers.find(x=>x.id===supCur);del('suppliers',supCur);supOpen(null);if(s)toast('اتمسح المورد: '+s.name,'تراجع',()=>{undel('suppliers',s);drawSup()})};
 
 /* المخزون الكامل: S.stock {id,iid,ts,q,t?,why?,sid?,cost?,note?}، q موجب وارد وسالب صرف، t='adj' يعني تسوية جرد.
