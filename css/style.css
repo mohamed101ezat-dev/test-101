@@ -2056,3 +2056,9 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #jd .jdnz input{height:30px;min-height:30px;text-align:center;font-size:13px;margin:0;min-width:0}
 #jd .jdnz button{height:30px;min-height:30px;padding:0 10px;margin:0;font-size:12.5px;white-space:nowrap}
 #jd .jdh{margin-bottom:2px}
+/* v400: كل مقاس سطر واحد: طول · عرض · عدد · سعر · × */
+#jd .jdhd,#jd .jdz{grid-template-columns:repeat(4,minmax(0,1fr)) 22px}
+#jd .jdz{display:grid}
+#jd .jdz input{height:32px;font-size:14px;padding:0}
+#jd .jdadd{display:block;width:100%;text-align:start;font-size:12px;padding:4px 0 0;margin:0}
+#jd .jdhd{padding:0 10px}#jd .jdhd span:first-child{text-align:center}

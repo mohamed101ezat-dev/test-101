@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='399';
+const APP_VER='400';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3357,16 +3357,17 @@ function jdDraw(){const b=$('jd');if(!b)return;if(jdV==='new'&&jdE){b.innerHTML=
   ${J.map(j=>{const n=(j.rows||[]).length,df=rd2((j.rows||[]).reduce((a,o)=>a+(o.exp!=null?(+o.m2||0)-o.exp:0),0));return`<div class="purow sm" data-jdv="${esc(j.id)}" role="button" tabindex="0"><span class="num mute">${puDM(j.ts)}</span><span class="pun">${plN(n,'نوع')}</span>${j.first?'<small class="tag">افتتاحي</small>':`<b class="num ${Math.abs(df)<.01?'':df<0?'dn':'ok'}">${Math.abs(df)<.01?'✓':(df>0?'+':'−')+fq(Math.abs(df))+' م²'}</b>`}</div>`}).join('')}`}
 function jdStart(){const R=s2Calc(),first=!s2Jds().length;jdE={first,rows:s2Types().map(t=>{const o=R.get(t.id),Z=s2Sizes(t),cp=s2Cpm(t);if(!Z.length)Z.push({w:S2REF[0],h:S2REF[1]});return{iid:t.id,exp:o&&o.tr?o.bal:null,p:cp>0?String(rd2(cp)):'',sz:Z.map(z=>({w:z.w,h:z.h,c:'',p:cp>0?String(rd2(cp)):''}))}})};jdGo('new')}
 const jdM2=r=>rd2(r.sz.reduce((a,z)=>a+s2A(z.w,z.h)*(nv(z.c)||0),0));
+
 const jdDone=r=>r.sz.some(z=>String(z.c).trim()!=='');
 function jdNewH(){const e=jdE,T=new Map(S.items.map(i=>[i.id,i]));
   return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-jd="back" aria-label="رجوع">→</button><b>📝 ${e.first?'جرد افتتاحي':'جرد'}</b><small class="mute">اكتب عدد الألواح الكاملة · اللي تسيبه فاضي مش هيتجرد</small></div></div>
-  <div class="jdhd"><span>المقاس (سم)</span><span>عدد الألواح</span><span>سعر المتر</span><span></span></div>
+  <div class="jdhd"><span>طول</span><span>عرض</span><span>عدد</span><span>سعر المتر</span><span></span></div>
   <div id="jdL">${e.rows.map((r,i)=>{const t=T.get(r.iid);if(!t)return'';return`<div class="card jdt" data-r="${i}"><div class="jdh"><b>${esc(t.name)}</b><span class="jdx" id="jdx${i}">${jdLineTx(r)}</span></div>
-    ${r.sz.map((z,k)=>`<div class="jdz" data-k="${k}"><span class="jdsz"><b class="num">${s2ZN(z)}</b><small class="mute">${fq(s2A(z.w,z.h))} م²</small></span><input class="jdc" inputmode="decimal" value="${esc(z.c)}" placeholder="0" autocomplete="off" aria-label="عدد ألواح ${esc(t.name)} ${fq(z.w)}×${fq(z.h)}"><input class="jdpr" inputmode="decimal" value="${esc(z.p!=null?z.p:r.p)}" placeholder="0" autocomplete="off" aria-label="سعر المتر"><button type="button" class="xd" data-jdzx="${i}:${k}" aria-label="شيل المقاس">×</button></div>`).join('')}
-    <div class="jdnz" data-nz="${i}"><input class="jdw" inputmode="decimal" placeholder="الطول 321" aria-label="الطول بالسنتي"><input class="jdh2" inputmode="decimal" placeholder="العرض 225" aria-label="العرض بالسنتي"><button type="button" class="alt" data-jdzok="${i}">➕ مقاس</button></div></div>`}).join('')}</div>
+    ${r.sz.map((z,k)=>`<div class="jdz" data-k="${k}"><input class="jdl" inputmode="decimal" value="${z.w?esc(String(z.w)):''}" placeholder="321" autocomplete="off" aria-label="الطول سم"><input class="jdh2" inputmode="decimal" value="${z.h?esc(String(z.h)):''}" placeholder="225" autocomplete="off" aria-label="العرض سم"><input class="jdc" inputmode="decimal" value="${esc(z.c)}" placeholder="0" autocomplete="off" aria-label="عدد الألواح"><input class="jdpr" inputmode="decimal" value="${esc(z.p)}" placeholder="0" autocomplete="off" aria-label="سعر المتر"><button type="button" class="xd" data-jdzx="${i}:${k}" aria-label="شيل السطر">×</button></div>`).join('')}
+    <button type="button" class="lnk jdadd" data-jdadd="${i}">➕ مقاس تاني لنفس النوع</button></div>`}).join('')}</div>
   <div class="card"><div class="purw"><button type="button" class="main" data-jd="save">✅ حفظ الجرد</button></div><div class="info" id="jdMsg" aria-live="polite"></div></div>`}
 function jdLineTx(r){if(!jdDone(r)){if(r.exp==null)return'';const t=S.items.find(i=>i.id===r.iid),rf=t?s2Ref(t):0;return'<small class="mute">المفروض '+fq(r.exp)+' م²'+(rf>0&&r.exp>0?' ≈ '+fq(s2Sh(r.exp,rf))+' لوح':'')+'</small>'}const m=jdM2(r);if(r.exp==null)return'<b class="num">'+fq(m)+' م²</b>';const d=rd2(m-r.exp);return'<b class="num">'+fq(m)+' م²</b> <small class="'+(Math.abs(d)<.01?'mute':d<0?'dn':'ok')+'">'+(Math.abs(d)<.01?'✓ مظبوط':(d>0?'+':'−')+fq(Math.abs(d))+' م² عن المفروض')+'</small>'}
-function jdSave(){const e=jdE,m=$('jdMsg'),rows=e.rows.filter(jdDone).map(r=>{const pz=r.sz.find(z=>nv(z.c)>0&&nv(z.p)>0)||r.sz.find(z=>nv(z.p)>0),p=pz?rd2(nv(pz.p)):0;return{iid:r.iid,sz:r.sz.filter(z=>nv(z.c)>0).map(z=>({w:z.w,h:z.h,c:rd2(nv(z.c))})),m2:jdM2(r),...(r.exp!=null?{exp:r.exp}:{}),...(p>0?{p}:{})}});
+function jdSave(){const e=jdE,m=$('jdMsg'),rows=e.rows.filter(jdDone).map(r=>{const pz=r.sz.find(z=>nv(z.c)>0&&nv(z.p)>0)||r.sz.find(z=>nv(z.p)>0),p=pz?rd2(nv(pz.p)):0;return{iid:r.iid,sz:r.sz.filter(z=>nv(z.c)>0&&z.w>0&&z.h>0).map(z=>({w:z.w,h:z.h,c:rd2(nv(z.c))})),m2:jdM2(r),...(r.exp!=null?{exp:r.exp}:{}),...(p>0?{p}:{})}});
   if(!rows.length){m.textContent='اكتب عدد الألواح لنوع واحد على الأقل';return}
   const j={id:uid(),jd:1,ts:Date.now(),rows,...(e.first?{first:1}:{})};S.stock.push(j);put('stock',j);jdE=null;jdId=j.id;jdGo('view');toast('✅ اتحفظ الجرد · '+plN(rows.length,'نوع'))}
 function jdViewH(j){const T=new Map(S.items.map(i=>[i.id,i]));
@@ -3382,13 +3383,13 @@ $('sk2').addEventListener('click',e=>{const x=e.target.closest('[data-s2x]');
   if(b.dataset.s2one)return s2Go('one',b.dataset.s2one);const k=b.dataset.s2;
   if(k==='back')return s2Go('home');
   if(k==='save')return s2Save()});
-$('jd').addEventListener('click',e=>{const b=e.target.closest('[data-jd],[data-jdv],[data-jdaz],[data-jdzok],[data-jdzx]');if(!b)return;const d=b.dataset;
+$('jd').addEventListener('click',e=>{const b=e.target.closest('[data-jd],[data-jdv],[data-jdadd],[data-jdzx]');if(!b)return;const d=b.dataset;
   if(d.jdv){jdId=d.jdv;return jdGo('view')}
   if(d.jdzx!=null){const[i,k]=d.jdzx.split(':').map(Number);jdE.rows[i].sz.splice(k,1);const y=window.scrollY;jdDraw();window.scrollTo(0,y);return}
-  if(d.jdaz!=null){const c=b.closest('.jdt'),z=c.querySelector('.jdnz');z.hidden=!z.hidden;if(!z.hidden)z.querySelector('.jdw').focus();return}
-  if(d.jdzok!=null){const i=+d.jdzok,c=b.closest('.jdt'),w=puCm(c.querySelector('.jdw').value),h=puCm(c.querySelector('.jdh2').value);if(!(w>0&&h>0))return;const p0=(jdE.rows[i].sz.find(z=>nv(z.p)>0)||{}).p||'';jdE.rows[i].sz.push({w,h,c:'',p:p0});const y=window.scrollY;jdDraw();window.scrollTo(0,y);const n=document.querySelector('#jdL [data-r="'+i+'"] .jdz:last-of-type .jdc');if(n)n.focus();return}
+  if(d.jdadd!=null){const i=+d.jdadd,p0=(jdE.rows[i].sz.find(z=>nv(z.p)>0)||{}).p||'';jdE.rows[i].sz.push({w:0,h:0,c:'',p:p0});const y=window.scrollY;jdDraw();window.scrollTo(0,y);const rr=document.querySelectorAll('#jdL [data-r="'+i+'"] .jdz'),n=rr[rr.length-1]&&rr[rr.length-1].querySelector('.jdl');if(n)n.focus();return}
   const k=d.jd;if(k==='new')return jdE?jdGo('new'):jdStart();if(k==='back')return jdGo('home');if(k==='save')return jdSave();
   if(k==='del'){if(!ok2(b))return;del('stock',jdId);jdId=null;jdGo('home');toast('اتحذف الجرد');return}});
 $('jd').addEventListener('input',e=>{const t=e.target;if(!jdE)return;const c=t.closest('.jdt');if(!c)return;const i=+c.dataset.r;
-  if(t.classList.contains('jdc')){const k=+t.closest('.jdz').dataset.k;jdE.rows[i].sz[k].c=t.value;const x=$('jdx'+i);if(x)x.innerHTML=jdLineTx(jdE.rows[i])}
-  else if(t.classList.contains('jdpr')){const k=+t.closest('.jdz').dataset.k;jdE.rows[i].sz[k].p=t.value}});
+  const kk=t.closest('.jdz'),k=kk?+kk.dataset.k:-1,z=k>=0?jdE.rows[i].sz[k]:null;
+  if(z&&(t.classList.contains('jdc')||t.classList.contains('jdl')||t.classList.contains('jdh2'))){if(t.classList.contains('jdc'))z.c=t.value;else if(t.classList.contains('jdl'))z.w=puCm(t.value);else z.h=puCm(t.value);const x=$('jdx'+i);if(x)x.innerHTML=jdLineTx(jdE.rows[i])}
+  else if(z&&t.classList.contains('jdpr'))z.p=t.value});
