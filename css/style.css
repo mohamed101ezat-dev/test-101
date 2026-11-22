@@ -2069,3 +2069,13 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #sk2 .s2r .s2n{text-align:start;font-size:14px;font-weight:700;white-space:normal;line-height:1.25}
 #sk2 .s2r .num{font-size:13.5px;white-space:nowrap}
 #sk2 .s2ft{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;font-weight:700;cursor:default}
+/* v402: صفحة النوع مضغوطة */
+#sk2 .s2one{padding:6px 8px}
+#sk2 .s2f{margin-top:5px}
+#sk2 .s2f input{height:32px;min-height:32px;font-size:14px;padding:0 8px;margin:0;text-align:start;width:100%}
+#sk2 .s2g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 44px;gap:5px;align-items:end;margin-top:5px}
+#sk2 .s2g label{font-size:10.5px}
+#sk2 .s2g input{height:32px;min-height:32px;font-size:14px}
+#sk2 .s2g .main{height:32px;min-height:32px;width:100%;padding:0;margin:0;font-size:15px}
+#sk2 .s2sub{font-size:12px;margin-top:3px}
+#sk2 .pul td.tn{white-space:normal;max-width:none;overflow:visible}
