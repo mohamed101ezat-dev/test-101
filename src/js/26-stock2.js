@@ -13,7 +13,7 @@ const s2Jds=()=>s2JdsAll().filter(x=>!x.one);
 /* كل حركات كل نوع: شراء/مرتجع للمورد/بيع/مرتجع من عميل/جرد */
 function s2Calc(){const T=s2Types(),byId=new Map(S.items.map(i=>[i.id,i])),byN=new Map(T.map(t=>[nkey(t.name),t])),E=new Map(T.map(t=>[t.id,[]]));
   const add=(t,o)=>{if(t&&E.has(t.id))E.get(t.id).push(o)};
-  S.purchases.forEach(p=>{if(p.type!=='buy'||!p.ln||p.ob)return;const s=S.suppliers.find(y=>y.id===p.sid);p.ln.forEach(l=>{const t=(l.iid&&byId.get(l.iid))||byN.get(nkey(l.n));const m=rd2(s2A(l.w,l.h)*(+l.q||0));if(m)add(t&&t.type==='mq'?t:byN.get(nkey(l.n)),{ts:p.ts,d:p.ret?-m:m,k:p.ret?'ret':'buy',tx:(p.ret?'↩️ مرتجع للمورد':'📥 شراء')+(s?' · '+s.name:'')+' · '+fq(l.q)+' لوح '+fq(l.w/100)+'×'+fq(l.h/100),pid:p.id})})});
+  S.purchases.forEach(p=>{if(p.type!=='buy'||!p.ln||p.ob)return;const s=S.suppliers.find(y=>y.id===p.sid);p.ln.forEach(l=>{const t=(l.iid&&byId.get(l.iid))||byN.get(nkey(l.n));const m=rd2(s2A(l.w,l.h)*(+l.q||0));if(m)add(t&&t.type==='mq'?t:byN.get(nkey(l.n)),{ts:p.ts,d:p.ret?-m:m,k:p.ret?'ret':'buy',tx:(p.ret?'↩️ مرتجع للمورد':'📥 شراء')+(s?' · '+s.name:'')+' · '+fq(l.q)+' لوح '+fq(l.w)+'×'+fq(l.h),pid:p.id})})});
   S.invoices.forEach(r=>{if(r.type==='pay')return;(r.rows||[]).forEach(x=>{let it=x.i&&byId.get(x.i),t=null,m=0;
       if(it&&it.type==='rd'){t=skPar(it);const w=+x.w||+it.w||0,h=+x.h||+it.h||0;m=s2A(w,h)*(+x.c||0)}
       else{t=it&&it.type==='mq'?it:byN.get(nkey(x.n));if(!t){const pi=byN.size&&S.items.find(i=>i.type==='rd'&&nkey(i.name)===nkey(String(x.n||'').replace(/\s*\d+(\.\d+)?\s*[×x*]\s*\d+(\.\d+)?\s*$/,'')));if(pi){t=skPar(pi);m=s2A(+x.w||+pi.w,+x.h||+pi.h)*(+x.c||0)}}else m=+x.q>0?+x.q:s2A(x.w,x.h)*(+x.c||0)}
@@ -34,7 +34,7 @@ function s2Sizes(t){const k=nkey(t.name),Z=[],has=(w,h)=>Z.some(z=>(Math.abs(z.w
   s2JdsAll().reverse().forEach(j=>(j.rows||[]).forEach(o=>{if(o.iid===t.id)(o.sz||[]).forEach(z=>{if(!has(z.w,z.h))Z.push({w:z.w,h:z.h})})}));
   S.purchases.filter(p=>p.ln).sort((a,b)=>b.ts-a.ts).forEach(p=>p.ln.forEach(l=>{if((l.iid===t.id||nkey(l.n)===k)&&!has(l.w,l.h))Z.push({w:l.w,h:l.h})}));return Z}
 const s2Sh=(m2,ref)=>ref>0?Math.round(m2/ref*10)/10:0;
-const s2ZN=z=>'⁦'+fq(z.w/100)+' × '+fq(z.h/100)+'⁩';
+const s2ZN=z=>'<bdi dir="ltr">'+fq(z.h)+' × '+fq(z.w)+'</bdi>';
 const s2Mn=t=>+((t.inv||{}).mn2)||0;
 function s2Go(v,id){s2V=v;s2Id=id||null;s2Draw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 function jdGo(v){jdV=v;jdDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
@@ -67,23 +67,23 @@ function jdDraw(){const b=$('jd');if(!b)return;if(jdV==='new'&&jdE){b.innerHTML=
   b.innerHTML=`<div class="puact"><button type="button" class="main" data-jd="new">📝 ${jdE?'كمّل الجرد اللي بدأته':J.length?'جرد جديد':'جرد افتتاحي'}</button></div>
   ${J.length?`<div class="pudl">📋 آخر جرد ${puDTx(Math.floor((Date.now()-J[0].ts)/864e5))}</div>`:'<div class="card mute s2hint">أول جرد هو الافتتاحي: عدّ الألواح الكاملة من كل نوع ومقاس، والرقم ده يبقى رصيد المخزن. بعد كده كل جرد بيقارن اللي عدّيته باللي المفروض يكون.</div>'}
   ${J.map(j=>{const n=(j.rows||[]).length,df=rd2((j.rows||[]).reduce((a,o)=>a+(o.exp!=null?(+o.m2||0)-o.exp:0),0));return`<div class="purow sm" data-jdv="${esc(j.id)}" role="button" tabindex="0"><span class="num mute">${puDM(j.ts)}</span><span class="pun">${plN(n,'نوع')}</span>${j.first?'<small class="tag">افتتاحي</small>':`<b class="num ${Math.abs(df)<.01?'':df<0?'dn':'ok'}">${Math.abs(df)<.01?'✓':(df>0?'+':'−')+fq(Math.abs(df))+' م²'}</b>`}</div>`}).join('')}`}
-function jdStart(){const R=s2Calc(),first=!s2Jds().length;jdE={first,rows:s2Types().map(t=>{const o=R.get(t.id),Z=s2Sizes(t),cp=s2Cpm(t);if(!Z.length)Z.push({w:S2REF[0],h:S2REF[1]});return{iid:t.id,exp:o&&o.tr?o.bal:null,p:cp>0?String(rd2(cp)):'',sz:Z.map(z=>({w:z.w,h:z.h,c:''}))}})};jdGo('new')}
+function jdStart(){const R=s2Calc(),first=!s2Jds().length;jdE={first,rows:s2Types().map(t=>{const o=R.get(t.id),Z=s2Sizes(t),cp=s2Cpm(t);if(!Z.length)Z.push({w:S2REF[0],h:S2REF[1]});return{iid:t.id,exp:o&&o.tr?o.bal:null,p:cp>0?String(rd2(cp)):'',sz:Z.map(z=>({w:z.w,h:z.h,c:'',p:cp>0?String(rd2(cp)):''}))}})};jdGo('new')}
 const jdM2=r=>rd2(r.sz.reduce((a,z)=>a+s2A(z.w,z.h)*(nv(z.c)||0),0));
 const jdDone=r=>r.sz.some(z=>String(z.c).trim()!=='');
 function jdNewH(){const e=jdE,T=new Map(S.items.map(i=>[i.id,i]));
   return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-jd="back" aria-label="رجوع">→</button><b>📝 ${e.first?'جرد افتتاحي':'جرد'}</b><small class="mute">اكتب عدد الألواح الكاملة · اللي تسيبه فاضي مش هيتجرد</small></div></div>
+  <div class="jdhd"><span>المقاس (سم)</span><span>عدد الألواح</span><span>سعر المتر</span><span></span></div>
   <div id="jdL">${e.rows.map((r,i)=>{const t=T.get(r.iid);if(!t)return'';return`<div class="card jdt" data-r="${i}"><div class="jdh"><b>${esc(t.name)}</b><span class="jdx" id="jdx${i}">${jdLineTx(r)}</span></div>
-    ${r.sz.map((z,k)=>`<div class="jdz" data-k="${k}"><span class="num">${s2ZN(z)}<small class="mute"> = ${fq(s2A(z.w,z.h))} م²</small></span><input class="jdc" inputmode="decimal" value="${esc(z.c)}" placeholder="0" autocomplete="off" aria-label="عدد ألواح ${esc(t.name)} ${fq(z.w/100)}×${fq(z.h/100)}"><small class="mute">لوح</small><button type="button" class="xd" data-jdzx="${i}:${k}" aria-label="شيل المقاس">×</button></div>`).join('')}
-    <div class="jdb"><button type="button" class="lnk jdadd" data-jdaz="${i}">➕ مقاس</button><label class="jdp">💰 سعر المتر<input class="jdpr" inputmode="decimal" value="${esc(r.p)}" placeholder="0" autocomplete="off" aria-label="سعر المتر"></label></div>
-    <div class="jdnz" hidden><input class="jdw" inputmode="decimal" placeholder="طول 3.21" aria-label="الطول"><input class="jdh2" inputmode="decimal" placeholder="عرض 2.25" aria-label="العرض"><button type="button" class="alt" data-jdzok="${i}">✅</button></div></div>`}).join('')}</div>
+    ${r.sz.map((z,k)=>`<div class="jdz" data-k="${k}"><span class="jdsz"><b class="num">${s2ZN(z)}</b><small class="mute">${fq(s2A(z.w,z.h))} م²</small></span><input class="jdc" inputmode="decimal" value="${esc(z.c)}" placeholder="0" autocomplete="off" aria-label="عدد ألواح ${esc(t.name)} ${fq(z.w)}×${fq(z.h)}"><input class="jdpr" inputmode="decimal" value="${esc(z.p!=null?z.p:r.p)}" placeholder="0" autocomplete="off" aria-label="سعر المتر"><button type="button" class="xd" data-jdzx="${i}:${k}" aria-label="شيل المقاس">×</button></div>`).join('')}
+    <div class="jdnz" data-nz="${i}"><input class="jdw" inputmode="decimal" placeholder="الطول 321" aria-label="الطول بالسنتي"><input class="jdh2" inputmode="decimal" placeholder="العرض 225" aria-label="العرض بالسنتي"><button type="button" class="alt" data-jdzok="${i}">➕ مقاس</button></div></div>`}).join('')}</div>
   <div class="card"><div class="purw"><button type="button" class="main" data-jd="save">✅ حفظ الجرد</button></div><div class="info" id="jdMsg" aria-live="polite"></div></div>`}
 function jdLineTx(r){if(!jdDone(r)){if(r.exp==null)return'';const t=S.items.find(i=>i.id===r.iid),rf=t?s2Ref(t):0;return'<small class="mute">المفروض '+fq(r.exp)+' م²'+(rf>0&&r.exp>0?' ≈ '+fq(s2Sh(r.exp,rf))+' لوح':'')+'</small>'}const m=jdM2(r);if(r.exp==null)return'<b class="num">'+fq(m)+' م²</b>';const d=rd2(m-r.exp);return'<b class="num">'+fq(m)+' م²</b> <small class="'+(Math.abs(d)<.01?'mute':d<0?'dn':'ok')+'">'+(Math.abs(d)<.01?'✓ مظبوط':(d>0?'+':'−')+fq(Math.abs(d))+' م² عن المفروض')+'</small>'}
-function jdSave(){const e=jdE,m=$('jdMsg'),rows=e.rows.filter(jdDone).map(r=>{const p=rd2(nv(r.p));return{iid:r.iid,sz:r.sz.filter(z=>nv(z.c)>0).map(z=>({w:z.w,h:z.h,c:rd2(nv(z.c))})),m2:jdM2(r),...(r.exp!=null?{exp:r.exp}:{}),...(p>0?{p}:{})}});
+function jdSave(){const e=jdE,m=$('jdMsg'),rows=e.rows.filter(jdDone).map(r=>{const pz=r.sz.find(z=>nv(z.c)>0&&nv(z.p)>0)||r.sz.find(z=>nv(z.p)>0),p=pz?rd2(nv(pz.p)):0;return{iid:r.iid,sz:r.sz.filter(z=>nv(z.c)>0).map(z=>({w:z.w,h:z.h,c:rd2(nv(z.c))})),m2:jdM2(r),...(r.exp!=null?{exp:r.exp}:{}),...(p>0?{p}:{})}});
   if(!rows.length){m.textContent='اكتب عدد الألواح لنوع واحد على الأقل';return}
   const j={id:uid(),jd:1,ts:Date.now(),rows,...(e.first?{first:1}:{})};S.stock.push(j);put('stock',j);jdE=null;jdId=j.id;jdGo('view');toast('✅ اتحفظ الجرد · '+plN(rows.length,'نوع'))}
 function jdViewH(j){const T=new Map(S.items.map(i=>[i.id,i]));
   return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-jd="back" aria-label="رجوع">→</button><b>📋 ${j.first?'جرد افتتاحي':'جرد'} ${puDM(j.ts)}</b></div>
-  <table class="xl jdtb"><tr><th>النوع</th><th>اتعدّ</th><th>المفروض</th><th>الفرق</th></tr>${(j.rows||[]).map(o=>{const t=T.get(o.iid),d=o.exp!=null?rd2(o.m2-o.exp):null;return`<tr><td class="tn">${esc(t?t.name:'—')}<small class="mute">${(o.sz||[]).map(z=>fq(z.c)+' × '+s2ZN(z)).join(' · ')}</small></td><td class="num">${fq(o.m2)}</td><td class="num">${o.exp!=null?fq(o.exp):'—'}</td><td class="num ${d==null||Math.abs(d)<.01?'':d<0?'dn':'ok'}">${d==null?'—':Math.abs(d)<.01?'✓':(d>0?'+':'−')+fq(Math.abs(d))}</td></tr>`}).join('')}</table>
+  <table class="xl jdtb"><tr><th>النوع</th><th>اتعدّ</th><th>المفروض</th><th>الفرق</th></tr>${(j.rows||[]).map(o=>{const t=T.get(o.iid),d=o.exp!=null?rd2(o.m2-o.exp):null;return`<tr><td class="tn">${esc(t?t.name:'—')}<small class="mute">${(o.sz||[]).map(z=>fq(z.c)+' لوح '+s2ZN(z)).join(' · ')}</small></td><td class="num">${fq(o.m2)}</td><td class="num">${o.exp!=null?fq(o.exp):'—'}</td><td class="num ${d==null||Math.abs(d)<.01?'':d<0?'dn':'ok'}">${d==null?'—':Math.abs(d)<.01?'✓':(d>0?'+':'−')+fq(Math.abs(d))}</td></tr>`}).join('')}</table>
   <div class="purw"><button type="button" class="alt b-red" data-jd="del">🗑️ حذف الجرد ده</button></div></div>`}
 
 /* ---- الأحداث ---- */
@@ -98,9 +98,9 @@ $('jd').addEventListener('click',e=>{const b=e.target.closest('[data-jd],[data-j
   if(d.jdv){jdId=d.jdv;return jdGo('view')}
   if(d.jdzx!=null){const[i,k]=d.jdzx.split(':').map(Number);jdE.rows[i].sz.splice(k,1);const y=window.scrollY;jdDraw();window.scrollTo(0,y);return}
   if(d.jdaz!=null){const c=b.closest('.jdt'),z=c.querySelector('.jdnz');z.hidden=!z.hidden;if(!z.hidden)z.querySelector('.jdw').focus();return}
-  if(d.jdzok!=null){const i=+d.jdzok,c=b.closest('.jdt'),w=puCm(c.querySelector('.jdw').value),h=puCm(c.querySelector('.jdh2').value);if(!(w>0&&h>0))return;jdE.rows[i].sz.push({w,h,c:''});const y=window.scrollY;jdDraw();window.scrollTo(0,y);const n=document.querySelector('#jdL [data-r="'+i+'"] .jdz:last-of-type .jdc');if(n)n.focus();return}
+  if(d.jdzok!=null){const i=+d.jdzok,c=b.closest('.jdt'),w=puCm(c.querySelector('.jdw').value),h=puCm(c.querySelector('.jdh2').value);if(!(w>0&&h>0))return;const p0=(jdE.rows[i].sz.find(z=>nv(z.p)>0)||{}).p||'';jdE.rows[i].sz.push({w,h,c:'',p:p0});const y=window.scrollY;jdDraw();window.scrollTo(0,y);const n=document.querySelector('#jdL [data-r="'+i+'"] .jdz:last-of-type .jdc');if(n)n.focus();return}
   const k=d.jd;if(k==='new')return jdE?jdGo('new'):jdStart();if(k==='back')return jdGo('home');if(k==='save')return jdSave();
   if(k==='del'){if(!ok2(b))return;del('stock',jdId);jdId=null;jdGo('home');toast('اتحذف الجرد');return}});
 $('jd').addEventListener('input',e=>{const t=e.target;if(!jdE)return;const c=t.closest('.jdt');if(!c)return;const i=+c.dataset.r;
   if(t.classList.contains('jdc')){const k=+t.closest('.jdz').dataset.k;jdE.rows[i].sz[k].c=t.value;const x=$('jdx'+i);if(x)x.innerHTML=jdLineTx(jdE.rows[i])}
-  else if(t.classList.contains('jdpr'))jdE.rows[i].p=t.value});
+  else if(t.classList.contains('jdpr')){const k=+t.closest('.jdz').dataset.k;jdE.rows[i].sz[k].p=t.value}});

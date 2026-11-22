@@ -2041,3 +2041,18 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #jd .jdb{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
 #jd .jdp{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);margin:0}
 #jd .jdp input{width:84px;height:30px;min-height:30px;text-align:center;margin:0;font-size:14px}
+/* v398: الجرد: كل مقاس سطر لوحده (المقاس · العدد · السعر · ×) بالسنتي من غير نقط */
+#jd .jdhd,#jd .jdz{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) 24px;gap:5px;align-items:center}
+#jd .jdhd{padding:0 10px;margin:0 0 3px;font-size:10.5px;color:var(--mute);text-align:center}
+#jd .jdhd span:first-child{text-align:start}
+#jd .jdz{margin-top:4px}
+#jd .jdz>span.jdsz{display:flex;flex-direction:column;align-items:flex-start;gap:0;line-height:1.25}
+#jd .jdsz b{font-size:14px;color:var(--ink);font-weight:700}
+#jd .jdsz small{font-size:11px;color:var(--mute)}
+#jd .jdz input{width:100%;min-width:0;height:32px;min-height:32px;text-align:center;font-size:14px;margin:0;padding:0 2px;flex:none}
+#jd .jdz .xd{width:24px;min-width:0;height:28px;min-height:0;padding:0;font-size:14px}
+#jd .jdnz{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:5px;margin-top:6px;padding-top:5px;border-top:1px dashed var(--line)}
+#jd .jdnz[hidden]{display:grid}
+#jd .jdnz input{height:30px;min-height:30px;text-align:center;font-size:13px;margin:0;min-width:0}
+#jd .jdnz button{height:30px;min-height:30px;padding:0 10px;margin:0;font-size:12.5px;white-space:nowrap}
+#jd .jdh{margin-bottom:2px}
