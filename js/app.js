@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='390';
+const APP_VER='391';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -219,17 +219,24 @@ if(window.visualViewport){visualViewport.addEventListener('resize',kbFix);visual
 document.addEventListener('focusin',()=>setTimeout(kbFix,300));document.addEventListener('focusout',()=>setTimeout(kbFix,300));
 window.addEventListener('resize',fixBar);
 let curTab='new',tabHist=[],navNoHist=false;
-const navClick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;let t=b.dataset.t;if(t==='it'){skCur='it';t='sk'}const hb=t==='sk'?document.querySelector('#bnav [data-t="sk"]'):t==='cu'?$('hdrCu'):t==='cl'?$('hdrCl'):b;if(!navNoHist&&t!==curTab)tabHist.push(curTab);if(t==='sk'&&curTab!=='sk'&&!navNoHist)skHist=[];curTab=t;try{sessionStorage.setItem('lastTab',t)}catch(e){}
+const navClick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;let t=b.dataset.t;const hb=t==='sk'?document.querySelector('#bnav [data-t="sk"]'):t==='cu'?$('hdrCu'):t==='cl'?$('hdrCl'):b;if(!navNoHist&&t!==curTab)tabHist.push(curTab);if(t==='sk'&&curTab!=='sk'&&!navNoHist)skHist=[];curTab=t;try{sessionStorage.setItem('lastTab',t)}catch(e){}
   document.querySelectorAll('#bnav button,#hdrSet,#hdrCu,#hdrCl').forEach(x=>x.classList.toggle('on',x===hb));
   ['dash','new','cl','cu','it','st','sk'].forEach(k=>$('t-'+k).classList.toggle('hide',k!==t));
   $('saveBar').classList.toggle('hide',t!=='new');document.body.classList.toggle('onNew',t==='new');fixBar();
-  if(t==='new'){drawRecent();drawQS()}if(t==='st')stGo('');if(t==='dash')drawDash();if(t==='cu')drawCusts();if(t==='sk')skShow();if(t==='new'&&lastC&&!editId){$('prev').value=balOf(lastC)||'';calc()}};
+  if(t==='new'){drawRecent();drawQS()}if(t==='st')stGo('');if(t==='dash')drawDash();if(t==='cu')drawCusts();if(t==='sk')skShow();if(t==='it')drawItems();if(t==='new'&&lastC&&!editId){$('prev').value=balOf(lastC)||'';calc()}};
 $('bnav').onclick=navClick;$('hdrSet').onclick=navClick;$('hdrCu').onclick=navClick;$('hdrCl').onclick=navClick;
 /* v380: تاب المخزن فيه الأصناف والمخزن والموردين، كل واحد في تبويب */
-let skCur='it',skHist=[];
-function skShow(){const P={it:$('t-it'),stk:$('stkPanel'),sup:document.querySelector('.stp[data-sp="sup"]')};Object.keys(P).forEach(k=>{if(P[k])P[k].classList.toggle('hide',k!==skCur)});
+let skCur='stk',skHist=[];
+function skShow(){if(skCur!=='stk'&&skCur!=='sup')skCur='stk';const P={stk:$('stkPanel'),sup:document.querySelector('.stp[data-sp="sup"]')};Object.keys(P).forEach(k=>{if(P[k])P[k].classList.toggle('hide',k!==skCur)});
   document.querySelectorAll('#skSeg [data-skt]').forEach(x=>x.classList.toggle('on',x.dataset.skt===skCur));
-  try{if(skCur==='it')drawItems();else if(skCur==='stk')stkOpen();else supOpen(null)}catch(e){}}
+  try{if(skCur==='stk')stkOpen();else supOpen(null)}catch(e){}try{skTopDraw();skTopVis()}catch(e){}}
+/* v391: المخزن والموردين تاب واحد: ملخص صغير فوق (قيمة المخزن · الناقص · عليك للموردين) وأزرار الشغل اليومي */
+function skTopDraw(){const A=skInfo(),val=A.reduce((a,x)=>a+x.val,0),nL=A.filter(x=>x.st==='low'||x.st==='out').length,ow=supTot(),ov=supOv();
+  $('skSum').innerHTML='<div class="skk"><button type="button" data-skt2="stk"><small>🧱 قيمة المخزن</small><b class="num">'+f(Math.round(val))+'</b></button><button type="button" data-sg="ord"'+(nL?' class="lw"':'')+'><small>📋 ناقص</small><b class="num">'+nL+'</b></button><button type="button" data-skt2="sup"'+(ov>0?' class="dn"':'')+'><small>🚚 عليك للموردين</small><b class="num">'+f(ow)+'</b></button></div>'}
+function skTopVis(){const sub=(skCur==='stk'&&typeof stkV!=='undefined'&&stkV!=='home')||(skCur==='sup'&&!!supCur);$('skTop').classList.toggle('hide',sub);$('skSeg').classList.toggle('hide',sub)}
+$('skTop').onclick=e=>{const b=e.target.closest('[data-sg],[data-skt2]');if(!b)return;
+  if(b.dataset.skt2){const k=b.dataset.skt2;if(k!==skCur){skHist.push(skCur);skCur=k;skShow()}window.scrollTo(0,0);return}
+  if(skCur!=='stk'){skHist.push(skCur);skCur='stk';skShow()}stkV=b.dataset.sg;stkAct=null;drawStk();window.scrollTo(0,0)};
 $('skSeg').onclick=e=>{const b=e.target.closest('[data-skt]');if(!b)return;if(b.dataset.skt!==skCur)skHist.push(skCur);skCur=b.dataset.skt;skShow();window.scrollTo(0,0)};
 /* العملاء والأصناف بقوا جوه الإعدادات: زرار الإعدادات يفضل متعلّم وانت فيهم */
 document.addEventListener('click',e=>{if(e.target.closest('[data-goset]')){$('hdrSet').click();window.scrollTo(0,0)}});
@@ -866,7 +873,7 @@ const itG=cf=>(itSelOn?'28px ':'')+'2fr '+cf.map(()=>'1fr').join(' ')+' 30px 34p
 function drawItemList(){const cf=itCols(),g=itG(cf);
   $('items').innerHTML=itemsList().map(it=>`<div class="itw" data-id="${it.id}"><div class="it" style="grid-template-columns:${g}">${itSelOn?'<input type="checkbox" class="itck" data-ck="'+it.id+'"'+(itSel.has(it.id)?' checked':'')+' aria-label="تحديد">':''}<input data-k="${it.id}" data-f="name" value="${esc(it.name)}">${cf.map(x=>`<input data-k="${it.id}" data-f="${x[0]}" type="text" inputmode="decimal" value="${(x[0]==='p'?priceOf(it,itCat):it[x[0]])||''}">`).join('')}<button type="button" class="alt itpm" data-pm="${it.id}" aria-label="تغيير سعر الصنف ده بنسبة">±</button><button class="del" data-d="${it.id}" aria-label="حذف">×</button></div><div class="itpc hide" data-pc="${it.id}"><span class="mute">غيّر سعر الصنف ده</span><input inputmode="decimal" placeholder="10" aria-label="النسبة"><span>%</span><button type="button" class="alt" data-pcu="${it.id}">⬆ زوّد</button><button type="button" class="alt" data-pcd="${it.id}">⬇ قلّل</button></div></div>`).join('')||'<p class="mute">'+(S.items.length?'مفيش أصناف بالبحث ده.':'لسه مفيش أصناف. اكتب اسم الصنف وسعره فوق واضغط ➕، أو استوردهم من Excel في الإعدادات ← الحفظ والنسخ.')+'</p>';itSelN()}
 const itSelN=()=>{const e=$('itSelN');if(e)e.textContent=itSelOn?'معلّم '+itSel.size+' صنف':''};
-let stkFromIt=false;$('itStk').onclick=()=>{stkTy=curIT;stkF='all';nfGo('stk');stkFromIt=true};
+let stkFromIt=false;
 $('seg').onclick=e=>{const t=e.target.dataset.it;if(!t)return;curIT=t;document.querySelectorAll('#seg button').forEach(b=>b.classList.toggle('on',b===e.target));drawItems()};
 $('nform').addEventListener('click',e=>{if(e.target.id!=='addIt')return;const name=$('ni_name').value.trim();if(!name){toast('اكتب اسم الصنف الأول');$('ni_name').focus();return}
   /* v189: نفس الاسم بنفس النوع ميتكررش */
@@ -1954,7 +1961,8 @@ function supOpen(id){supCur=id;$('supHome').classList.toggle('hide',!!id);$('sup
   if(id){spTy='buy';spDay=0;spAll=false;const s=S.suppliers.find(x=>x.id===id);spDue=s&&s.terms>0?+s.terms:null;spHow='كاش';$('spAmt').value='';$('spNote').value='';$('spQty').value='';$('spIt').value='';$('spStk').open=false;$('supEdit').open=false;$('spXtra').open=false;spFl=[];spPend=[];spEid=null;spLF='all';$('spAttN').textContent='';spLoadF(id).then(()=>{if(supCur===id)drawSup()})}
   drawSup();window.scrollTo(0,0)}
 function spMonth(a){const d=new Date(a),x=new Date(d.getFullYear(),d.getMonth(),1).getTime();return[x,new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
-function drawSup(){const s=S.suppliers.find(x=>x.id===supCur);
+function drawSup(){try{drawSup0()}finally{try{if(curTab==='sk'){skTopVis();if(!supCur)skTopDraw()}}catch(e){}}}
+function drawSup0(){const s=S.suppliers.find(x=>x.id===supCur);
   if(!s){if(supCur){supOpen(null);return}spHome();return}
   spOne(s)}
 let spMig=0;function spHome(){if(!spMig){spMig=1;spMigFiles().then(()=>{if(!supCur)drawSup()})}const now=Date.now(),[a,b]=spMonth(now),pm=puIn(a,b),q=$('supQ').value.trim();
@@ -2170,25 +2178,25 @@ const SKR=[['قطّعت','🔨 قطّعت منه'],['اتكسر','💥 اتكس�
 /* v302: صفحة المخزن ببساطة: سطر واحد بالحال، زرارين كبار، وكل صنف قدامه عنده كام */
 function skHome(){const A=skInfo(),q=$('stkQ').value,c=k=>A.filter(x=>x.st===k).length,val=A.reduce((a,x)=>a+x.val,0),nNew=c('new'),nLow=c('low'),nOut=c('out');
   const st=[nOut?'<b class="dn">❌ '+plN(nOut,'صنف')+' خلص</b>':'',nLow?'<b class="lw">⚠️ '+plN(nLow,'صنف')+' قرب يخلص</b>':''].filter(Boolean).join(' · ');
-  $('skSum').innerHTML='<div class="skh">'+(A.length?'عندك '+plN(A.length,'صنف'):'مفيش أصناف لسه')+(val>0?' <small>· قيمتهم حوالي '+f(Math.round(val))+' ج</small>':'')+'</div>'+(st?'<div class="skst">'+st+'</div>':(A.length&&nNew<A.length?'<div class="skst ok">✅ كله تمام</div>':''));
+  skTopDraw();const _skOld='<div class="skh">'+(A.length?'عندك '+plN(A.length,'صنف'):'مفيش أصناف لسه')+(val>0?' <small>· قيمتهم حوالي '+f(Math.round(val))+' ج</small>':'')+'</div>'+(st?'<div class="skst">'+st+'</div>':(A.length&&nNew<A.length?'<div class="skst ok">✅ كله تمام</div>':''));
   const sb=$('skStart');sb.classList.add('hide');
   if(!sb.classList.contains('hide'))sb.innerHTML='<b>👋 ابدأ من هنا</b><div class="mute" style="margin:4px 0 8px">'+plN(nNew,'صنف')+' لسه ما اتعدّوش. دوس «✍️ عدّ المخزن» واكتب عندك كام لوح أو قطعة من كل صنف مرة واحدة، وبعد كده البرنامج بيحسب لوحده.</div><button type="button" class="main" data-sg="cnt" style="width:100%">✍️ عدّ المخزن دلوقتي</button>';
   /* v364: المخزن نفس جدول الأصناف: تبويب للجاهز وتبويب للمقطع، وكل واحد بحاله */
   const nR=A.filter(x=>x.it.type==='rd').length,nM=A.filter(x=>x.it.type==='mq').length;if(stkTy!=='rd'&&stkTy!=='mq'||(stkTy==='rd'&&!nR&&nM)||(stkTy==='mq'&&!nM&&nR))stkTy=nR||!nM?'rd':'mq';
   $('stkTy').innerHTML='<button type="button" data-sty="rd" class="'+(stkTy==='rd'?'on':'')+'">📦 جاهز <small>'+nR+'</small></button><button type="button" data-sty="mq" class="'+(stkTy==='mq'?'on':'')+'">✂️ مقطع <small>'+nM+'</small></button>';
   const AT=A.filter(x=>x.it.type===stkTy),cT=k=>AT.filter(x=>x.st===k).length;
-  const F=[['all','الكل',AT.length],['out','❌ خلص',cT('out')],['low','⚠️ قرب يخلص',cT('low')],['new','مش متعدّ',cT('new')]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
+  const F=[['all','الكل',AT.length],['out','❌ خلص',cT('out')],['low','⚠️ قرب يخلص',cT('low')]].filter(x=>x[0]==='all'||x[2]||x[0]===stkF);
   if(!F.some(x=>x[0]===stkF))stkF='all';
   $('stkFil').innerHTML=F.length>1?F.map(([k,l,n])=>`<button type="button" data-sf="${k}"${k===stkF?' class="on"':''}>${l} <small>${n}</small></button>`).join(''):'';
   const O={out:0,low:1,ok:2,idle:2,new:3},l=AT.filter(x=>(stkF==='all'||x.st===stkF||(stkF==='ok'&&x.st==='idle'))&&qm(x.it.name,q)).sort((a,b)=>a.it.name.localeCompare(b.it.name,'ar')||((+a.it.w||0)*(+a.it.h||0))-((+b.it.w||0)*(+b.it.h||0)));
   $('stkRows').innerHTML=l.length?l.map(x=>{const kd=x.it.type==='mq'?skKids(x.it):[],sub=[x.tr&&x.left!=null?'يكفي حوالي '+x.left+' يوم':'',skInv(x.it).loc?'📍 '+esc(skInv(x.it).loc):''].filter(Boolean).join(' · ');
     const ic=x.st==='out'?'❌':x.st==='low'?'⚠️':'';
-    return`<div class="skr ${x.st==='idle'?'ok':x.st}" data-sg="one" data-id="${esc(x.it.id)}" role="button" tabindex="0">${ic?'<span class="sks">'+ic+'</span>':''}<div class="skn"><span>${skNm(x.it)}</span>${sub?'<small>'+sub+'</small>':''}${(()=>{const l=skSzLine(x);return l?'<div class="skzs">'+esc(l)+'</div>':''})()}</div><div class="skb">${x.tr?skBalTx(x.it,x):'<small class="skz">مش متعدّ</small>'}</div></div>`}).join(''):`<div class="card mute">${S.items.length?'مفيش صنف بالشكل ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.'}</div>`}
+    return`<div class="skr ${x.st==='idle'?'ok':x.st}" data-sg="one" data-id="${esc(x.it.id)}" role="button" tabindex="0">${ic?'<span class="sks">'+ic+'</span>':''}<div class="skn"><span>${skNm(x.it)}</span>${sub?'<small>'+sub+'</small>':''}${(()=>{const l=skSzLine(x);return l?'<div class="skzs">'+esc(l)+'</div>':''})()}</div><div class="skb">${x.tr?skBalTx(x.it,x):'<small class="skz">—</small>'}</div></div>`}).join(''):`<div class="card mute">${S.items.length?'مفيش صنف بالشكل ده.':'مفيش أصناف لسه. ضيفها الأول من: الإعدادات ← الأصناف.'}</div>`}
 function skMvRow(x,nm){const it=S.items.find(i=>i.id===x.iid)||{},t=x.inv?'sale':(x.t==='adj'?'adj':(x.q>0?'in':'out')),sup=x.sid&&S.suppliers.find(s=>s.id===x.sid);
   const d=t==='sale'?(x.q<0?'🧾 اتباع ':'↩️ مرتجع ')+'<small class="mute">'+esc(x.code)+'</small>':t==='adj'?'✍️ عدّ <small class="mute">'+(x.q>0?'زاد':'نقص')+'</small>':t==='in'?'➕ دخل'+(x.tc?' <small class="mute">بـ'+f(x.tc)+'</small>':(x.cost?' <small class="mute">بـ'+f(x.cost)+'</small>':''))+(sup?' <small class="mute">· '+esc(sup.name)+'</small>':''):'➖ '+esc(x.why||'صرف');
   return`<tr><td class="num">${dshort(x.ts).slice(5)}</td>${nm?`<td class="tn">${esc(it.name||'')}</td>`:''}<td>${d}${x.note?'<br><small class="mute">'+esc(x.note)+'</small>':''}${skMvX(x)}</td><td class="num">${x.q>0?'+':'−'}${f(Math.abs(x.q))}</td><td>${x.inv?'':`<button type="button" class="xd" data-skd="${esc(x.id)}" aria-label="حذف الحركة">×</button>`}</td></tr>`}
 function skSub(h){$('stkHome').classList.toggle('hide',!!h);$('stkSub').classList.toggle('hide',!h);if(h)$('stkSub').innerHTML=h}
-const skBack='<div class="ro" style="color:var(--ink);margin:0 0 6px"><button type="button" class="lnk" data-sg="home">→ كل الأصناف</button></div>';
+const skBack='<div class="ro" style="color:var(--ink);margin:0 0 6px"><button type="button" class="lnk" data-sg="home">→ رجوع</button></div>';
 /* v344: النوع+السمك صنف واحد، ومقاسات ألواحه جواه. بعد «الجرد الافتتاحي» كل مقاس ليه رصيده الحقيقي (بالألواح، وممكن يبقى كسر لو اتفتح لوح). المتر والجاهز بيتخصموا من أصغر مقاس يكفي القطعة (أو من المقاس اللي اخترته في سطر الفاتورة) */
 const skSizes=it=>{const a=skInv(it).sizes;return Array.isArray(a)?a.filter(z=>z&&z.id&&+z.w>0&&+z.h>0):[]};
 const skZA=z=>(+z.w)*(+z.h)/1e4,skZEq=(it,z)=>skZA(z)/skArea(it),skZN=z=>'\u2066'+fq(+z.w)+'×'+fq(+z.h)+'\u2069',eq3=v=>Math.round(v*1000)/1000,rd3=eq3;
@@ -2326,7 +2334,8 @@ function skWst(){const d=new Date(),a=new Date(d.getFullYear(),d.getMonth()-stkW
 function skMv(){const m=stkAll(),sal=skSales(),a=S.stock.filter(x=>m.has(x.iid)),s=[];sal.forEach((l,id)=>{const o=m.get(id);l.forEach(x=>{if(o&&x.ts>=o.from)s.push(x)})});
   const T=x=>x.inv?'sale':x.t==='adj'?'adj':x.q>0?'in':'out',all=a.concat(s).sort((x,y)=>y.ts-x.ts),l=all.filter(x=>stkMF==='all'||T(x)===stkMF).slice(0,80);
   skSub(skBack+`<div class="spc">${[['all','الكل'],['in','➕ دخل'],['out','➖ صرف'],['adj','⚖️ جرد'],['sale','🧾 بيع']].map(([k,t])=>`<button type="button" data-mf="${k}"${k===stkMF?' class="on"':''}>${t}</button>`).join('')}</div><div class="card" style="padding:6px 8px"><table class="xl">${l.length?l.map(x=>skMvRow(x,true)).join(''):'<tr><td class="tn mute">مفيش حركات.</td></tr>'}</table></div>`)}
-function drawStk(){if(stkV==='rcv')skRcv();else if(stkV==='home'){skSub('');skHome()}else if(stkV==='one')skOne();else if(stkV==='cnt')skCnt();else if(stkV==='ord')skOrd();else if(stkV==='mv')skMv();else if(stkV==='wst')skWst();else{stkV='home';skSub('');skHome()}}
+function drawStk(){try{skDraw0()}finally{try{skTopVis();if(stkV==='home')skTopDraw()}catch(e){}}}
+function skDraw0(){if(stkV==='rcv')skRcv();else if(stkV==='home'){skSub('');skHome()}else if(stkV==='one')skOne();else if(stkV==='cnt')skCnt();else if(stkV==='ord')skOrd();else if(stkV==='mv')skMv();else if(stkV==='wst')skWst();else{stkV='home';skSub('');skHome()}}
 $('stkQ').oninput=drawStk;
 $('stkWmax').onchange=e=>{svk('wasteMax',String(Math.max(1,nv(e.target.value)||15)));drawStk()};
 $('stkLim').onchange=e=>{svk('stkMin',String(Math.max(0,nv(e.target.value))));drawStk()};
@@ -3089,7 +3098,7 @@ function draftBoot(){let d=null;try{d=JSON.parse(localStorage.getItem('invDraft'
 lockInit();loadMsgUI();loadLogo();paperLabels();fixBar();document.body.classList.add('onNew');
 (async()=>{try{await instInit();await dataInit()}catch(e){if(window.__bootFail)window.__bootFail('storage: '+(e&&e.message||e));return}
   if(!fbCfg()){reflowAll();syncNames()}drawDash();drawCusts();drawItems();calc();bkInfo();applyFeatures();drawTrash();drawRecent();qtBtn();try{draftBoot()}catch(e){logErr(e,'draftBoot')}
-  try{$('skBody').append($('t-it'),$('stkPanel'),document.querySelector('.stp[data-sp="sup"]'))}catch(e){}window.__bootOK=true;applyBiz();bellUI();startUI();try{const lt=sessionStorage.getItem('lastTab');if(lt&&lt!==curTab){const bt=lt==='st'?$('hdrSet'):lt==='cu'?$('hdrCu'):lt==='cl'?$('hdrCl'):document.querySelector('#bnav button[data-t="'+lt+'"]');if(bt&&!bt.closest('.hide')&&!bt.classList.contains('hide'))bt.click()}}catch(e){}fbBoot();cloudUI();welcMaybe();setTimeout(nfDaily,1800);nfBoot();setTimeout(storCheck,2500);setTimeout(cloudNag,6000);if(migNote)setTimeout(()=>toast(migNote),700)})();
+  try{$('skBody').append($('stkPanel'),document.querySelector('.stp[data-sp="sup"]'))}catch(e){}window.__bootOK=true;applyBiz();bellUI();startUI();try{const lt=sessionStorage.getItem('lastTab');if(lt&&lt!==curTab){const bt=lt==='st'?$('hdrSet'):lt==='cu'?$('hdrCu'):lt==='cl'?$('hdrCl'):document.querySelector('#bnav button[data-t="'+lt+'"]');if(bt&&!bt.closest('.hide')&&!bt.classList.contains('hide'))bt.click()}}catch(e){}fbBoot();cloudUI();welcMaybe();setTimeout(nfDaily,1800);nfBoot();setTimeout(storCheck,2500);setTimeout(cloudNag,6000);if(migNote)setTimeout(()=>toast(migNote),700)})();
 /* ---------- زرار الرجوع في الموبايل ---------- */
 const OVS=['res','rem','remL','bulk','calcModal','clOv','pinOv','qtOv','dzOv'],OVX={dzOv:'dzX',res:'resx',rem:'remX',remL:'remLX',bulk:'bulkX',calcModal:'calcClose',clOv:'clX',pinOv:'pinNo',qtOv:'qtX'};
 let NS=[],navIgnore=false,exitArm=false,exitT=0,navOK=false;
@@ -3104,7 +3113,7 @@ function closeTop(l){
   else if(l==='db'){dbMode=false;dbSel=null;drawDebt()}
   else if(l==='sp'){stGo('')}
   else if(l==='info'){infoMode=false;iSc='';drawDebt()}
-  else if(l[0]==='k'){skCur=skHist.pop()||'it';skShow()}
+  else if(l[0]==='k'){skCur=skHist.pop()||'stk';skShow()}
   else if(l==='sv'){stkV='home';stkAct=null;drawStk()}
   else if(l==='su'){supOpen(null)}
   else if(l[0]==='o'){const id=l.slice(2),x=$(OVX[id]);if(x)x.click();else if($(id))$(id).classList.add('hide');if($(id))$(id).classList.add('hide')}}

@@ -1888,3 +1888,20 @@ html[data-theme][data-pal] #rcRows .row:nth-child(even){background:color-mix(in 
 #supOne #spList .spq{color:#b42318}#supOne #spList .spp{color:#15803d}
 #supOne #spList .xd{width:18px;height:20px;font-size:11px}
 html[data-theme="dark"] #supOne #spList .spq{color:#f87171}html[data-theme="dark"] #supOne #spList .spp{color:#4ade80}
+/* v391: المخزن + الموردين تاب واحد */
+#t-sk #skTop{padding:6px 8px;margin-bottom:6px}
+#t-sk .skk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+#t-sk .skk>button{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;height:auto;min-height:0;padding:4px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);box-shadow:none;font-weight:400}
+#t-sk .skk small{font-size:10.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#t-sk .skk b{font-size:15px}
+#t-sk .skk .lw b{color:#b45309}#t-sk .skk .dn b{color:var(--danger)}
+#t-sk #skTop .skact{display:flex;gap:5px;margin-top:6px}
+#t-sk #skTop .skact>button{flex:1 1 0;min-width:0;height:34px;min-height:34px;padding:0 4px;font-size:13px;white-space:nowrap;margin:0}
+#t-sk #skTop .skact>.main{flex:1.6 1 0}
+#t-sk .skq{display:flex;gap:6px;align-items:center;margin:0 0 6px;flex-wrap:nowrap}
+#t-sk .skq #stkQ{flex:1;min-width:0;height:34px;margin:0}
+#t-sk .skq #stkTy{flex:none;margin:0}
+#t-sk .skq #stkTy button{padding:0 8px;font-size:12px}
+#t-sk #supHome .spk{grid-template-columns:repeat(3,minmax(0,1fr))}
+#t-sk #supHome .spk>div:first-child{display:none}
+html[data-theme="dark"] #t-sk .skk .lw b{color:#fbbf24}

@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=390">
+<link rel="stylesheet" href="css/style.css?v=391">
 
 
 
@@ -263,9 +263,8 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div id="clHost"></div>
 </section>
 
-<section id="t-sk" class="hide"><div class="seg s skseg" id="skSeg"><button type="button" data-skt="it">📦 الأصناف</button><button type="button" data-skt="stk">🧱 المخزن</button><button type="button" data-skt="sup">🚚 الموردين</button></div><div id="skBody"></div></section>
+<section id="t-sk" class="hide"><div class="card sktop" id="skTop"><div id="skSum"></div><div class="skact"><button type="button" class="main" data-sg="rcv">📥 وصلت بضاعة</button><button type="button" class="alt" data-sg="cnt">✍️ عدّ</button><button type="button" class="alt" data-sg="mv">🕘 الحركات</button></div></div><div class="seg s skseg" id="skSeg"><button type="button" data-skt="stk">🧱 الرصيد</button><button type="button" data-skt="sup">🚚 الموردين</button></div><div id="skBody"></div></section>
 <section id="t-it" class="hide">
-  <div class="sth"><button type="button" class="lnk" data-goset="1" aria-label="رجوع للإعدادات">→</button><b>📦 الأصناف</b><button type="button" class="ab" id="itStk" style="margin-inline-start:auto">🧱 المخزن</button></div>
   <div class="ro" id="itTop" style="gap:6px;margin:6px 0;flex-wrap:nowrap"><div class="seg s" style="flex:none" id="seg"><button data-it="rd">📦 جاهز</button><button data-it="mq" class="on">✂️ مقطع</button></div><span id="catBar" class="ro" style="gap:6px;flex:1;min-width:0;flex-wrap:nowrap"><select id="icat" class="catsel" aria-label="سعر فئة" style="flex:1;min-width:0;max-width:130px"></select><button class="lnk" id="catMgrBtn" style="flex:none;white-space:nowrap">🗂️ إدارة الفئات</button></span></div>
   <div id="catMgr" class="card hide"></div>
   <div class="card itadd"><b>➕ صنف جديد</b><div id="nform" class="it"></div></div>
@@ -457,15 +456,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 </div>
 <div class="stp hide" data-sp="stk" id="stkPanel"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🧱 المخزن</b></div>
 <div id="stkHome">
-<div class="card sktop"><div id="skSum"></div>
-  <div class="skact"><button type="button" class="main" data-sg="rcv">📥 وصلت بضاعة</button><button type="button" class="alt" data-sg="cnt">✍️ عدّ المخزن</button></div>
-  <div class="skmini"><button type="button" class="lnk" data-sg="ord">📋 محتاج أطلب إيه؟</button><button type="button" class="lnk" data-sg="mv">🕘 اللي دخل وخرج</button><button type="button" class="lnk" data-sg="wst">🗑 الهادر</button></div></div>
 <div class="card skstart hide" id="skStart"></div>
-<div class="ro" style="gap:6px;margin:0 0 6px"><input id="stkQ" type="search" placeholder="🔍 دوّر على صنف" autocomplete="off" aria-label="بحث في المخزن" style="flex:1;height:34px"></div>
-<div class="seg s" id="stkTy"></div>
+<div class="ro skq"><input id="stkQ" type="search" placeholder="🔍 دوّر على صنف" autocomplete="off" aria-label="بحث في المخزن"><div class="seg s" id="stkTy"></div></div>
 <div class="spc" id="stkFil"></div>
 <div id="stkRows"></div>
-<details class="card spdt"><summary>⚙️ نبّهني لما الصنف يقل</summary><label for="stkLim" style="margin-top:6px">نبّهني لما يفضل من الصنف (لأي صنف مالوش رقم خاص بيه)</label><input id="stkLim" inputmode="decimal" autocomplete="off"><label for="stkWmax" style="margin-top:6px">نبّهني لو هادر نوع في الشهر عدّى (%)</label><input id="stkWmax" inputmode="decimal" autocomplete="off"><div class="mute" style="margin-top:4px">القطع الجاهزة بتنقص لوحدها مع كل فاتورة. الألواح بتعدّها بإيدك من «✍️ عدّ المخزن». وكل صنف ممكن تحط له رقم تنبيه وسعر ومكان ومورد من صفحته.</div><div class="info" id="stkMsg" aria-live="polite"></div></details>
+<details class="card spdt"><summary>⚙️ التنبيهات</summary><label for="stkLim" style="margin-top:6px">⚠️ نبّهني لما يفضل من الصنف</label><input id="stkLim" inputmode="decimal" autocomplete="off"><input id="stkWmax" class="hide" aria-hidden="true" tabindex="-1"><div class="info" id="stkMsg" aria-live="polite"></div></details>
 </div>
 <div id="stkSub" class="hide"></div>
 </div>
@@ -584,19 +579,19 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <nav class="bottom-nav" id="bnav">
   <button data-t="new" class="on"><span class="nav-icon">🧾</span><span class="nav-label">فاتورة</span></button>
   <button data-t="dash"><span class="nav-icon">📒</span><span class="nav-label">سجل</span></button>
+  <button data-t="it"><span class="nav-icon">📦</span><span class="nav-label">الأصناف</span></button>
   <button data-t="sk"><span class="nav-icon">🧱</span><span class="nav-label">المخزن</span></button>
   <button data-t="cl" class="hide"><span class="nav-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" style="display:block;margin:0 auto" aria-hidden="true"><rect x="3" y="3" width="8" height="7" rx="1.2"/><rect x="13" y="3" width="8" height="11" rx="1.2"/><rect x="3" y="12" width="8" height="9" rx="1.2"/><rect x="13" y="16" width="8" height="5" rx="1.2"/></svg></span><span class="nav-label">CutList</span></button>
-  <button data-t="it" class="hide"><span class="nav-icon">📦</span><span class="nav-label">الأصناف</span></button>
   <button data-t="cu" class="hide"><span class="nav-icon">👥</span><span class="nav-label">العملاء</span></button>
 </nav>
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=390"></script>
-<script src="js/qr.js?v=390"></script>
+<script src="js/app.js?v=391"></script>
+<script src="js/qr.js?v=391"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=390"></script>
-<script src="js/features.js?v=390"></script>
+<script src="js/cutlist.js?v=391"></script>
+<script src="js/features.js?v=391"></script>
 </body>
 </html>
 
