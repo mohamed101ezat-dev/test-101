@@ -284,13 +284,13 @@ function custInput(){drawRecent();xSync();const name=$('cust').value.trim(),c=fi
   else if(!c&&lastC){$('prev').value='';$('phone').value=''}
   const nc=custCat(c);if(nc!==invCat){const had=[...$('rows').children].some(d=>!rowBlank(d));invCat=nc;if(had)toast('الفئة اتغيرت لـ '+catName(nc)+': الأسعار اللي في الفاتورة لسه زي ما هي')}
   lastC=c;
-  $('saveNewC').classList.toggle('hide',!(!c&&name));
+  const cTyping=document.activeElement===$('cust');$('saveNewC').classList.toggle('hide',!(!c&&name)||cTyping);
   {const sb=$('siteC'),ss=c&&c.sites||[];sb.innerHTML=ss.map((s,i)=>'<button type="button" class="alt b-cu" data-site="'+i+'">📍 '+esc(s)+'</button>').join('');sb.classList.toggle('hide',!ss.length)}
   /* آخر فاتورة للعميل + آخر سعر اتباع بيه لكل صنف */
   {const iv=c?S.invoices.filter(r=>r.cid===c.id&&r.type==='inv').sort((a,b)=>b.ts-a.ts):[];repR=iv[0]||null;lpMap=new Map();iv.slice().reverse().forEach(r=>(r.rows||[]).forEach(x=>{if(!x.rt&&x.n&&+x.p>0)lpMap.set(nkey(x.n),+x.p)}))}
-  $('phoneBox').classList.toggle('hide',!!c||!name);$('prev').readOnly=!!c;if((c&&balOf(c)!==0)||(!c&&name))$('r_prev').classList.remove('hide');else if(!nv($('prev').value))$('r_prev').classList.add('hide');
+  $('phoneBox').classList.toggle('hide',!!c||!name||cTyping);$('prev').readOnly=!!c;if((c&&balOf(c)!==0)||(!c&&name))$('r_prev').classList.remove('hide');else if(!nv($('prev').value))$('r_prev').classList.add('hide');
   drawQS();$('cinfo').textContent=c?(c.name!==name?'هيتسجل على: '+c.name+' · ':'')+`كود ${nextCode()} · إذن ${nextNo(c)} · ${catName(invCat)} · حسابه ${bal(c)}`:name?'عميل جديد: لو عليه حساب قديم يتكتب في (رصيد سابق)':'';calc()}
-$('cust').addEventListener('input',custInput);
+$('cust').addEventListener('input',custInput);$('cust').addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==$('cust'))custInput()},120));
 /* إضافة عميل: جهات الاتصال (لو المتصفح بيدعمها) + تنبيه لو الاسم موجود */
 if('contacts' in navigator&&'ContactsManager' in window)$('pickC').classList.remove('hide');
 /* جهة اتصال: بياخد كل أرقامها (من غير تكرار نفس الرقم بصيغتين)، والأول هو الأساسي للواتساب والتذكير */

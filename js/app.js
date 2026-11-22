@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='393';
+const APP_VER='394';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1221,13 +1221,13 @@ function custInput(){drawRecent();xSync();const name=$('cust').value.trim(),c=fi
   else if(!c&&lastC){$('prev').value='';$('phone').value=''}
   const nc=custCat(c);if(nc!==invCat){const had=[...$('rows').children].some(d=>!rowBlank(d));invCat=nc;if(had)toast('الفئة اتغيرت لـ '+catName(nc)+': الأسعار اللي في الفاتورة لسه زي ما هي')}
   lastC=c;
-  $('saveNewC').classList.toggle('hide',!(!c&&name));
+  const cTyping=document.activeElement===$('cust');$('saveNewC').classList.toggle('hide',!(!c&&name)||cTyping);
   {const sb=$('siteC'),ss=c&&c.sites||[];sb.innerHTML=ss.map((s,i)=>'<button type="button" class="alt b-cu" data-site="'+i+'">📍 '+esc(s)+'</button>').join('');sb.classList.toggle('hide',!ss.length)}
   /* آخر فاتورة للعميل + آخر سعر اتباع بيه لكل صنف */
   {const iv=c?S.invoices.filter(r=>r.cid===c.id&&r.type==='inv').sort((a,b)=>b.ts-a.ts):[];repR=iv[0]||null;lpMap=new Map();iv.slice().reverse().forEach(r=>(r.rows||[]).forEach(x=>{if(!x.rt&&x.n&&+x.p>0)lpMap.set(nkey(x.n),+x.p)}))}
-  $('phoneBox').classList.toggle('hide',!!c||!name);$('prev').readOnly=!!c;if((c&&balOf(c)!==0)||(!c&&name))$('r_prev').classList.remove('hide');else if(!nv($('prev').value))$('r_prev').classList.add('hide');
+  $('phoneBox').classList.toggle('hide',!!c||!name||cTyping);$('prev').readOnly=!!c;if((c&&balOf(c)!==0)||(!c&&name))$('r_prev').classList.remove('hide');else if(!nv($('prev').value))$('r_prev').classList.add('hide');
   drawQS();$('cinfo').textContent=c?(c.name!==name?'هيتسجل على: '+c.name+' · ':'')+`كود ${nextCode()} · إذن ${nextNo(c)} · ${catName(invCat)} · حسابه ${bal(c)}`:name?'عميل جديد: لو عليه حساب قديم يتكتب في (رصيد سابق)':'';calc()}
-$('cust').addEventListener('input',custInput);
+$('cust').addEventListener('input',custInput);$('cust').addEventListener('blur',()=>setTimeout(()=>{if(document.activeElement!==$('cust'))custInput()},120));
 /* إضافة عميل: جهات الاتصال (لو المتصفح بيدعمها) + تنبيه لو الاسم موجود */
 if('contacts' in navigator&&'ContactsManager' in window)$('pickC').classList.remove('hide');
 /* جهة اتصال: بياخد كل أرقامها (من غير تكرار نفس الرقم بصيغتين)، والأول هو الأساسي للواتساب والتذكير */
@@ -2557,7 +2557,7 @@ function drawDash(){startUI();drawHero();drawTopDebt();
     if(!flat&&k!==last){last=k;h+=`<div class="hday"><span>${dayLabel(r.ts)}</span><span class="num">${pm?'':'مبيعات '+f(T[k].s)+' · '}مدفوع ${f(T[k].p)}</span>${pget('dayCl',true)?`<button class="lnk" data-dc="${r.ts}" style="padding:1px 9px;font-size:calc(var(--fs) - 1px)">${clLocked(r)?'🔒 ':''}🧾 إقفال</button>`:''}</div>`}
     h+=`<div class="hrow" data-h="${r.id}"><div class="hl"><b>${esc(r.cname)}${ordTag(r)}</b><span class="mute">${(r.type==='pay'?'دفعة'+(r.code?' '+r.code:''):'فاتورة '+(r.code||'#'+r.no))+(hasRet(r)&&r.rcode?' ↩'+r.rcode:'')} · ${flat?dshort(r.ts)+' ':''}${hm(r.ts)}${r.by?' · 👷 '+esc(r.by):''}${pm&&r.pfWhy?' · '+esc(r.pfWhy):''}</span></div><div class="hr">${r.type==='pay'?`<b class="num">${f(r.amount)}</b><span class="tag ok">دفعة</span>`:pm?`<b class="num">${f(r.paid)}</b><span class="mute num">من ${f(val(r))}</span>`:`<b class="num">${f(val(r))}</b>${(()=>{const due=rd2(val(r)-r.paid);return pureRet(r)?`<span class="tag rt">↩ مرتجع</span>`:due>0?`<span class="tag dr">متبقي ${f(due)}</span>`+hWa(r):`<span class="tag ok">مدفوعة</span>`})()}`}</div></div>`});
   if(!win&&l.length>hLim)h+=`<button class="lnk" data-more="1">عرض المزيد (${l.length-hLim})</button>`;
-  if(win){let pv=0;S.invoices.forEach(r=>{if(r.ts<from&&r.ts>pv)pv=r.ts});if(!l.length&&S.invoices.length)h='<p class="mute">مفيش معاملات في '+(moW===1?'الأسبوع ده':'الفترة دي')+'</p>';
+  if(win){let pv=0;S.invoices.forEach(r=>{if(r.ts<from&&r.ts>pv)pv=r.ts});if(!l.length&&pv&&!$('hq').value.trim()&&!drawDash._x){hMo=moW+Math.round((from-wkOf(pv))/(7*864e5));drawDash._x=1;try{drawDash()}finally{drawDash._x=0}return}if(!l.length&&S.invoices.length)h='<p class="mute">مفيش معاملات في '+(moW===1?'الأسبوع ده':'الفترة دي')+'</p>';
     if(pv){const ws=wkOf(pv),we=new Date(ws);we.setDate(we.getDate()+6);const mo=moW+Math.round((from-ws)/(7*864e5));const wl=S.invoices.filter(r=>r.ts>=ws&&r.ts<ws+7*864e5),yr=new Date().getFullYear(),dm=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)+(d.getFullYear()!==yr?'/'+d.getFullYear():'')};h+=`<button class="lnk" data-mo="${mo}" style="width:100%;margin-top:6px;flex-direction:column;gap:2px"><span>⬇ المزيد: أسبوع ${dm(ws)} ← ${dm(we.getTime())}</span><small style="font-weight:500">${plN(wl.length,'معاملة')} · مبيعات ${f(wl.reduce((a,r)=>a+val(r),0))} · مدفوع ${f(wl.reduce((a,r)=>a+pd(r),0))}</small></button>`}}
   $('hList').innerHTML=h||(S.invoices.length?'<p class="mute">مفيش نتايج للبحث ده. جرّب كلمة تانية أو امسح البحث.</p>':'<p class="mute">لسه مفيش معاملات. أول فاتورة هتظهر هنا.</p>');drawDebt();try{remDraw()}catch(e){}}
 $('hq').oninput=()=>{hLim=30;drawDash()};
@@ -3103,7 +3103,7 @@ lockInit();loadMsgUI();loadLogo();paperLabels();fixBar();document.body.classList
   if(!fbCfg()){reflowAll();syncNames()}drawDash();drawCusts();drawItems();calc();bkInfo();applyFeatures();drawTrash();drawRecent();qtBtn();try{draftBoot()}catch(e){logErr(e,'draftBoot')}
   try{$('skBody').append($('t-it'),$('stkPanel'),document.querySelector('.stp[data-sp="sup"]'))}catch(e){}window.__bootOK=true;applyBiz();bellUI();startUI();try{const lt=sessionStorage.getItem('lastTab');if(lt&&lt!==curTab){const bt=lt==='st'?$('hdrSet'):lt==='cu'?$('hdrCu'):lt==='cl'?$('hdrCl'):document.querySelector('#bnav button[data-t="'+lt+'"]');if(bt&&!bt.closest('.hide')&&!bt.classList.contains('hide'))bt.click()}}catch(e){}fbBoot();cloudUI();welcMaybe();setTimeout(nfDaily,1800);nfBoot();setTimeout(storCheck,2500);setTimeout(cloudNag,6000);if(migNote)setTimeout(()=>toast(migNote),700)})();
 /* ---------- زرار الرجوع في الموبايل ---------- */
-const OVS=['res','rem','remL','bulk','calcModal','clOv','pinOv','qtOv','dzOv'],OVX={dzOv:'dzX',res:'resx',rem:'remX',remL:'remLX',bulk:'bulkX',calcModal:'calcClose',clOv:'clX',pinOv:'pinNo',qtOv:'qtX'};
+const OVS=['res','rem','remL','bulk','calcModal','clOv','pinOv','qtOv','dzOv','nfOv','tfOv','delOv','shopOv'],OVX={nfOv:'nfX',tfOv:'tfX',delOv:'delNo',shopOv:'shopAskNo',dzOv:'dzX',res:'resx',rem:'remX',remL:'remLX',bulk:'bulkX',calcModal:'calcClose',clOv:'clX',pinOv:'pinNo',qtOv:'qtX'};
 let NS=[],navIgnore=false,exitArm=false,exitT=0,navOK=false;
 const wantNav=()=>{const w=tabHist.map((t,i)=>'t'+i+':'+t);if(curTab==='cu'&&selC&&getC(selC))w.push('cu');if(curTab==='dash'&&dbMode){w.push('db');if(dbSel&&getC(dbSel))w.push('dbs')}if(curTab==='st'&&stCur)w.push('sp');if(curTab==='dash'&&infoMode&&!dbMode)w.push('info');if(curTab==='sk'){skHist.forEach((s,i)=>w.push('k'+i+':'+s));if(skCur==='stk'&&stkV!=='home')w.push('sv');if(skCur==='sup'&&supCur)w.push('su')}OVS.forEach(id=>{const e=$(id);if(e&&!e.classList.contains('hide'))w.push('o:'+id)});return w};
 function syncNav(){if(!navOK||navIgnore)return;const w=wantNav();let p=0;while(p<NS.length&&p<w.length&&NS[p]===w[p])p++;
