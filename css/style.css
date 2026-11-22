@@ -1905,3 +1905,7 @@ html[data-theme="dark"] #supOne #spList .spq{color:#f87171}html[data-theme="dark
 #t-sk #supHome .spk{grid-template-columns:repeat(3,minmax(0,1fr))}
 #t-sk #supHome .spk>div:first-child{display:none}
 html[data-theme="dark"] #t-sk .skk .lw b{color:#fbbf24}
+/* v392: تابات المخزن فوق */
+#t-sk .skmain{position:sticky;top:0;z-index:6;margin:0 0 6px;background:var(--bg,#f3f6f5);padding:2px 0}
+#t-sk .skmain button{font-size:12.5px;padding:0 4px;white-space:nowrap}
+#t-sk .skseg{top:40px}
