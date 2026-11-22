@@ -1970,3 +1970,51 @@ html[data-theme="dark"] #t-sk .skk .lw b{color:#fbbf24}
 html[data-theme="dark"] #pu .dn,html[data-theme="dark"] #pu .pud.red,html[data-theme="dark"] #pu .pubad{color:#f87171!important}
 html[data-theme="dark"] #pu .ok,html[data-theme="dark"] #pu .puok{color:#4ade80!important}
 #pu .puhd span{white-space:nowrap;overflow:hidden;font-size:10px}
+/* v396: 🧱 المخزن + 📋 الجرد */
+:is(#sk2,#jd) .card{padding:6px 8px;margin-bottom:6px}
+:is(#sk2,#jd) .dn{color:var(--danger)!important}:is(#sk2,#jd) .ok{color:#15803d!important}
+#sk2 .s2k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:6px}
+#sk2 .s2k>div{display:flex;flex-direction:column;align-items:center;padding:5px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+#sk2 .s2k small{font-size:10.5px;color:var(--mute);white-space:nowrap}#sk2 .s2k b{font-size:15px;color:var(--ink)}#sk2 .s2k .lw b{color:#b45309}
+#sk2 .s2bar{display:flex;gap:5px;margin-bottom:6px}
+#sk2 .s2bar input{flex:1;min-width:0;height:34px;margin:0}
+#sk2 .s2bar button{flex:none;height:34px;min-height:34px;padding:0 10px;font-size:13px;margin:0;white-space:nowrap}
+#sk2 .s2hint,#jd .s2hint{font-size:12.5px;line-height:1.6}
+#sk2 .s2r{display:flex;align-items:baseline;gap:6px;padding:7px 10px;margin-bottom:4px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
+#sk2 .s2r.lw{background:rgba(251,146,60,.14);border-color:rgba(251,146,60,.5)}
+#sk2 .s2r.off{opacity:.65}
+#sk2 .s2n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);font-size:14px}
+#sk2 .s2m{flex:none;font-size:15px;color:var(--ink)}
+#sk2 .s2s{flex:none;font-size:11px;color:var(--mute);min-width:56px;text-align:end}
+#sk2 .s2sub{font-size:12px;margin-top:4px}
+#sk2 .puh,#jd .puh{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#sk2 .puh .lnk,#jd .puh .lnk{flex:none;font-size:16px;padding:0 4px}
+#sk2 .puh .pun{flex:1;min-width:0;font-size:15px}
+#sk2 .pub b{font-size:17px}
+:is(#sk2,#jd) .purw{display:flex;align-items:center;gap:5px;margin-top:6px}
+:is(#sk2,#jd) .purw>span{flex:1;font-size:13px}
+:is(#sk2,#jd) .purw>input{flex:0 0 90px;height:32px;min-height:32px;text-align:center;margin:0}
+:is(#sk2,#jd) .purw>button{flex:1;height:34px;min-height:34px;margin:0}
+:is(#sk2,#jd) .pul,#jd .jdtb{font-size:12px}
+:is(#sk2,#jd) table.xl{margin:0;font-size:12px}
+:is(#sk2,#jd) table.xl td,:is(#sk2,#jd) table.xl th{padding:3px}
+:is(#sk2,#jd) table.xl th{font-size:10.5px;font-weight:500;color:var(--mute)}
+:is(#sk2,#jd) td.tn{max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:is(#sk2,#jd) td.tn small{display:block;font-size:10px;overflow:hidden;text-overflow:ellipsis}
+#jd .puact{display:flex;margin-bottom:6px}#jd .puact>.main{flex:1;height:36px;min-height:36px;margin:0}
+#jd .pudl{font-size:12px;padding:3px 8px;border-radius:8px;background:var(--accLight);margin:0 0 6px}
+#jd .purow{display:flex;align-items:center;gap:6px;padding:6px 10px;margin-bottom:4px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
+#jd .purow .pun{flex:1;min-width:0;color:var(--ink);font-size:13px}
+#jd .puh small{flex-basis:100%;font-size:11px}
+#jd .jdt{padding:5px 8px}
+#jd .jdh{display:flex;align-items:baseline;gap:6px;justify-content:space-between}
+#jd .jdh b{font-size:14px;color:var(--ink)}#jd .jdx{font-size:12px;text-align:end}
+#jd .jdz{display:flex;align-items:center;gap:6px;margin-top:4px}
+#jd .jdz>span{flex:1;font-size:13px;color:var(--ink)}
+#jd .jdz .jdc{flex:0 0 70px;height:32px;min-height:32px;text-align:center;font-size:15px;margin:0}
+#jd .jdz small{flex:none;font-size:11px}
+#jd .jdadd{font-size:12px;padding:2px 0;margin-top:2px}
+#jd .jdnz{display:flex;gap:5px;margin-top:4px}#jd .jdnz[hidden]{display:none}
+#jd .jdnz input{flex:1;min-width:0;height:30px;min-height:30px;text-align:center;margin:0;font-size:13px}
+#jd .jdnz button{flex:none;height:30px;min-height:30px;padding:0 10px;margin:0}
+html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-theme="dark"] :is(#sk2,#jd) .ok{color:#4ade80!important}

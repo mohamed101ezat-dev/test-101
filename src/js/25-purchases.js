@@ -20,9 +20,9 @@ const puTs=(v,old)=>{if(!v)return old||Date.now();if(old&&puDate(old)===v)return
 const puDM=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)};
 const puSupOpts=sel=>'<option value="">اختار المورد</option>'+S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(s=>`<option value="${esc(s.id)}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
 const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${esc(h)}</button>`).join('');
-function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0)}
+function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
-function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}}
+function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
 
 function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else{puV='home';b.innerHTML=puHomeH()}}
 
@@ -78,7 +78,7 @@ function puSaveInv(){const e=puE,m=$('puMsg'),s=puSup(e.sid);if(!s){m.textConten
   Object.assign(x,{sid:s.id,ts,type:'buy',amt:e.ret?-tot:tot,ln:L,note:e.note.trim()});if(e.ref.trim())x.ref=e.ref.trim();else delete x.ref;if(e.ret)x.ret=1;else delete x.ret;if(paper>0)x.paper=paper;else delete x.paper;put('purchases',x);
   const pd=e.ret?0:rd2(nv(e.paid));let pp=S.purchases.find(y=>y.pf===x.id&&y.type==='pay');
   if(pd>0){if(!pp){pp={id:uid(),pf:x.id};S.purchases.push(pp)}Object.assign(pp,{sid:s.id,ts:ts+1,type:'pay',amt:pd,how:e.how||'كاش',note:'مع فاتورة الشراء'});put('purchases',pp)}else if(pp)del('purchases',pp.id);
-  const was=e.id;puSid=s.id;puE=null;{const tp=puStack[puStack.length-1];if(tp&&tp[0]==='sup')puStack.pop()}puV='sup';puDraw();window.scrollTo(0,0);toast((was?'✅ اتعدّلت ':'✅ اتسجّلت ')+(x.ret?'المرتجع':'الفاتورة')+' · '+f(tot)+(pd>0?' · دفعت '+f(pd):'')+' · عليك '+f(puBal(s.id)))}
+  const was=e.id;puSid=s.id;puE=null;{const tp=puStack[puStack.length-1];if(tp&&tp[0]==='sup')puStack.pop()}puV='sup';puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}toast((was?'✅ اتعدّلت ':'✅ اتسجّلت ')+(x.ret?'المرتجع':'الفاتورة')+' · '+f(tot)+(pd>0?' · دفعت '+f(pd):'')+' · عليك '+f(puBal(s.id)))}
 
 /* ---- دفعة للمورد ---- */
 function puNewPay(sid,x){puP=x?{id:x.id,sid:x.sid,amt:String(x.amt),how:x.how||'كاش',date:puDate(x.ts),note:x.note||'',ts:x.ts,buy:x.type!=='pay'}:{id:null,sid:sid||'',amt:'',how:'كاش',date:puDate(Date.now()),note:'',ts:0};puGo('pay')}
@@ -92,7 +92,7 @@ function puPayH(){const p=puP,b=p.sid?puBal(p.sid):0;
 function puSavePay(){const p=puP,m=$('puMsg'),s=puSup(p.sid),a=rd2(nv(p.amt));if(!s){m.textContent='اختار المورد';return}if(!(a>0)){m.textContent='اكتب المبلغ';return}
   let x=p.id&&S.purchases.find(y=>y.id===p.id);if(!x){x={id:uid(),type:'pay'};S.purchases.push(x)}
   Object.assign(x,{sid:s.id,ts:puTs(p.date,p.ts),amt:a,note:p.note.trim()});if(x.type==='pay')x.how=p.how||'كاش';put('purchases',x);
-  puSid=s.id;puP=null;{const tp=puStack[puStack.length-1];if(tp&&tp[0]==='sup')puStack.pop()}puV='sup';puDraw();window.scrollTo(0,0);toast('✅ اتسجّل · عليك '+f(puBal(s.id)))}
+  puSid=s.id;puP=null;{const tp=puStack[puStack.length-1];if(tp&&tp[0]==='sup')puStack.pop()}puV='sup';puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}toast('✅ اتسجّل · عليك '+f(puBal(s.id)))}
 
 /* ---- الأحداث ---- */
 $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],[data-puinv],[data-pue]');

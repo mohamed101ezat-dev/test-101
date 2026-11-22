@@ -38,7 +38,7 @@ $('skTop').onclick=e=>{const b=e.target.closest('[data-sg],[data-skt2]');if(!b)r
   if(b.dataset.skt2){const k=b.dataset.skt2;if(k!==skCur){skHist.push(skCur);skCur=k;skShow()}window.scrollTo(0,0);return}
   if(skCur!=='stk'){skHist.push(skCur);skCur='stk';skShow()}stkV=b.dataset.sg;stkAct=null;drawStk();window.scrollTo(0,0)};
 /* v392: تابات المخزن فوق: الأصناف (النظام الحالي) · المخزن · المشتريات · الجرد (هنبنيهم واحدة واحدة) */
-function skMainUI(){document.querySelectorAll('#skMain [data-skm]').forEach(x=>x.classList.toggle('on',x.dataset.skm===skM));$('skOld').classList.toggle('hide',skM!=='it');$('skNew').classList.toggle('hide',skM==='it'||skM==='buy');$('pu').classList.toggle('hide',skM!=='buy');if(skM==='buy')try{puDraw()}catch(e){}}
+function skMainUI(){document.querySelectorAll('#skMain [data-skm]').forEach(x=>x.classList.toggle('on',x.dataset.skm===skM));$('skOld').classList.toggle('hide',skM!=='it');$('skNew').classList.add('hide');$('pu').classList.toggle('hide',skM!=='buy');$('sk2').classList.toggle('hide',skM!=='stk');$('jd').classList.toggle('hide',skM!=='cnt');try{if(skM==='buy')puDraw();else if(skM==='stk')s2Draw();else if(skM==='cnt')jdDraw()}catch(e){}}
 $('skMain').onclick=e=>{const b=e.target.closest('[data-skm]');if(!b||b.dataset.skm===skM)return;skHist.push('m:'+skM);skM=b.dataset.skm;skMainUI();if(skM==='it')skShow();window.scrollTo(0,0)};
 $('skSeg').onclick=e=>{const b=e.target.closest('[data-skt]');if(!b)return;if(b.dataset.skt!==skCur)skHist.push(skCur);skCur=b.dataset.skt;skShow();window.scrollTo(0,0)};
 /* العملاء والأصناف بقوا جوه الإعدادات: زرار الإعدادات يفضل متعلّم وانت فيهم */
