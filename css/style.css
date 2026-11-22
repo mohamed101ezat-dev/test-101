@@ -1836,3 +1836,7 @@ html[data-theme][data-pal] #rcRows .row:nth-child(even){background:color-mix(in 
 #t-sk .stp .skr .skb{grid-column:3}
 #t-sk .stp .skr{padding:5px 10px;margin-bottom:3px;border-radius:9px}
 #t-sk .stp .skr .skn small{font-size:11px}
+
+/* v383: أدوات الأسعار لوحة صغيرة بتفتح من 🧮 */
+#itTool{padding:6px 8px;margin:0 0 6px}#itTool .itr{gap:6px;margin:0 0 5px;flex-wrap:nowrap;align-items:center}#itTool .itr:last-of-type{margin:0}#itTool span{flex:none;font-size:13px}#itTool input{width:56px;flex:none;height:32px;margin:0;text-align:center}#itTool select{width:auto;flex:none;height:32px;margin:0}#itTool .alt{flex:none;height:32px;min-height:32px;padding:0 10px;margin:0}#itToolB{height:36px;padding:0 10px}#itToolB.on{background:var(--acc);color:#fff}
+#itTool .itr{justify-content:flex-start}

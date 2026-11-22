@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='382';
+const APP_VER='383';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -891,9 +891,10 @@ function itemsList(){const q=$('iq').value.trim(),u=curIT==='mq'?usageCat(itCat)
   l.sort($('isort').value==='name'?(a,b)=>a.name.localeCompare(b.name,'ar'):(a,b)=>(u[b.id]||0)-(u[a.id]||0)||a.name.localeCompare(b.name,'ar'));return l}
 $('iq').oninput=drawItemList;$('isort').onchange=drawItemList;
 /* v342: زيادة/نقص الأسعار على المحدد (لو فيه تعليم) أو على كل الظاهر */
-function itBulk(dir,ev){const p=nv($('itPct').value),m=$('itToolMsg');if(!(p>0)||p>=100&&dir<0){m.textContent='اكتب النسبة (مثلًا 10)';return}
+function itBulk(dir,ev){const p=nv($('itPct').value),m=$('itToolMsg'),pc=$('itUnit').value==='p';if(!(p>0)||pc&&p>=100&&dir<0){m.textContent=pc?'اكتب النسبة (مثلًا 10)':'اكتب المبلغ (مثلًا 10)';return}
   const sel=itSelOn&&itSel.size?itemsList().filter(x=>itSel.has(x.id)):null,l=sel||itemsList();if(!l.length){m.textContent='مفيش أصناف';return}
-  const b=ev&&ev.currentTarget;if(b&&!ok2(b))return;let n=0;l.forEach(it=>{const o=priceOf(it,itCat)||0;if(!(o>0))return;setPrice(it,itCat,Math.round(o*(1+dir*p/100)));put('items',it);n++});drawItemList();m.textContent='✓ اتغيّر سعر '+n+' صنف '+(dir>0?'بزيادة':'بنقص')+' '+p+'%'+(sel?' (المعلّمين)':' (كل الظاهرين)')}
+  const b=ev&&ev.currentTarget;if(b&&!ok2(b))return;let n=0;l.forEach(it=>{const o=priceOf(it,itCat)||0;if(!(o>0))return;setPrice(it,itCat,Math.max(0,Math.round(pc?o*(1+dir*p/100):o+dir*p)));put('items',it);n++});drawItemList();m.textContent='✓ اتغيّر سعر '+n+' صنف '+(dir>0?'بزيادة':'بنقص')+' '+p+(pc?'%':' ج')+(sel?' (المعلّمين)':' (كل الظاهرين)')}
+$('itToolB').onclick=()=>{const t=$('itTool');t.classList.toggle('hide');$('itToolB').classList.toggle('on',!t.classList.contains('hide'));if(!t.classList.contains('hide'))$('itPct').focus()};
 $('itUp').onclick=e=>itBulk(1,e);$('itDn').onclick=e=>itBulk(-1,e);
 $('itSelB').onclick=()=>{itSelOn=!itSelOn;if(!itSelOn)itSel.clear();$('itSelB').classList.toggle('on',itSelOn);$('itSelB').textContent=itSelOn?'✖ إلغاء التحديد':'☑️ حدّد أصناف';drawItems()};
 $('itSelAll').onclick=()=>{itSelOn=true;itemsList().forEach(x=>itSel.add(x.id));$('itSelB').textContent='✖ إلغاء التحديد';drawItems()};

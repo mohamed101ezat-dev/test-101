@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=382">
+<link rel="stylesheet" href="css/style.css?v=383">
 
 
 
@@ -270,15 +270,9 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="ro" id="catBar" style="gap:6px;margin:6px 0"><span class="mute">سعر فئة:</span><select id="icat" class="catsel" style="max-width:150px"></select><button class="lnk" id="catMgrBtn" style="flex:none">🗂️ إدارة الفئات</button></div>
   <div id="catMgr" class="card hide"></div>
   <div class="card itadd"><b>➕ صنف جديد</b><div id="nform" class="it"></div></div>
-  <details class="card itool"><summary>🧮 أدوات الأسعار (زيادة الأسعار · أسعار الشراء)</summary>
-    <div class="mute" style="font-size:12px;margin:4px 0">لصنف واحد: دوس «±» جنب الصنف. لأكتر من صنف: «☑️ حدّد أصناف» وعلّم عليهم. ولو ما علّمتش حاجة، بتشتغل على كل الأصناف الظاهرة (حسب النوع والفئة والبحث).</div>
-    <div class="ro" style="gap:6px"><button type="button" class="alt" id="itSelB" style="flex:none">☑️ حدّد أصناف</button><button type="button" class="alt" id="itSelAll" style="flex:none">☑️ الكل</button><span class="mute" id="itSelN" style="font-size:12px"></span></div>
-    <div class="ro" style="gap:6px;flex-wrap:wrap"><span style="flex:none">غيّر أسعار البيع</span><input id="itPct" inputmode="decimal" placeholder="10" style="width:64px;flex:none"><span style="flex:none">%</span><button type="button" class="alt" id="itUp" style="flex:none">⬆ زوّد</button><button type="button" class="alt" id="itDn" style="flex:none">⬇ قلّل</button></div>
-    <div class="ro" style="gap:6px;flex-wrap:wrap;margin-top:6px"><span style="flex:none">سعر الشراء الفاضي =</span><input id="itCpPct" inputmode="decimal" placeholder="70" style="width:64px;flex:none"><span style="flex:none">% من البيع</span><button type="button" class="alt" id="itCpGo" style="flex:none">املاه</button></div>
-    <div class="mute" style="font-size:12px;margin-top:4px">سعر الشراء هو اللي بيخلّي البرنامج يحسب ربحك الحقيقي. الأحسن تكتبه بإيدك لكل صنف، والنسبة دي للبداية بس.</div>
-    <div class="info" id="itToolMsg"></div></details>
   <div class="mute" id="itHint" style="font-size:12px;margin:2px 0"></div>
-  <div class="rowc"><input id="iq" placeholder="ابحث في الأصناف" style="flex:1"><select id="isort" style="width:auto;flex:none"><option value="use">الأكثر استخداماً</option><option value="name">بالاسم</option></select></div>
+  <div class="rowc"><input id="iq" placeholder="🔍 ابحث في الأصناف" style="flex:1"><select id="isort" style="width:auto;flex:none"><option value="use">🔥 الأكثر</option><option value="name">🔤 بالاسم</option></select><button type="button" class="alt" id="itToolB" aria-label="أدوات الأسعار" title="أدوات الأسعار" style="flex:none">🧮</button></div>
+  <div class="card itool hide" id="itTool"><div class="ro itr"><span>💰 البيع</span><input id="itPct" inputmode="decimal" placeholder="10" aria-label="المقدار"><select id="itUnit" aria-label="الوحدة"><option value="a">ج</option><option value="p">%</option></select><button type="button" class="alt" id="itUp">⬆️</button><button type="button" class="alt" id="itDn">⬇️</button></div><div class="ro itr"><button type="button" class="alt" id="itSelB">☑️ حدّد</button><button type="button" class="alt" id="itSelAll">☑️ الكل</button><span class="mute" id="itSelN"></span></div><div class="ro itr"><span>🛒 الشراء الفاضي</span><input id="itCpPct" inputmode="decimal" placeholder="70" aria-label="نسبة الشراء"><span>% من البيع</span><button type="button" class="alt" id="itCpGo">املاه</button></div><div class="info" id="itToolMsg"></div></div>
   <div id="ihead" class="mute"></div><div id="items" style="margin-top:4px"></div>
 </section>
 
@@ -601,11 +595,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=382"></script>
-<script src="js/qr.js?v=382"></script>
+<script src="js/app.js?v=383"></script>
+<script src="js/qr.js?v=383"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=382"></script>
-<script src="js/features.js?v=382"></script>
+<script src="js/cutlist.js?v=383"></script>
+<script src="js/features.js?v=383"></script>
 </body>
 </html>
 
