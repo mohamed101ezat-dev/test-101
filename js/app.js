@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='400';
+const APP_VER='401';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3330,9 +3330,10 @@ function jdGo(v){jdV=v;jdDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 /* ---- صفحة المخزن: ليستة الأنواع بس، كل واحد بياناته واضحة وتدوس عليه تعدّله ---- */
 function s2Draw(){const b=$('sk2');if(!b)return;const R=s2Calc();if(s2V==='one'&&R.get(s2Id)){b.innerHTML=s2OneH(R.get(s2Id));return}s2V='home';
   const A=[...R.values()].sort((a,b)=>(b.tr-a.tr)||a.t.name.localeCompare(b.t.name,'ar'));
-  b.innerHTML=A.length?A.map(o=>{const t=o.t,cpm=s2Cpm(t),lw=o.tr&&s2Mn(t)>0&&o.bal<=s2Mn(t),ng=o.tr&&o.bal<0;
-    return`<div class="s2r${lw?' lw':''}" data-s2one="${esc(t.id)}" role="button" tabindex="0"><div class="s2t"><span class="s2n">${lw?'⚠️ ':''}${esc(t.name)}</span>${o.tr?`<b class="s2m num${ng?' dn':''}">${fq(o.bal)} م²</b>`:'<b class="s2m s2no">لسه ما اتعدّش</b>'}</div>
-      ${o.tr?`<div class="s2d"><span>≈ ${fq(s2Sh(Math.max(0,o.bal),o.ref))} لوح</span>${cpm?`<span>💰 ${f(Math.round(cpm))} للمتر</span><span>قيمته ${f(Math.round(Math.max(0,o.bal)*cpm))}</span>`:'<span>من غير سعر</span>'}${s2Mn(t)>0?`<span>⚠️ تحت ${fq(s2Mn(t))}</span>`:''}</div>`:`<div class="s2d"><span>دوس وسجّل رصيده</span></div>`}</div>`}).join(''):'<div class="card mute">مفيش أنواع. الأنواع بتتضاف من الأصناف (مقطع) أو من فاتورة شراء.</div>'}
+  const rows=A.map(o=>{const t=o.t,cpm=s2Cpm(t),lw=o.tr&&s2Mn(t)>0&&o.bal<=s2Mn(t),ng=o.tr&&o.bal<0,v=o.tr&&cpm?Math.round(Math.max(0,o.bal)*cpm):0;
+    return`<div class="s2r${lw?' lw':''}" data-s2one="${esc(t.id)}" role="button" tabindex="0"><span class="s2n">${lw?'⚠️ ':''}${esc(t.name)}</span><span class="num${ng?' dn':''}">${o.tr?fq(o.bal):'—'}</span><span class="num">${o.tr?fq(s2Sh(Math.max(0,o.bal),o.ref)):'—'}</span><span class="num">${cpm?f(Math.round(cpm)):'—'}</span><span class="num">${v?f(v):'—'}</span></div>`}).join('');
+  const tv=A.reduce((a,o)=>a+(o.tr&&s2Cpm(o.t)?Math.max(0,o.bal)*s2Cpm(o.t):0),0);
+  b.innerHTML=A.length?`<div class="s2hd"><span>النوع</span><span>م²</span><span>لوح</span><span>سعر م</span><span>القيمة</span></div>${rows}<div class="s2r s2ft"><span class="s2n">الإجمالي</span><span class="num">${fq(rd2(A.reduce((a,o)=>a+(o.tr?Math.max(0,o.bal):0),0)))}</span><span></span><span></span><span class="num">${f(Math.round(tv))}</span></div>`:'<div class="card mute">مفيش أنواع. الأنواع بتتضاف من الأصناف (مقطع) أو من فاتورة شراء.</div>'}
 /* ---- صفحة النوع: كلها قابلة للتعديل ---- */
 function s2OneH(o){const t=o.t,ev=o.ev.slice().reverse().slice(0,60),cpm=s2Cpm(t);
   return`<div class="card s2one"><div class="puh"><button type="button" class="lnk" data-s2="back" aria-label="رجوع">→</button><b class="pun">${esc(t.name)}</b><span class="pub"><b class="num${o.bal<0?' dn':''}">${o.tr?fq(o.bal)+' م²':'—'}</b></span></div>

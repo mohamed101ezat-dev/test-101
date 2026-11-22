@@ -2062,3 +2062,10 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #jd .jdz input{height:32px;font-size:14px;padding:0}
 #jd .jdadd{display:block;width:100%;text-align:start;font-size:12px;padding:4px 0 0;margin:0}
 #jd .jdhd{padding:0 10px}#jd .jdhd span:first-child{text-align:center}
+/* v401: المخزن جدول منظم: النوع · م² · لوح · سعر · قيمة */
+#sk2 .s2hd,#sk2 .s2r{display:grid;grid-template-columns:minmax(0,2.1fr) minmax(0,1fr) minmax(0,.7fr) minmax(0,.9fr) minmax(0,1.1fr);gap:4px;align-items:center}
+#sk2 .s2hd{padding:0 8px 3px;font-size:10.5px;color:var(--mute);text-align:center}#sk2 .s2hd span:first-child{text-align:start}
+#sk2 .s2r{padding:9px 8px;margin-bottom:3px;border-radius:9px;font-size:13px;text-align:center;color:var(--ink)}
+#sk2 .s2r .s2n{text-align:start;font-size:14px;font-weight:700;white-space:normal;line-height:1.25}
+#sk2 .s2r .num{font-size:13.5px;white-space:nowrap}
+#sk2 .s2ft{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;font-weight:700;cursor:default}
