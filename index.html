@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' data: blob: https://api.telegram.org https://*.googleapis.com https://*.firebaseio.com https://www.gstatic.com https://apis.google.com; frame-src https://tabakha-glass-5b9a4.firebaseapp.com https://accounts.google.com https://apis.google.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<script>try{if(localStorage.getItem('lkOn')==='1')document.documentElement.classList.add('locked')}catch(e){}try{var z=localStorage.getItem('fz');if(z==='x'||z==='s'||z==='l'||z==='xl')document.documentElement.classList.add('fz-'+z)}catch(e){}</script>
+<script>try{if(localStorage.getItem('lkOn')==='1'&&localStorage.getItem('lkOpen')!=='0')document.documentElement.classList.add('locked')}catch(e){}try{var z=localStorage.getItem('fz');if(z==='x'||z==='s'||z==='l'||z==='xl')document.documentElement.classList.add('fz-'+z)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
 /* شبكة أمان: لو البرنامج وقع وهو بيفتح، تظهر رسالة فيها زرار ينزّل نسخة من البيانات (مستقلة عن باقي الكود) */
@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=409">
+<link rel="stylesheet" href="css/style.css?v=410">
 
 
 
@@ -128,7 +128,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="pinOv" class="res-ov hide" style="z-index:95;padding-top:22vh"><div class="card res-in" style="max-width:320px;text-align:center"><b id="pinWhy">🔒 اكتب الرقم السري</b>
   <input id="pinIn" type="password" inputmode="numeric" maxlength="6" autocomplete="off" style="text-align:center;font-size:20px;letter-spacing:6px;height:44px;margin:8px 0">
-  <div class="btns"><button class="main" id="pinOk">✅ تأكيد</button><button class="alt" id="pinNo">✖️ إلغاء</button></div><div class="info" id="pinErr" style="color:var(--danger)"></div></div></div>
+  <button type="button" class="alt hide" id="pinBio" style="width:100%;margin-bottom:6px">👆 بالبصمة</button><div class="btns"><button class="main" id="pinOk">✅ تأكيد</button><button class="alt" id="pinNo">✖️ إلغاء</button></div><div class="info" id="pinErr" style="color:var(--danger)"></div></div></div>
 <div id="qtOv" class="res-ov hide" style="z-index:65"><div class="card res-in">
   <div class="ro" style="color:var(--ink)"><b>📝 عروض الأسعار</b><button class="del" id="qtX" aria-label="إغلاق">×</button></div>
   <div class="mute" style="margin:4px 0 6px">عرض السعر مش بيتسجل على حساب العميل. لما يوافق اضغط (تحويل لفاتورة) واكتب المدفوع واحفظ.</div>
@@ -505,11 +505,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="card"><b>👷 وضع العامل</b><div class="mute">بيخبّي عن الجهاز ده: الربح وسعر الشراء، والمديونيات وأرصدة العملاء، والإعدادات، وحذف وتعديل الفواتير. للرجوع لازم الرقم السري.</div>
   <button type="button" class="main" id="wkGo" style="width:100%;margin-top:6px">👷 شغّل وضع العامل على الجهاز ده</button><div class="ro" style="gap:6px;margin-top:8px"><input id="wkNew" placeholder="اسم عامل (اختياري)" style="flex:1"><button type="button" class="alt" id="wkAdd" style="flex:none">➕</button></div><div id="wkL" style="margin-top:6px"></div><div class="mute" style="margin-top:4px">دوس على اسم عشان تختاره، وكل فاتورة تتسجل بالجهاز ده هتتكتب باسمه (👷) في السجل.</div><div class="info" id="wkMsg"></div></div>
 <div class="card"><b>🔒 قفل البرنامج</b><div class="mute" style="font-size:12px">اقتراح: فعّل على الأقل «اطلب الرقم السري قبل تعديل أو حذف فاتورة قديمة»، علشان محدش يغيّر حسابات قديمة من غير ما تعرف.</div>
-    <label class="opt"><input type="checkbox" id="lkChk"> قفل البرنامج برقم سري</label>
+    <label class="opt"><input type="checkbox" id="lkChk"> 🔑 رقم سري للبرنامج</label>
     <div id="lkSet" class="hide"><div class="g2" style="margin-top:6px"><input id="lkP1" type="password" inputmode="numeric" maxlength="6" placeholder="رقم سري (4 إلى 6 أرقام)"><input id="lkP2" type="password" inputmode="numeric" maxlength="6" placeholder="اكتب الرقم تاني"></div>
       <div class="btns"><button class="main" id="lkSave">🔒 تفعيل القفل</button></div></div>
     <div id="lkOff" class="hide"><div class="ro" style="gap:6px;margin-top:6px"><input id="lkOffIn" type="password" inputmode="numeric" maxlength="6" placeholder="الرقم السري الحالي" style="flex:1"><button class="alt b-red" id="lkOffGo" style="flex:none">🔓 إلغاء القفل</button></div></div>
-    <label class="opt hide" id="lkBioBox"><input type="checkbox" id="lkBio"> الفتح بالبصمة</label>
+    <label class="opt hide" id="lkOpenBox"><input type="checkbox" id="lkOpen"> 🔒 اطلب الرقم السري أو البصمة وانا بفتح البرنامج</label><label class="opt hide" id="lkBioBox"><input type="checkbox" id="lkBio"> 👆 البصمة بدل الرقم السري</label>
     <div class="info" id="lkMsg"></div>
     <label class="opt" style="margin-top:8px"><input type="checkbox" id="editLk"> اطلب الرقم السري قبل تعديل أو حذف فاتورة قديمة</label>
     <div id="editLkBox" class="hide"><select id="editLkD"><option value="0">أي فاتورة</option><option value="1">أقدم من يوم</option><option value="7">أقدم من 7 أيام</option></select></div>
@@ -600,11 +600,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=409"></script>
-<script src="js/qr.js?v=409"></script>
+<script src="js/app.js?v=410"></script>
+<script src="js/qr.js?v=410"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=409"></script>
-<script src="js/features.js?v=409"></script>
+<script src="js/cutlist.js?v=410"></script>
+<script src="js/features.js?v=410"></script>
 </body>
 </html>
 

@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='409';
+const APP_VER='410';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -2969,8 +2969,10 @@ const sha=async t=>{try{const b=await crypto.subtle.digest('SHA-256',new TextEnc
 const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const unb64=t=>Uint8Array.from(atob(t.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
 let bioOK=false,lkFails=0,lkWait=0,hiddenAt=0;
+/* v410: القفل وقت فتح البرنامج اختياري. الرقم السري/البصمة يفضلوا مطلوبين في الحاجات الحساسة (تعديل وحذف القديم، الخروج من وضع العامل) */
+const lkOpenOn=()=>lkGet('lkOpen')!=='0';
 async function bioAvail(){try{return!!(window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())}catch(e){return false}}
-function lkUI(){const on=lkGet('lkOn')==='1';$('lkRecSet').classList.toggle('hide',!on);$('lkRecMake').textContent=lkGet('lkRecHash')?'🔑 اعمل كود استرجاع جديد (القديم هيبطل)':'🔑 اعمل كود استرجاع (لو نسيت الرقم السري)';if(!on)$('lkRecShow').classList.add('hide');$('lkChk').checked=on||!$('lkSet').classList.contains('hide');$('lkBioBox').classList.toggle('hide',!(on&&bioOK));$('lkBio').checked=!!lkGet('lkBio')}
+function lkUI(){const on=lkGet('lkOn')==='1';$('lkRecSet').classList.toggle('hide',!on);$('lkRecMake').textContent=lkGet('lkRecHash')?'🔑 اعمل كود استرجاع جديد (القديم هيبطل)':'🔑 اعمل كود استرجاع (لو نسيت الرقم السري)';if(!on)$('lkRecShow').classList.add('hide');$('lkChk').checked=on||!$('lkSet').classList.contains('hide');$('lkBioBox').classList.toggle('hide',!(on&&bioOK));$('lkBio').checked=!!lkGet('lkBio');$('lkOpenBox').classList.toggle('hide',!on);$('lkOpen').checked=lkOpenOn()}
 function lockNow(){document.documentElement.classList.add('locked');$('lkIn').value='';$('lkErr').textContent='';$('lkBioBtn').classList.toggle('hide',!(lkGet('lkBio')&&bioOK))}
 function unlock(){document.documentElement.classList.remove('locked');lkFails=0}
 const lkW=()=>Math.max(lkWait,+lkGet('lkW')||0);
@@ -3026,20 +3028,22 @@ $('lkBio').onchange=async()=>{const m=$('lkMsg');m.textContent='';
   try{const cr=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'فواتير'},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'owner',displayName:'صاحب المحل'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000}});
     lkSet('lkBio',b64(cr.rawId));m.textContent='تم تفعيل البصمة ✓'}
   catch(e){$('lkBio').checked=false;m.textContent='البصمة متفعّلتش على الجهاز ده'}};
-document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(lkGet('lkOn')==='1'&&hiddenAt&&Date.now()-hiddenAt>60000){lockNow();if(lkGet('lkBio')&&bioOK)tryBio()}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(lkGet('lkOn')==='1'&&lkOpenOn()&&hiddenAt&&Date.now()-hiddenAt>60000){lockNow();if(lkGet('lkBio')&&bioOK)tryBio()}});
 async function lockInit(){bioOK=await bioAvail();
   if(lkGet('lkOn')==='1'&&!lkGet('lkHash')){lkSet('lkOn',null);unlock()}
-  lkUI();if(lkGet('lkOn')==='1'){lockNow();if(lkGet('lkBio')&&bioOK)tryBio()}}
+  lkUI();if(lkGet('lkOn')==='1'&&lkOpenOn()){lockNow();if(lkGet('lkBio')&&bioOK)tryBio()}else unlock()}
+$('lkOpen').onchange=()=>{lkSet('lkOpen',$('lkOpen').checked?null:'0');$('lkMsg').textContent=$('lkOpen').checked?'✅ البرنامج هيطلب الرقم السري وانت بتفتحه':'✅ البرنامج هيفتح على طول، والرقم السري/البصمة للحاجات الحساسة بس'};
 
 /* ---------- حماية التعديل/الحذف بالرقم السري ---------- */
 let pinOkAt=0,pinWait=0,pinFail=0,pinRes=null;
 const lkReady=()=>lkGet('lkOn')==='1'&&!!lkGet('lkHash');
-function askPin(why){return new Promise(res=>{if(pinRes)pinRes(false);pinRes=res;$('pinWhy').textContent=why||'اكتب الرقم السري';$('pinIn').value='';$('pinErr').textContent='';$('pinOv').classList.remove('hide');setTimeout(()=>$('pinIn').focus(),50)})}
+function askPin(why){return new Promise(res=>{if(pinRes)pinRes(false);pinRes=res;$('pinWhy').textContent=why||'اكتب الرقم السري';$('pinIn').value='';$('pinErr').textContent='';const bio=!!(lkGet('lkBio')&&bioOK);$('pinBio').classList.toggle('hide',!bio);$('pinOv').classList.remove('hide');if(bio)pinBioTry();else setTimeout(()=>$('pinIn').focus(),50)})}
+async function pinBioTry(){try{await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:unb64(lkGet('lkBio')),transports:['internal']}],userVerification:'required',timeout:60000}});pinOkAt=Date.now();pinFail=0;pinDone(true)}catch(e){$('pinErr').textContent='اكتب الرقم السري';setTimeout(()=>$('pinIn').focus(),50)}}
 const pinDone=v=>{$('pinOv').classList.add('hide');const r=pinRes;pinRes=null;if(r)r(v)};
 async function pinTry(){if(Date.now()<pinWait){$('pinErr').textContent='استنى شوية وحاول تاني';return}
   if(await sha(lkGet('lkSalt')+$('pinIn').value)===lkGet('lkHash')){pinOkAt=Date.now();pinFail=0;pinDone(true)}
   else{$('pinIn').value='';if(++pinFail>=5){pinWait=Date.now()+30000;pinFail=0;$('pinErr').textContent='محاولات كتير، استنى 30 ثانية'}else $('pinErr').textContent='الرقم غلط'}}
-$('pinOk').onclick=pinTry;$('pinNo').onclick=()=>pinDone(false);$('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')pinTry()});$('pinOv').addEventListener('click',e=>{if(e.target===$('pinOv'))pinDone(false)});
+$('pinOk').onclick=pinTry;$('pinBio').onclick=pinBioTry;$('pinNo').onclick=()=>pinDone(false);$('pinIn').addEventListener('keydown',e=>{if(e.key==='Enter')pinTry()});$('pinOv').addEventListener('click',e=>{if(e.target===$('pinOv'))pinDone(false)});
 async function guard(r,why){if(wkOn()){toast('مش مسموح في وضع العامل');return false}
   {const k=clLocked(r);if(k){if(lkReady()){if(Date.now()-pinOkAt<12e4||await askPin('اليوم ده متقفّل · '+why)){clMark(k);return true}return false}if(!confirm('🔒 يوم '+dayLabel(dayStart(r.ts))+' متقفّل. متأكد إنك عايز '+why+'؟ (هيتسجل إنه اتعدّل)'))return false;clMark(k);return true}}if(!pget('editLk',false)||!lkReady())return true;const d=+lsv('editLkD','1');if(d>0&&r&&r.ts>Date.now()-d*864e5)return true;if(Date.now()-pinOkAt<12e4)return true;return askPin(why)}
 (()=>{const c=$('editLk'),b=$('editLkBox'),sel=$('editLkD'),m=$('editLkMsg');const sync=()=>{c.checked=pget('editLk',false);b.classList.toggle('hide',!c.checked);sel.value=lsv('editLkD','1')};
