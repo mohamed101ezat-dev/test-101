@@ -2148,3 +2148,12 @@ html[data-theme="dark"] #pu .puok2{color:#4ade80}html[data-theme="dark"] #pu .pu
 #pu .wai{filter:none}
 #pu .puwa{color:#128C7E;border-color:#25D366}
 #pu .pusbar>button{display:flex;align-items:center;justify-content:center;gap:5px}
+
+/* v421: الجرد: ترتيب وإخفاء وصنف جديد */
+#jd .jdh{flex-wrap:wrap}
+#jd .jdac{display:flex;gap:2px;flex:none;margin-inline-start:auto}
+#jd .jdac .xd{width:26px;min-width:0;height:26px;min-height:0;padding:0;font-size:13px;border:1px solid var(--line);border-radius:7px;background:var(--card)}
+#jd .jdnew{margin:0 0 6px}
+#jd .jdnew input{flex:1;min-width:0;height:34px}
+#jd .jdnew button{flex:none;height:34px;padding:0 12px}
+#sk2 .s2hid{margin-top:8px}

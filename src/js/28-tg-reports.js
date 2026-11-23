@@ -68,7 +68,7 @@ function tgSpTx(){const l=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)}))
   return{title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
 function tgSkTx(){const R=[...s2Calc().values()],tr=R.filter(o=>o.tr);if(!R.length)return null;const v=tr.reduce((s,o)=>s+Math.max(0,o.bal)*s2Cpm(o.t),0),low=tr.filter(o=>s2Mn(o.t)>0&&o.bal<=s2Mn(o.t)),un=R.filter(o=>!o.tr),lj=s2Jds().pop(),jd=lj?Math.floor((Date.now()-lj.ts)/864e5):null;
   return{title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
-    sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.sort((a,b)=>a.t.name.localeCompare(b.t.name,'ar')).map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
+    sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
     foot:'📋 '+(jd==null?'لسه ما عملتش جرد افتتاحي':'آخر جرد '+puDTx(jd)+(jd>=7?' — فاكر الجرد؟':'')),footC:jd==null||jd>=7?TGC.or:TGC.mu}}
 
 /* ---- الجدولة: كل تقرير مرة في فترته ---- */

@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='420';
+const APP_VER='421';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3398,7 +3398,9 @@ $('pu').addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.p
    (من غير iid فالمحرك القديم بيتجاهله) · one=1 يعني تعديل رصيد نوع واحد من صفحته (مش جرد كامل) */
 var s2V='home',s2Id=null,jdV='home',jdE=null,jdId=null;
 const S2REF=[321,225];
-const s2Types=()=>S.items.filter(i=>i.type==='mq').sort((a,b)=>a.name.localeCompare(b.name,'ar'));
+const s2Ord=i=>{const v=(i.inv||{}).ord;return v==null||v===''?1e6:+v};
+const s2Types=()=>S.items.filter(i=>i.type==='mq'&&!(i.inv&&i.inv.hide)).sort((a,b)=>s2Ord(a)-s2Ord(b)||a.name.localeCompare(b.name,'ar'));
+const s2Hidden=()=>S.items.filter(i=>i.type==='mq'&&i.inv&&i.inv.hide);
 const s2A=(w,h)=>rd2((+w||0)*(+h||0)/1e4);
 const s2JdsAll=()=>S.stock.filter(x=>x&&x.jd).sort((a,b)=>a.ts-b.ts);
 const s2Jds=()=>s2JdsAll().filter(x=>!x.one);
@@ -3433,11 +3435,12 @@ function jdGo(v){jdV=v;jdDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 
 /* ---- صفحة المخزن: ليستة الأنواع بس، كل واحد بياناته واضحة وتدوس عليه تعدّله ---- */
 function s2Draw(){const b=$('sk2');if(!b)return;const R=s2Calc();if(s2V==='one'&&R.get(s2Id)){b.innerHTML=s2OneH(R.get(s2Id));return}s2V='home';
-  const A=[...R.values()].sort((a,b)=>(b.tr-a.tr)||a.t.name.localeCompare(b.t.name,'ar'));
+  const A=[...R.values()];
   const rows=A.map(o=>{const t=o.t,cpm=s2Cpm(t),lw=o.tr&&s2Mn(t)>0&&o.bal<=s2Mn(t),ng=o.tr&&o.bal<0,v=o.tr&&cpm?Math.round(Math.max(0,o.bal)*cpm):0;
     return`<div class="s2r${lw?' lw':''}" data-s2one="${esc(t.id)}" role="button" tabindex="0"><span class="s2n">${lw?'⚠️ ':''}${esc(t.name)}</span><span class="num${ng?' dn':''}">${o.tr?fq(o.bal):'—'}</span><span class="num">${o.tr?fq(s2Sh(Math.max(0,o.bal),o.ref)):'—'}</span><span class="num">${cpm?f(Math.round(cpm)):'—'}</span><span class="num">${v?f(v):'—'}</span></div>`}).join('');
   const tv=A.reduce((a,o)=>a+(o.tr&&s2Cpm(o.t)?Math.max(0,o.bal)*s2Cpm(o.t):0),0);
-  b.innerHTML=A.length?`<div class="s2hd"><span>النوع</span><span>م²</span><span>لوح</span><span>سعر م</span><span>القيمة</span></div>${rows}<div class="s2r s2ft"><span class="s2n">الإجمالي</span><span class="num">${fq(rd2(A.reduce((a,o)=>a+(o.tr?Math.max(0,o.bal):0),0)))}</span><span></span><span></span><span class="num">${f(Math.round(tv))}</span></div>`:'<div class="card mute">مفيش أنواع. الأنواع بتتضاف من الأصناف (مقطع) أو من فاتورة شراء.</div>'}
+  b.innerHTML=A.length?`<div class="s2hd"><span>النوع</span><span>م²</span><span>لوح</span><span>سعر م</span><span>القيمة</span></div>${rows}<div class="s2r s2ft"><span class="s2n">الإجمالي</span><span class="num">${fq(rd2(A.reduce((a,o)=>a+(o.tr?Math.max(0,o.bal):0),0)))}</span><span></span><span></span><span class="num">${f(Math.round(tv))}</span></div>`:'<div class="card mute">مفيش أنواع. الأنواع بتتضاف من الأصناف (مقطع) أو من فاتورة شراء.</div>';
+  {const H=s2Hidden();if(H.length)b.innerHTML+=`<details class="card spdt s2hid"><summary>🙈 مخفي من المخزن (${H.length})</summary>${H.map(t=>`<div class="purw"><span>${esc(t.name)}</span><button type="button" class="alt" data-s2show="${esc(t.id)}">↩️ رجّعه</button></div>`).join('')}</details>`}}
 /* ---- صفحة النوع: كلها قابلة للتعديل ---- */
 function s2OneH(o){const t=o.t,ev=o.ev.slice().reverse().slice(0,60),cpm=s2Cpm(t);
   return`<div class="card s2one"><div class="puh"><button type="button" class="lnk" data-s2="back" aria-label="رجوع">→</button><b class="pun">${esc(t.name)}</b></div>
@@ -3464,34 +3467,53 @@ const jdM2=r=>rd2(r.sz.reduce((a,z)=>a+s2A(z.w,z.h)*(nv(z.c)||0),0));
 
 const jdDone=r=>r.sz.some(z=>String(z.c).trim()!=='');
 function jdNewH(){const e=jdE,T=new Map(S.items.map(i=>[i.id,i]));
-  return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-jd="back" aria-label="رجوع">→</button><b>📝 ${e.first?'جرد افتتاحي':'جرد'}</b><small class="mute">اكتب عدد الألواح الكاملة · اللي تسيبه فاضي مش هيتجرد</small></div></div>
+  return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-jd="back" aria-label="رجوع">→</button><b>${e.editId?'✏️ تعديل جرد '+puDM(e.ts):'📝 '+(e.first?'جرد افتتاحي':'جرد')}</b><small class="mute">اكتب عدد الألواح الكاملة · اللي تسيبه فاضي مش هيتجرد</small></div></div>
+  <div class="purw jdnew"><input id="jdNN" placeholder="➕ صنف جديد: اسمه (مثلًا 4م رمادي)" autocomplete="off" aria-label="اسم صنف جديد"><button type="button" class="alt" data-jd="addit">➕ ضيفه</button></div>
   <div class="jdhd"><span>طول</span><span>عرض</span><span>عدد</span><span>سعر المتر</span><span></span></div>
-  <div id="jdL">${e.rows.map((r,i)=>{const t=T.get(r.iid);if(!t)return'';return`<div class="card jdt" data-r="${i}"><div class="jdh"><b>${esc(t.name)}</b><span class="jdx" id="jdx${i}">${jdLineTx(r)}</span></div>
+  <div id="jdL">${e.rows.map((r,i)=>{const t=T.get(r.iid);if(!t)return'';return`<div class="card jdt" data-r="${i}"><div class="jdh"><b>${esc(t.name)}</b><span class="jdx" id="jdx${i}">${jdLineTx(r)}</span><span class="jdac"><button type="button" class="xd" data-jdmv="${i}:-1" aria-label="فوق">⬆</button><button type="button" class="xd" data-jdmv="${i}:1" aria-label="تحت">⬇</button><button type="button" class="xd" data-jdhd="${i}" aria-label="شيله من الجرد والمخزن">🗑</button></span></div>
     ${r.sz.map((z,k)=>`<div class="jdz" data-k="${k}"><input class="jdl" inputmode="decimal" value="${z.w?esc(String(z.w)):''}" placeholder="321" autocomplete="off" aria-label="الطول سم"><input class="jdh2" inputmode="decimal" value="${z.h?esc(String(z.h)):''}" placeholder="225" autocomplete="off" aria-label="العرض سم"><input class="jdc" inputmode="decimal" value="${esc(z.c)}" placeholder="0" autocomplete="off" aria-label="عدد الألواح"><input class="jdpr" inputmode="decimal" value="${esc(z.p)}" placeholder="0" autocomplete="off" aria-label="سعر المتر"><button type="button" class="xd" data-jdzx="${i}:${k}" aria-label="شيل السطر">×</button></div>`).join('')}
     <button type="button" class="lnk jdadd" data-jdadd="${i}">➕ مقاس تاني لنفس النوع</button></div>`}).join('')}</div>
   <div class="card"><div class="purw"><button type="button" class="main" data-jd="save">✅ حفظ الجرد</button></div><div class="info" id="jdMsg" aria-live="polite"></div></div>`}
 function jdLineTx(r){if(!jdDone(r)){if(r.exp==null)return'';const t=S.items.find(i=>i.id===r.iid),rf=t?s2Ref(t):0;return'<small class="mute">المفروض '+fq(r.exp)+' م²'+(rf>0&&r.exp>0?' ≈ '+fq(s2Sh(r.exp,rf))+' لوح':'')+'</small>'}const m=jdM2(r);if(r.exp==null)return'<b class="num">'+fq(m)+' م²</b>';const d=rd2(m-r.exp);return'<b class="num">'+fq(m)+' م²</b> <small class="'+(Math.abs(d)<.01?'mute':d<0?'dn':'ok')+'">'+(Math.abs(d)<.01?'✓ مظبوط':(d>0?'+':'−')+fq(Math.abs(d))+' م² عن المفروض')+'</small>'}
 function jdSave(){const e=jdE,m=$('jdMsg'),rows=e.rows.filter(jdDone).map(r=>{const pz=r.sz.find(z=>nv(z.c)>0&&nv(z.p)>0)||r.sz.find(z=>nv(z.p)>0),p=pz?rd2(nv(pz.p)):0;return{iid:r.iid,sz:r.sz.filter(z=>nv(z.c)>0&&z.w>0&&z.h>0).map(z=>({w:z.w,h:z.h,c:rd2(nv(z.c))})),m2:jdM2(r),...(r.exp!=null?{exp:r.exp}:{}),...(p>0?{p}:{})}});
   if(!rows.length){m.textContent='اكتب عدد الألواح لنوع واحد على الأقل';return}
-  const j={id:uid(),jd:1,ts:Date.now(),rows,...(e.first?{first:1}:{})};S.stock.push(j);put('stock',j);jdE=null;jdId=j.id;jdGo('view');toast('✅ اتحفظ الجرد · '+plN(rows.length,'نوع'))}
+  const all=rows.concat(e.keep||[]);let j;if(e.editId&&(j=S.stock.find(x=>x.id===e.editId))){j.rows=all;put('stock',j)}else{j={id:uid(),jd:1,ts:Date.now(),rows:all,...(e.first?{first:1}:{})};S.stock.push(j);put('stock',j)}jdE=null;jdId=j.id;jdGo('view');toast((e.editId?'✅ اتعدّل الجرد · ':'✅ اتحفظ الجرد · ')+plN(rows.length,'نوع'))}
 function jdViewH(j){const T=new Map(S.items.map(i=>[i.id,i]));
   return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-jd="back" aria-label="رجوع">→</button><b>📋 ${j.first?'جرد افتتاحي':'جرد'} ${puDM(j.ts)}</b></div>
   <table class="xl jdtb"><tr><th>النوع</th><th>اتعدّ</th><th>المفروض</th><th>الفرق</th></tr>${(j.rows||[]).map(o=>{const t=T.get(o.iid),d=o.exp!=null?rd2(o.m2-o.exp):null;return`<tr><td class="tn">${esc(t?t.name:'—')}<small class="mute">${(o.sz||[]).map(z=>fq(z.c)+' لوح '+s2ZN(z)).join(' · ')}</small></td><td class="num">${fq(o.m2)}</td><td class="num">${o.exp!=null?fq(o.exp):'—'}</td><td class="num ${d==null||Math.abs(d)<.01?'':d<0?'dn':'ok'}">${d==null?'—':Math.abs(d)<.01?'✓':(d>0?'+':'−')+fq(Math.abs(d))}</td></tr>`}).join('')}</table>
-  <div class="purw"><button type="button" class="alt b-red" data-jd="del">🗑️ حذف الجرد ده</button></div></div>`}
+  <div class="purw"><button type="button" class="main" data-jd="edit">✏️ عدّل الجرد</button><button type="button" class="alt b-red" data-jd="del">🗑️ حذف</button></div></div>`}
+
+/* ---- ترتيب · إخفاء · صنف جديد · تعديل جرد محفوظ (v421) ---- */
+function jdKeepScroll(f){const y=window.scrollY;f();jdDraw();window.scrollTo(0,y)}
+function jdMove(i,dr){const j=i+dr,R=jdE.rows;if(j<0||j>=R.length)return;jdKeepScroll(()=>{[R[i],R[j]]=[R[j],R[i]];R.forEach((r,k)=>{const it=S.items.find(x=>x.id===r.iid);if(it&&s2Ord(it)!==k)skSet(it,{ord:k})})})}
+function jdHide(i){const r=jdE.rows[i],t=r&&S.items.find(x=>x.id===r.iid);if(!t)return;skSet(t,{hide:1});jdKeepScroll(()=>jdE.rows.splice(i,1));toast('اتشال «'+t.name+'» من الجرد والمخزن (بيرجع من المخزن ← 🙈 مخفي)')}
+function jdAddItem(){const inp=$('jdNN'),n=(inp.value||'').trim(),m=$('jdMsg');if(!n){inp.focus();return}
+  let t=S.items.find(i=>i.type==='mq'&&nkey(i.name)===nkey(n));
+  if(t&&!(t.inv&&t.inv.hide)){toast('الصنف ده موجود');return}
+  if(t){skSet(t,{hide:''})}else{t={id:uid(),type:'mq',name:n,p:0,w:0,h:0};S.items.push(t);put('items',t);skSet(t,{ord:jdE.rows.length})}
+  const Z=s2Sizes(t);if(!Z.length)Z.push({w:S2REF[0],h:S2REF[1]});
+  if(!jdE.rows.some(r=>r.iid===t.id))jdE.rows.push({iid:t.id,exp:null,p:'',sz:Z.map(z=>({w:z.w,h:z.h,c:'',p:''}))});
+  inp.value='';jdDraw();const cs=document.querySelectorAll('#jdL .jdt');const last=cs[cs.length-1];if(last){try{last.scrollIntoView({block:'center'})}catch(e){}const c=last.querySelector('.jdc');if(c)c.focus()}toast('✅ اتضاف «'+n+'» للأصناف والمخزن')}
+function jdEdit(){const j=S.stock.find(x=>x.id===jdId);if(!j)return;const R=s2Calc(),by=new Map((j.rows||[]).map(o=>[o.iid,o])),T=s2Types(),ids=new Set(T.map(t=>t.id));
+  jdE={first:!!j.first,editId:j.id,ts:j.ts,keep:(j.rows||[]).filter(o=>!ids.has(o.iid)),rows:T.map(t=>{const o=by.get(t.id);const Z=s2Sizes(t);
+    if(o){const sz=(o.sz||[]).map(z=>({w:z.w,h:z.h,c:String(z.c),p:o.p?String(o.p):''}));Z.forEach(z=>{if(!sz.some(q=>(Math.abs(q.w-z.w)<1&&Math.abs(q.h-z.h)<1)||(Math.abs(q.w-z.h)<1&&Math.abs(q.h-z.w)<1)))sz.push({w:z.w,h:z.h,c:'',p:o.p?String(o.p):''})});return{iid:t.id,exp:o.exp!=null?o.exp:null,p:o.p?String(o.p):'',sz}}
+    if(!Z.length)Z.push({w:S2REF[0],h:S2REF[1]});const cp=s2Cpm(t);return{iid:t.id,exp:null,p:cp>0?String(rd2(cp)):'',sz:Z.map(z=>({w:z.w,h:z.h,c:'',p:cp>0?String(rd2(cp)):''}))}})};jdGo('new')}
 
 /* ---- الأحداث ---- */
-$('sk2').addEventListener('click',e=>{const x=e.target.closest('[data-s2x]');
+$('sk2').addEventListener('click',e=>{const sh=e.target.closest('[data-s2show]');if(sh){const t=S.items.find(i=>i.id===sh.dataset.s2show);if(t){skSet(t,{hide:''});s2Draw();toast('اتردّ «'+t.name+'» للمخزن')}return}const x=e.target.closest('[data-s2x]');
   if(x){const id=x.dataset.s2x;del('stock',id);s2Draw();toast('اتشال التعديل');return}
   const pr=e.target.closest('[data-s2p]');if(pr){const p=S.purchases.find(y=>y.id===pr.dataset.s2p);if(p&&p.ln){skHist.push('m:'+skM);skM='buy';skMainUI();puSid=p.sid;puEditInv(p)}return}
   const b=e.target.closest('[data-s2],[data-s2one]');if(!b)return;
   if(b.dataset.s2one)return s2Go('one',b.dataset.s2one);const k=b.dataset.s2;
   if(k==='back')return s2Go('home');
   if(k==='save')return s2Save()});
-$('jd').addEventListener('click',e=>{const b=e.target.closest('[data-jd],[data-jdv],[data-jdadd],[data-jdzx]');if(!b)return;const d=b.dataset;
+$('jd').addEventListener('click',e=>{const b=e.target.closest('[data-jd],[data-jdv],[data-jdadd],[data-jdzx],[data-jdmv],[data-jdhd]');if(!b)return;const d=b.dataset;
   if(d.jdv){jdId=d.jdv;return jdGo('view')}
   if(d.jdzx!=null){const[i,k]=d.jdzx.split(':').map(Number);jdE.rows[i].sz.splice(k,1);const y=window.scrollY;jdDraw();window.scrollTo(0,y);return}
   if(d.jdadd!=null){const i=+d.jdadd,p0=(jdE.rows[i].sz.find(z=>nv(z.p)>0)||{}).p||'';jdE.rows[i].sz.push({w:0,h:0,c:'',p:p0});const y=window.scrollY;jdDraw();window.scrollTo(0,y);const rr=document.querySelectorAll('#jdL [data-r="'+i+'"] .jdz'),n=rr[rr.length-1]&&rr[rr.length-1].querySelector('.jdl');if(n)n.focus();return}
-  const k=d.jd;if(k==='new')return jdE?jdGo('new'):jdStart();if(k==='back')return jdGo('home');if(k==='save')return jdSave();
+  if(d.jdmv!=null){const[i,dr]=d.jdmv.split(':').map(Number);return jdMove(i,dr)}
+  if(d.jdhd!=null){if(!ok2(b))return;return jdHide(+d.jdhd)}
+  const k=d.jd;if(k==='addit')return jdAddItem();if(k==='edit')return jdEdit();if(k==='new')return jdE?jdGo('new'):jdStart();if(k==='back'){if(jdE&&jdE.editId)jdE=null;return jdGo('home')}if(k==='save')return jdSave();
   if(k==='del'){if(!ok2(b))return;del('stock',jdId);jdId=null;jdGo('home');toast('اتحذف الجرد');return}});
 $('jd').addEventListener('input',e=>{const t=e.target;if(!jdE)return;const c=t.closest('.jdt');if(!c)return;const i=+c.dataset.r;
   const kk=t.closest('.jdz'),k=kk?+kk.dataset.k:-1,z=k>=0?jdE.rows[i].sz[k]:null;
@@ -3601,7 +3623,7 @@ function tgSpTx(){const l=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)}))
   return{title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
 function tgSkTx(){const R=[...s2Calc().values()],tr=R.filter(o=>o.tr);if(!R.length)return null;const v=tr.reduce((s,o)=>s+Math.max(0,o.bal)*s2Cpm(o.t),0),low=tr.filter(o=>s2Mn(o.t)>0&&o.bal<=s2Mn(o.t)),un=R.filter(o=>!o.tr),lj=s2Jds().pop(),jd=lj?Math.floor((Date.now()-lj.ts)/864e5):null;
   return{title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
-    sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.sort((a,b)=>a.t.name.localeCompare(b.t.name,'ar')).map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
+    sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
     foot:'📋 '+(jd==null?'لسه ما عملتش جرد افتتاحي':'آخر جرد '+puDTx(jd)+(jd>=7?' — فاكر الجرد؟':'')),footC:jd==null||jd>=7?TGC.or:TGC.mu}}
 
 /* ---- الجدولة: كل تقرير مرة في فترته ---- */
