@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='418';
+const APP_VER='419';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3212,7 +3212,7 @@ function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof sp
   const rows=l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse();
   const ob=S.purchases.find(x=>x.sid===s.id&&x.ob);
   return`<div class="card pus"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b class="pun">${esc(s.name)}</b><button type="button" class="xd" data-pu="edsup" aria-label="تعديل المورد">✏️</button><span class="pub"><small>${b<0?'ليك عنده':'عليك'}</small><b class="num${b>0?' dn':b<0?' ok':''}">${f(Math.abs(b))}</b></span></div>
-  ${d!=null?`<div class="pudl${d>=7?' red':''}">⏰ ${l.some(x=>x.type==='pay')?'آخر دفعة':'ما دفعتش'} ${puDTx(d)}</div>`:''}<div class="pusend" id="puSend" hidden><div class="spc">${[['last','🧾 آخر فاتورة واللي بعدها'],['date','📅 من تاريخ'],['all','📋 الحساب كله']].map(([k,t])=>`<button type="button" data-pus="${k}"${puSM===k?' class="on"':''}>${t}</button>`).join('')}</div><input type="date" id="puSD"${puSM==='date'?'':' hidden'} aria-label="من تاريخ"><div class="purw"><button type="button" class="main" data-pu="sendwa">💬 واتساب${s.phone?'':' (مفيش رقم)'}</button><button type="button" class="alt" data-pu="sendimg">🖼 صورة</button></div></div><div class="purw puowe" id="puOwe" hidden><input id="puOA" inputmode="decimal" placeholder="المبلغ اللي عليك" autocomplete="off" aria-label="المبلغ اللي عليك"><input id="puON" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><button type="button" class="main" data-pu="owesave">✅</button></div>
+  ${d!=null?`<div class="pudl${d>=7?' red':''}">⏰ ${l.some(x=>x.type==='pay')?'آخر دفعة':'ما دفعتش'} ${puDTx(d)}</div>`:''}<div class="purw puowe" id="puOwe" hidden><input id="puOA" inputmode="decimal" placeholder="المبلغ اللي عليك" autocomplete="off" aria-label="المبلغ اللي عليك"><input id="puON" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><button type="button" class="main" data-pu="owesave">✅</button></div>
   <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة</button><button type="button" class="alt" data-pu="owe">➕ عليّا</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="ret" aria-label="مرتجع للمورد">↩️</button><button type="button" class="alt" data-pu="send" aria-label="ابعت كشف حساب للمورد">📤</button>${tel?`<a class="alt" href="tel:${esc(tel)}">📞</a>`:''}${wa?`<a class="alt" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">💬</a>`:''}</div></div>
   <div class="card pued" ${puEdS?'':'hidden'}><div class="purw"><input id="puEN" value="${esc(s.name)}" placeholder="الاسم" autocomplete="off" aria-label="اسم المورد"><input id="puEP" inputmode="tel" value="${esc(s.phone||'')}" placeholder="تليفون" autocomplete="off" aria-label="التليفون"></div>
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
@@ -3235,12 +3235,12 @@ function puAlloc(sid){const l=puOf(sid),D=[],open=[];let pool=0,poolSrc=null;
   return{D,pool}}
 const puAlName=p=>!p?'دفعة':p.type==='pay'?'دفعة':'↩️ مرتجع';
 function puInvsH(s){const A=puAlloc(s.id);if(!A.D.length)return'';const L=A.D.slice().reverse();
-  return`<div class="card puinvs"><div class="puh"><b>🧾 الفواتير</b><small class="mute">${plN(L.filter(d=>d.rem>.005).length,'مفتوحة')}</small>${A.pool>.005?`<span class="pub"><small>ليّا عنده</small><b class="num ok">${f(A.pool)}</b></span>`:''}</div>
+  return`<div class="card puinvs"><div class="puh"><b>🧾 الفواتير</b><small class="mute">${plN(L.filter(d=>d.rem>.005).length,'مفتوحة')}</small>${A.pool>.005?`<span class="pub"><small>ليّا عنده</small><b class="num ok">${f(A.pool)}</b></span>`:''}</div>${puSelOn?puSelBar(A):''}
   ${L.map(d=>{const x=d.x,paid=d.rem<=.005,nm=x.ob?'رصيد من قبل':x.owe?'➕ عليّا':'🧾 فاتورة'+(x.ref?' #'+x.ref:'');
-    return`<details class="puiv${paid?' paid':''}"${!paid&&d.al.length?' open':''}><summary><span class="pin2">${esc(nm)} <small class="mute">${puDM(x.ts)}</small></span><b class="num">${f(d.tot)}</b>${paid?'<span class="puok2">✅ مدفوعة</span>':`<span class="pubad2">⏳ باقي ${f(d.rem)}</span>`}</summary>
+    return`<div class="puivw">${puSelOn?`<label class="pusel"><input type="checkbox" data-psel="${esc(x.id)}"${puSel.has(x.id)?' checked':''} aria-label="اختار الفاتورة دي"></label>`:''}<details class="puiv${paid?' paid':''}"${!paid&&d.al.length?' open':''}><summary><span class="pin2">${esc(nm)} <small class="mute">${puDM(x.ts)}</small></span><b class="num">${f(d.tot)}</b>${paid?'<span class="puok2">✅ مدفوعة</span>':`<span class="pubad2">⏳ باقي ${f(d.rem)}</span>`}</summary>
       ${x.ln?`<div class="puivl">${x.ln.map(l=>`<div><span>${esc(fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h))}</span><span class="num">${f(rd2(rd2(l.w*l.h/1e4)*l.p*l.q))}</span></div>`).join('')}</div>`:x.note?`<div class="puivl"><div><span class="mute">${esc(x.note)}</span></div></div>`:''}
       ${d.al.length?`<div class="puival">${d.al.map(a=>{const p=a.p||{};return`<div><span>${p.type==='pay'&&p.how?payIco(p.how)+' ':''}${esc(puAlName(p))} <small class="mute">${p.ts?puDM(p.ts):''}</small>${a.cr?' <small class="punote">↪ من رصيدك عنده</small>':a.sp?' <small class="punote">↪ باقي دفعة '+(p.ts?puDM(p.ts):'')+'</small>':''}</span><span class="num ok">−${f(a.amt)}</span></div>`}).join('')}</div>`:'<div class="puival"><div><span class="mute">لسه ما اتدفعش منها حاجة</span></div></div>'}
-      <div class="puivt"><span>${paid?'✅ اتدفعت كلها':'الباقي'}</span><b class="num ${paid?'ok':'dn'}">${paid?'':f(d.rem)}</b></div></details>`}).join('')}</div>`}
+      <div class="puivt"><span>${paid?'✅ اتدفعت كلها':'الباقي'}</span><b class="num ${paid?'ok':'dn'}">${paid?'':f(d.rem)}</b></div></details></div>`}).join('')}</div>`}
 
 /* ---- فاتورة شراء / مرتجع ---- */
 function puNewInv(sid,ret){puE={id:null,sid:sid||'',date:puDate(Date.now()),ref:'',ret:!!ret,ln:[puNewLn()],paper:'',paid:'',how:puDefHow(),note:'',ts:0};puGo('inv')}
@@ -3310,6 +3310,42 @@ async function puSendOut(s,st,how){if(!st||!st.mv.length){toast('مفيش حرك
   const tx=puStmtTx(s,st),w=s.phone?waNum(s.phone):'';if(w){window.open('https://wa.me/'+w+'?text='+encodeURIComponent(tx),'_blank','noopener');return}
   try{if(navigator.share){await navigator.share({text:tx});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(tx);toast('اتنسخ الكشف، الزقه في الواتساب (المورد ملوش رقم)')}catch(e){toast('المورد ملوش رقم')}}
 
+
+/* ---- ☑️ اختار الفواتير وابعتها للمورد كصورة شكل فاتورة حقيقية (v419) ---- */
+var puSelOn=false,puSel=new Set();
+const puSelBar=A=>`<div class="purw pusbar"><span id="puSelN">${plN(puSel.size,'فاتورة')}</span><button type="button" class="main" data-pu="selimg">🖼 ابعتها صور</button><button type="button" class="alt" data-pu="selwa">💬 رسالة</button><button type="button" class="alt" data-pu="selx" aria-label="إلغاء الاختيار">✖</button></div>`;
+const puInvNm=x=>x.ob?'رصيد من قبل':x.owe?'مبلغ عليّا':x.ret?'مرتجع':'فاتورة شراء';
+/* صورة فاتورة واحدة: هيدر · جدول الأصناف · الإجمالي · المدفوع منها · الباقي · الملاحظات · رصيد المورد */
+function puInvImg(s,d,bal){const W=1080,P=40,F=(z,w)=>(w||400)+' '+z+'px system-ui,"Segoe UI",Tahoma,Arial,sans-serif',x0=d.x,L=x0.ln||[],RH=60,shop=lsv('shop','');
+  const cols=[{k:'الصنف',x:W-P-12,a:'right'},{k:'المقاس',x:560,a:'center'},{k:'عدد',x:450,a:'center'},{k:'م²',x:350,a:'center'},{k:'سعر المتر',x:230,a:'center'},{k:'القيمة',x:P+12,a:'left'}];
+  const noteL=x0.note&&!(x0.ln&&x0.note==='')?String(x0.note):'';const H=250+(L.length?56+L.length*RH:RH)+70+(d.al.length?50+d.al.length*48:0)+80+(noteL?110:0)+90;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');c.direction='rtl';
+  c.fillStyle='#fff';c.fillRect(0,0,W,H);c.fillStyle='#1f5f3f';c.fillRect(0,0,W,150);
+  c.fillStyle='#fff';c.textAlign='right';c.font=F(46,700);c.fillText('🧾 '+puInvNm(x0)+(x0.ref?' #'+x0.ref:''),W-P,66);c.font=F(30);c.fillStyle='#d9e8df';c.fillText('المورد: '+s.name+' · '+puDMY(x0.ts),W-P,118);
+  if(shop){c.textAlign='left';c.font=F(32,700);c.fillStyle='#fff';c.fillText(shop,P,66)}
+  let y=180;
+  if(L.length){c.fillStyle='#eef3f0';c.fillRect(P,y,W-P*2,56);c.fillStyle='#374151';c.font=F(27,700);cols.forEach(o=>{c.textAlign=o.a;c.fillText(o.k,o.x,y+37)});y+=56;
+    L.forEach((l,i)=>{const ar=rd2(l.w*l.h/1e4),m2=rd2(ar*l.q),v=rd2(ar*l.p*l.q);c.fillStyle=i%2?'#fafbfa':'#fff';c.fillRect(P,y,W-P*2,RH);c.fillStyle='#e5e7eb';c.fillRect(P,y+RH-1,W-P*2,1);c.fillStyle='#111827';c.font=F(30,600);
+      const vals=[l.n,fq(l.w)+'×'+fq(l.h),fq(l.q),fq(m2),f(l.p),f(v)];cols.forEach((o,k)=>{c.textAlign=o.a;c.font=F(k===0?30:29,k===0||k===5?700:400);let t=String(vals[k]);if(k===0)while(c.measureText(t).width>W-P-12-640&&t.length>3)t=t.slice(0,-2);c.fillText(t,o.x,y+40)});y+=RH})}
+  else{c.fillStyle='#111827';c.font=F(32,600);c.textAlign='right';c.fillText(puInvNm(x0),W-P-12,y+40);y+=RH}
+  c.fillStyle='#1f5f3f';c.fillRect(P,y+6,W-P*2,3);y+=20;c.fillStyle='#111827';c.textAlign='right';c.font=F(36,700);c.fillText('الإجمالي',W-P-12,y+38);c.textAlign='left';c.fillText(f(d.tot),P+12,y+38);y+=70;
+  if(d.al.length){c.textAlign='right';c.fillStyle='#374151';c.font=F(30,700);c.fillText('المدفوع منها',W-P-12,y+34);y+=50;
+    d.al.forEach(a=>{const p=a.p||{};c.textAlign='right';c.fillStyle='#374151';c.font=F(28);c.fillText((p.type==='pay'?'دفعة '+(p.how||''):'مرتجع')+(p.ts?' · '+puDMY(p.ts):'')+(a.cr?'  ↪ من رصيدي عندك':a.sp?'  ↪ باقي دفعة':''),W-P-12,y+32);c.textAlign='left';c.fillStyle='#15803d';c.font=F(30,700);c.fillText('− '+f(a.amt),P+12,y+32);y+=48})}
+  c.fillStyle=d.rem>.005?'#fdecec':'#e8f5ec';c.fillRect(P,y,W-P*2,66);c.textAlign='right';c.fillStyle=d.rem>.005?'#b42318':'#15803d';c.font=F(36,700);c.fillText(d.rem>.005?'الباقي من الفاتورة':'✅ الفاتورة اتدفعت كلها',W-P-16,y+44);if(d.rem>.005){c.textAlign='left';c.fillText(f(d.rem),P+16,y+44)}y+=80;
+  if(noteL){c.fillStyle='#fffbeb';c.fillRect(P,y,W-P*2,90);c.fillStyle='#92400e';c.textAlign='right';c.font=F(28);let t='📝 '+noteL;while(c.measureText(t).width>W-P*2-30&&t.length>5)t=t.slice(0,-2);c.fillText(t,W-P-16,y+54);y+=110}
+  c.fillStyle='#6b7280';c.textAlign='right';c.font=F(30,600);c.fillText((bal<0?'ليّا عندك: ':'إجمالي اللي عليّا ليك: ')+f(Math.abs(bal)),W-P,y+44);
+  return new Promise(r=>cv.toBlob(r,'image/png'))}
+function puSelList(s){const A=puAlloc(s.id);return A.D.filter(d=>puSel.has(d.x.id))}
+async function puSelImgs(s){const L=puSelList(s);if(!L.length){toast('اختار فاتورة على الأقل');return}const bal=puBal(s.id),files=[];
+  for(const d of L){const b=await puInvImg(s,d,bal);files.push(new File([b],puInvNm(d.x)+(d.x.ref?'-'+d.x.ref:'')+'-'+puDMY(d.x.ts).replace(/\//g,'-')+'.png',{type:'image/png'}))}
+  try{if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files,title:'فواتير '+s.name});return}}catch(e){if(e&&e.name==='AbortError')return}
+  for(const fl of files)await dl(fl,fl.name)}
+function puSelTx(s){const L=puSelList(s),shop=lsv('shop','');let t='*'+(shop||'فواتير')+'*\n👤 '+s.name+'\n';
+  L.forEach(d=>{const x=d.x;t+='\n━━━━━━━━\n🧾 *'+puInvNm(x)+(x.ref?' #'+x.ref:'')+'* · '+puDMY(x.ts)+'\n';if(x.ln)t+=x.ln.map(l=>'▫️ '+puLnTx(l)).join('\n')+'\n';t+='الإجمالي: *'+f(d.tot)+'*\n';
+    d.al.forEach(a=>{const p=a.p||{};t+='− '+f(a.amt)+' '+(p.type==='pay'?'دفعة '+(p.how||''):'مرتجع')+(p.ts?' '+puDMY(p.ts):'')+(a.cr?' (من رصيدي عندك)':a.sp?' (باقي دفعة)':'')+'\n'});
+    t+=d.rem>.005?'الباقي: *'+f(d.rem)+'*\n':'✅ اتدفعت كلها\n';if(x.note)t+='📝 '+x.note+'\n'});
+  const b=puBal(s.id);return t+'\n━━━━━━━━\n*'+(b<0?'ليّا عندك: ':'إجمالي اللي عليّا: ')+f(Math.abs(b))+'*'}
+
 /* ---- الأحداث ---- */
 $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],[data-puinv],[data-pue]');
   const b=t.closest('[data-pu],[data-pux],[data-puh],[data-pus]');
@@ -3318,7 +3354,10 @@ $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],
   if(b&&b.dataset.pux!=null){puE.ln.splice(+b.dataset.pux,1);if(!puE.ln.length)puE.ln.push(puNewLn());$('puLns').innerHTML=puE.ln.map((l,i)=>puLnH(l,i)).join('');puLiveTot();return}
   if(b){const k=b.dataset.pu,s=puSup(puSid);
     if(k==='back')return puBack();
-    if(k==='send'){const o=$('puSend');o.hidden=!o.hidden;return}
+    if(k==='send'){puSelOn=!puSelOn;if(puSelOn&&s){puSel=new Set(puAlloc(s.id).D.filter(d=>d.rem>.005).map(d=>d.x.id))}puDraw();const e2=document.querySelector('#pu .puinvs');if(e2)e2.scrollIntoView({block:'start',behavior:'smooth'});return}
+    if(k==='selx'){puSelOn=false;puDraw();return}
+    if(k==='selimg'&&s)return puSelImgs(s);
+    if(k==='selwa'&&s){if(!puSel.size){toast('اختار فاتورة على الأقل');return}const tx=puSelTx(s),w=s.phone?waNum(s.phone):'';if(w){window.open('https://wa.me/'+w+'?text='+encodeURIComponent(tx),'_blank','noopener');return}(async()=>{try{if(navigator.share){await navigator.share({text:tx});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(tx);toast('اتنسخ، الزقه في الواتساب')}catch(e){}})();return}
     if(k==='sendwa'||k==='sendimg'){if(!s)return;const fr=puSM==='date'&&$('puSD').value?new Date($('puSD').value+'T00:00:00').getTime():0;if(puSM==='date'&&!fr){$('puSD').focus();return}return puSendOut(s,puStmt(s.id,puSM,fr),k==='sendimg'?'img':'wa')}
     if(k==='sendone'){const id=(puE||puP||{}).id,x=S.purchases.find(y=>y.id===id);if(!x)return;const sp=puSup(x.sid);if(sp)puSendOut(sp,puStmt(sp.id,'',0,id),'wa');return}
     if(k==='owe'){const o=$('puOwe');o.hidden=!o.hidden;if(!o.hidden)$('puOA').focus();return}
@@ -3341,14 +3380,14 @@ $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],
     if(k==='savepay')return puSavePay();
     if(k==='delinv'||k==='delpay'){if(!ok2(b))return;const id=(puE||puP).id,pp=S.purchases.find(y=>y.pf===id&&y.type==='pay');del('purchases',id);if(pp)del('purchases',pp.id);puE=null;puP=null;puBack();toast('اتحذفت');return}
     return}
-  if(r){if(r.dataset.pusup){puSid=r.dataset.pusup;puEdS=false;return puGo('sup')}
+  if(r){if(r.dataset.pusup){puSid=r.dataset.pusup;puEdS=false;puSelOn=false;return puGo('sup')}
     const x=S.purchases.find(y=>y.id===(r.dataset.puinv||r.dataset.pue));if(!x)return;puSid=x.sid;
     if(x.type==='buy'&&x.ln)return puEditInv(x);return puNewPay(x.sid,x)}});
 $('pu').addEventListener('input',e=>{const t=e.target;
   if(puE){const ln=t.closest('.puln');if(ln){const l=puE.ln[+ln.dataset.i];if(!l)return;const K={pN:'n',pW:'w',pH:'h',pQ:'q',pP:'p'};for(const k in K)if(t.classList.contains(k))l[K[k]]=t.value;const x=puLn(l);ln.querySelector('.pV').textContent=x.tot?f(x.tot):'';ln.querySelector('.pS').textContent=x.ar?'اللوح '+fq(x.ar)+' م²'+(x.sheet?' · '+f(x.sheet)+' ج':''):'';puLiveTot();return}
     if(t.id==='puR')puE.ref=t.value;if(t.id==='puPaper'){puE.paper=t.value;puLiveTot()}if(t.id==='puPd')puE.paid=t.value;if(t.id==='puTo')puE.to=t.value;if(t.id==='puNote')puE.note=t.value;if(t.id==='puD')puE.date=t.value}
   if(puP){if(t.id==='puA')puP.amt=t.value;if(t.id==='puTo')puP.to=t.value;if(t.id==='puNote')puP.note=t.value;if(t.id==='puD')puP.date=t.value}});
-$('pu').addEventListener('change',e=>{const t=e.target;if(t.id==='puS'){if(puE)puE.sid=t.value;if(puP){puP.sid=t.value;puDraw()}}if(t.id==='puD'){if(puE)puE.date=t.value;if(puP)puP.date=t.value}
+$('pu').addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.psel){if(t.checked)puSel.add(t.dataset.psel);else puSel.delete(t.dataset.psel);const n=$('puSelN');if(n)n.textContent=plN(puSel.size,'فاتورة');return}if(t.id==='puS'){if(puE)puE.sid=t.value;if(puP){puP.sid=t.value;puDraw()}}if(t.id==='puD'){if(puE)puE.date=t.value;if(puP)puP.date=t.value}
   /* لما تختار نوع اشتريته قبل كده: آخر مقاس وسعر متر اتشرى بيه يتحطوا لوحدهم */
   if(puE&&t.classList.contains('pN')){const ln=t.closest('.puln'),l=puE.ln[+ln.dataset.i];if(!l||l.w||l.p)return;const k=nkey(l.n),pv=S.purchases.filter(x=>x.ln&&!x.ret).sort((a,b)=>b.ts-a.ts).flatMap(x=>x.ln).find(q=>nkey(q.n)===k);if(!pv)return;l.w=String(pv.w);l.h=String(pv.h);l.p=String(pv.p);ln.outerHTML=puLnH(l,+ln.dataset.i);puLiveTot();const n=$('puLns').children[+ln.dataset.i];if(n)n.querySelector('.pQ').focus()}});
 /* ========== 🧱 المخزن + 📋 الجرد بالمتر (v396/v397) ==========

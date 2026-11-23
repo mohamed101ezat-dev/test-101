@@ -2132,3 +2132,13 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #pu .puivt{display:flex;justify-content:space-between;padding:5px 10px 7px;font-size:13px;border-top:1px solid var(--line)}
 #pu .pusum{cursor:pointer;font-size:13px;color:var(--ink);padding:2px 0 4px}
 html[data-theme="dark"] #pu .puok2{color:#4ade80}html[data-theme="dark"] #pu .pubad2{color:#f87171}
+
+/* v419: اختار الفواتير وابعتها */
+#pu .puivw{display:flex;align-items:flex-start;gap:6px}
+#pu .puivw>details{flex:1;min-width:0}
+#pu .pusel{flex:none;margin:12px 0 0;display:flex;align-items:center}
+#pu .pusel input{width:22px;height:22px;margin:0;accent-color:var(--acc)}
+#pu .pusbar{position:sticky;top:44px;z-index:4;background:var(--card);padding:5px 0;margin:4px 0 2px;border-bottom:1px solid var(--line)}
+#pu .pusbar>span{flex:none;font-size:12.5px;color:var(--ink);min-width:62px}
+#pu .pusbar>button{flex:1;height:32px;min-height:32px;font-size:12.5px;padding:0 6px;white-space:nowrap}
+#pu .pusbar>button[data-pu="selx"]{flex:none;width:34px;padding:0}
