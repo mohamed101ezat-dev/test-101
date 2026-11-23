@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='412';
+const APP_VER='413';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -1763,7 +1763,7 @@ $('wkOut').onclick=async()=>{if(!lkReady()){localStorage.removeItem('wkMode');lo
 $('wkAdd').onclick=()=>{const v=$('wkNew').value.trim();if(!v)return;const l=wkList();if(!l.includes(v))l.push(v);localStorage.setItem('wkList',JSON.stringify(l));localStorage.setItem('wkSel',v);$('wkNew').value='';wkDraw()};
 $('wkL').onclick=e=>{const d=e.target.dataset.wd;if(d){localStorage.setItem('wkList',JSON.stringify(wkList().filter(x=>x!==d)));if(localStorage.getItem('wkSel')===d)localStorage.removeItem('wkSel');wkDraw();return}const t=e.target.closest('[data-wn]');if(t){const n=t.dataset.wn;if(localStorage.getItem('wkSel')===n)localStorage.removeItem('wkSel');else localStorage.setItem('wkSel',n);wkDraw()}};wkDraw();
 $('wkGo').onclick=()=>{const m=$('wkMsg');if(!lkReady()){m.textContent='فعّل «قفل البرنامج برقم سري» الأول، علشان العامل ما يقدرش يخرج من الوضع ده.';return}m.textContent='';localStorage.setItem('wkMode','1');{const s=localStorage.getItem('wkSel');if(s)localStorage.setItem('wkName',s);else localStorage.removeItem('wkName')}wkApply();drawItems();drawDash();drawCusts();stGo('');document.querySelector('#bnav button[data-t="new"]').click();toast('وضع العامل شغّال. للرجوع دوس 🔓 مالك فوق')};
-$('phFix').onclick=()=>{let n=0;S.customers.forEach(c=>{const v=normPhones(c.phone);if(c.phone&&v&&v!==c.phone){c.phone=v;put('customers',c);n++}});$('phMsg').textContent=n?'اتوحّد رقم '+plN(n,'عميل')+'.':'كل الأرقام موحّدة بالفعل.';drawCusts()};
+$('phFix').onclick=()=>{let n=0,m=0;S.customers.forEach(c=>{const v=normPhones(c.phone);if(c.phone&&v&&v!==c.phone){c.phone=v;put('customers',c);n++}});S.suppliers.forEach(s=>{const v=normPhones(s.phone);if(s.phone&&v&&v!==s.phone){s.phone=v;put('suppliers',s);m++}});$('phMsg').textContent=n||m?'اتوحّد '+[n?plN(n,'عميل'):'',m?plN(m,'مورد'):''].filter(Boolean).join(' و')+'.':'كل الأرقام موحّدة بالفعل.';drawCusts();try{puDraw()}catch(e){}};
 wkApply();
 /* بحث الإعدادات: بيدوّر في كل الخيارات والشروحات ويفتح الصفحة ويظلل الخيار */
 const arN=s=>String(s||'').toLowerCase().replace(/[\u064B-\u065F\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه');
@@ -3268,9 +3268,9 @@ $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],
     if(k==='ret')return puNewInv(puSid,true);
     if(k==='pay')return puNewPay(puV==='sup'?puSid:'');
     if(k==='addsup'){const a=$('puAdd');a.hidden=!a.hidden;if(!a.hidden)$('puNS').focus();return}
-    if(k==='savesup'){const n=$('puNS').value.trim();if(!n){$('puAM').textContent='اكتب الاسم';return}if(S.suppliers.some(x=>nkey(x.name)===nkey(n))){$('puAM').textContent='المورد ده موجود';return}const o={id:uid(),name:n,phone:$('puNP').value.trim()};S.suppliers.push(o);put('suppliers',o);puSid=o.id;puGo('sup');toast('✅ اتضاف '+n);return}
+    if(k==='savesup'){const n=$('puNS').value.trim();if(!n){$('puAM').textContent='اكتب الاسم';return}if(S.suppliers.some(x=>nkey(x.name)===nkey(n))){$('puAM').textContent='المورد ده موجود';return}const o={id:uid(),name:n,phone:normPhones($('puNP').value.trim())};S.suppliers.push(o);put('suppliers',o);puSid=o.id;puGo('sup');toast('✅ اتضاف '+n);return}
     if(k==='edsup'){puEdS=!puEdS;puDraw();return}
-    if(k==='savedsup'&&s){const n=$('puEN').value.trim();if(!n){$('puEM').textContent='اكتب الاسم';return}s.name=n;s.phone=$('puEP').value.trim();put('suppliers',s);
+    if(k==='savedsup'&&s){const n=$('puEN').value.trim();if(!n){$('puEM').textContent='اكتب الاسم';return}s.name=n;s.phone=normPhones($('puEP').value.trim());put('suppliers',s);
       const v=rd2(nv($('puOB').value));let ob=S.purchases.find(x=>x.sid===s.id&&x.ob);
       if(v>0){if(!ob){const l=puOf(s.id);ob={id:uid(),sid:s.id,type:'buy',ob:1,ts:l.length?l[0].ts-1:Date.now(),note:'رصيد من قبل'};S.purchases.push(ob)}ob.amt=v;put('purchases',ob)}else if(ob)del('purchases',ob.id);
       puEdS=false;puDraw();toast('✅ اتحفظ');return}

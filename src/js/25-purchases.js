@@ -116,9 +116,9 @@ $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],
     if(k==='ret')return puNewInv(puSid,true);
     if(k==='pay')return puNewPay(puV==='sup'?puSid:'');
     if(k==='addsup'){const a=$('puAdd');a.hidden=!a.hidden;if(!a.hidden)$('puNS').focus();return}
-    if(k==='savesup'){const n=$('puNS').value.trim();if(!n){$('puAM').textContent='اكتب الاسم';return}if(S.suppliers.some(x=>nkey(x.name)===nkey(n))){$('puAM').textContent='المورد ده موجود';return}const o={id:uid(),name:n,phone:$('puNP').value.trim()};S.suppliers.push(o);put('suppliers',o);puSid=o.id;puGo('sup');toast('✅ اتضاف '+n);return}
+    if(k==='savesup'){const n=$('puNS').value.trim();if(!n){$('puAM').textContent='اكتب الاسم';return}if(S.suppliers.some(x=>nkey(x.name)===nkey(n))){$('puAM').textContent='المورد ده موجود';return}const o={id:uid(),name:n,phone:normPhones($('puNP').value.trim())};S.suppliers.push(o);put('suppliers',o);puSid=o.id;puGo('sup');toast('✅ اتضاف '+n);return}
     if(k==='edsup'){puEdS=!puEdS;puDraw();return}
-    if(k==='savedsup'&&s){const n=$('puEN').value.trim();if(!n){$('puEM').textContent='اكتب الاسم';return}s.name=n;s.phone=$('puEP').value.trim();put('suppliers',s);
+    if(k==='savedsup'&&s){const n=$('puEN').value.trim();if(!n){$('puEM').textContent='اكتب الاسم';return}s.name=n;s.phone=normPhones($('puEP').value.trim());put('suppliers',s);
       const v=rd2(nv($('puOB').value));let ob=S.purchases.find(x=>x.sid===s.id&&x.ob);
       if(v>0){if(!ob){const l=puOf(s.id);ob={id:uid(),sid:s.id,type:'buy',ob:1,ts:l.length?l[0].ts-1:Date.now(),note:'رصيد من قبل'};S.purchases.push(ob)}ob.amt=v;put('purchases',ob)}else if(ob)del('purchases',ob.id);
       puEdS=false;puDraw();toast('✅ اتحفظ');return}
