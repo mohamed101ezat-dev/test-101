@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='419';
+const APP_VER='420';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3213,7 +3213,7 @@ function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof sp
   const ob=S.purchases.find(x=>x.sid===s.id&&x.ob);
   return`<div class="card pus"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b class="pun">${esc(s.name)}</b><button type="button" class="xd" data-pu="edsup" aria-label="تعديل المورد">✏️</button><span class="pub"><small>${b<0?'ليك عنده':'عليك'}</small><b class="num${b>0?' dn':b<0?' ok':''}">${f(Math.abs(b))}</b></span></div>
   ${d!=null?`<div class="pudl${d>=7?' red':''}">⏰ ${l.some(x=>x.type==='pay')?'آخر دفعة':'ما دفعتش'} ${puDTx(d)}</div>`:''}<div class="purw puowe" id="puOwe" hidden><input id="puOA" inputmode="decimal" placeholder="المبلغ اللي عليك" autocomplete="off" aria-label="المبلغ اللي عليك"><input id="puON" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><button type="button" class="main" data-pu="owesave">✅</button></div>
-  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة</button><button type="button" class="alt" data-pu="owe">➕ عليّا</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="ret" aria-label="مرتجع للمورد">↩️</button><button type="button" class="alt" data-pu="send" aria-label="ابعت كشف حساب للمورد">📤</button>${tel?`<a class="alt" href="tel:${esc(tel)}">📞</a>`:''}${wa?`<a class="alt" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">💬</a>`:''}</div></div>
+  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة</button><button type="button" class="alt" data-pu="owe">➕ عليّا</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="ret" aria-label="مرتجع للمورد">↩️</button><button type="button" class="alt" data-pu="send" aria-label="ابعت كشف حساب للمورد">📤</button>${tel?`<a class="alt" href="tel:${esc(tel)}">📞</a>`:''}${wa?`<a class="alt" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener" aria-label="واتساب المورد"><i class="wai"></i></a>`:''}</div></div>
   <div class="card pued" ${puEdS?'':'hidden'}><div class="purw"><input id="puEN" value="${esc(s.name)}" placeholder="الاسم" autocomplete="off" aria-label="اسم المورد"><input id="puEP" inputmode="tel" value="${esc(s.phone||'')}" placeholder="تليفون" autocomplete="off" aria-label="التليفون"></div>
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
@@ -3313,7 +3313,7 @@ async function puSendOut(s,st,how){if(!st||!st.mv.length){toast('مفيش حرك
 
 /* ---- ☑️ اختار الفواتير وابعتها للمورد كصورة شكل فاتورة حقيقية (v419) ---- */
 var puSelOn=false,puSel=new Set();
-const puSelBar=A=>`<div class="purw pusbar"><span id="puSelN">${plN(puSel.size,'فاتورة')}</span><button type="button" class="main" data-pu="selimg">🖼 ابعتها صور</button><button type="button" class="alt" data-pu="selwa">💬 رسالة</button><button type="button" class="alt" data-pu="selx" aria-label="إلغاء الاختيار">✖</button></div>`;
+const puSelBar=A=>`<div class="purw pusbar"><span id="puSelN">${plN(puSel.size,'فاتورة')}</span><button type="button" class="alt puwa" data-pu="selwa" aria-label="رسالة واتساب للمورد"><i class="wai"></i> واتساب</button><button type="button" class="alt" data-pu="selimg" aria-label="مشاركة الفواتير صور"><i class="ic-share"></i> مشاركة</button><button type="button" class="alt" data-pu="selx" aria-label="إلغاء الاختيار">✖</button></div>`;
 const puInvNm=x=>x.ob?'رصيد من قبل':x.owe?'مبلغ عليّا':x.ret?'مرتجع':'فاتورة شراء';
 /* صورة فاتورة واحدة: هيدر · جدول الأصناف · الإجمالي · المدفوع منها · الباقي · الملاحظات · رصيد المورد */
 function puInvImg(s,d,bal){const W=1080,P=40,F=(z,w)=>(w||400)+' '+z+'px system-ui,"Segoe UI",Tahoma,Arial,sans-serif',x0=d.x,L=x0.ln||[],RH=60,shop=lsv('shop','');
