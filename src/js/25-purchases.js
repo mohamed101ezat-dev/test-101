@@ -168,10 +168,10 @@ const puInvNm=x=>x.ob?'رصيد من قبل':x.owe?'مبلغ عليّا':x.ret?'
 /* صورة فاتورة واحدة: هيدر · جدول الأصناف · الإجمالي · المدفوع منها · الباقي · الملاحظات · رصيد المورد */
 function puInvImg(s,d,bal){const W=1080,P=40,F=(z,w)=>(w||400)+' '+z+'px system-ui,"Segoe UI",Tahoma,Arial,sans-serif',x0=d.x,L=puOpt.it?(x0.ln||[]):[],RH=60,shop=lsv('shop','');
   const cols=[{k:'الصنف',x:W-P-12,a:'right'},{k:'المقاس',x:560,a:'center'},{k:'عدد',x:450,a:'center'},{k:'م²',x:350,a:'center'},{k:'سعر المتر',x:230,a:'center'},{k:'القيمة',x:P+12,a:'left'}];
-  const noteL=puOpt.nt&&x0.note?String(x0.note):'',alv=puOpt.py?d.al:[];const H=250+(L.length?56+L.length*RH:RH)+70+(alv.length?50+alv.length*48:0)+(puOpt.py?80:0)+(noteL?110:0)+90;
+  const noteL=puOpt.nt&&x0.note?String(x0.note):'',alv=puOpt.py?d.al:[];const H=250+(L.length?56+L.length*RH:RH)+70+(alv.length?98+alv.length*54:0)+(puOpt.py?80:0)+(noteL?110:0)+90;
   const cv=document.createElement('canvas');cv.width=W;cv.height=H;const c=cv.getContext('2d');c.direction='rtl';
   c.fillStyle='#fff';c.fillRect(0,0,W,H);c.fillStyle='#1f5f3f';c.fillRect(0,0,W,150);
-  c.fillStyle='#fff';c.textAlign='right';c.font=F(46,700);c.fillText('🧾 '+puInvNm(x0)+(x0.ref?' #'+x0.ref:''),W-P,66);c.font=F(30);c.fillStyle='#d9e8df';c.fillText('المورد: '+s.name+' · '+puDMY(x0.ts),W-P,118);
+  c.fillStyle='#fff';c.textAlign='right';c.font=F(46,700);c.fillText('🧾 '+puInvNm(x0)+(x0.ref?' #'+x0.ref:''),W-P,66);c.font=F(30);c.fillStyle='#d9e8df';c.fillText('المورد: '+s.name,W-P,118);c.textAlign='left';c.fillText(puDMY(x0.ts),P,118);c.textAlign='right';
   if(shop){c.textAlign='left';c.font=F(32,700);c.fillStyle='#fff';c.fillText(shop,P,66)}
   let y=180;
   if(L.length){c.fillStyle='#eef3f0';c.fillRect(P,y,W-P*2,56);c.fillStyle='#374151';c.font=F(27,700);cols.forEach(o=>{c.textAlign=o.a;c.fillText(o.k,o.x,y+37)});y+=56;
@@ -179,8 +179,15 @@ function puInvImg(s,d,bal){const W=1080,P=40,F=(z,w)=>(w||400)+' '+z+'px system-
       const vals=[l.n,fq(l.w)+'×'+fq(l.h),fq(l.q),fq(m2),f(l.p),f(v)];cols.forEach((o,k)=>{c.textAlign=o.a;c.font=F(k===0?30:29,k===0||k===5?700:400);let t=String(vals[k]);if(k===0)while(c.measureText(t).width>W-P-12-640&&t.length>3)t=t.slice(0,-2);c.fillText(t,o.x,y+40)});y+=RH})}
   else{c.fillStyle='#111827';c.font=F(32,600);c.textAlign='right';c.fillText(puInvNm(x0),W-P-12,y+40);y+=RH}
   c.fillStyle='#1f5f3f';c.fillRect(P,y+6,W-P*2,3);y+=20;c.fillStyle='#111827';c.textAlign='right';c.font=F(36,700);c.fillText('الإجمالي',W-P-12,y+38);c.textAlign='left';c.fillText(f(d.tot),P+12,y+38);y+=70;
-  if(alv.length){c.textAlign='right';c.fillStyle='#374151';c.font=F(30,700);c.fillText('المدفوع منها',W-P-12,y+34);y+=50;
-    alv.forEach(a=>{const p=a.p||{};c.textAlign='right';c.fillStyle='#374151';c.font=F(28);c.fillText((p.type==='pay'?'دفعة '+(p.how||''):'مرتجع')+(p.ts?' · '+puDMY(p.ts):'')+(a.cr?'  ↪ من رصيدي عندك':a.sp?'  ↪ باقي دفعة':''),W-P-12,y+32);c.textAlign='left';c.fillStyle='#15803d';c.font=F(30,700);c.fillText('− '+f(a.amt),P+12,y+32);y+=48})}
+  if(alv.length){const pn=a=>{const p=a.p||{};const m=a.cr?'من رصيدي عندك':a.sp?'باقي دفعة':'';const nt=p.note&&p.note!=='مع فاتورة الشراء'?String(p.note):'';return[m,nt].filter(Boolean).join(' · ')},hasN=alv.some(a=>pn(a));
+    c.textAlign='right';c.fillStyle='#374151';c.font=F(30,700);c.fillText('المدفوع منها',W-P-12,y+34);y+=50;
+    c.fillStyle='#eef3f0';c.fillRect(P,y,W-P*2,48);c.fillStyle='#374151';c.font=F(26,700);c.textAlign='right';c.fillText('التاريخ',W-P-14,y+32);c.fillText('الطريقة',W-P-250,y+32);if(hasN)c.fillText('ملاحظة',W-P-560,y+32);c.textAlign='left';c.fillText('المبلغ',P+14,y+32);y+=48;
+    alv.forEach((a,i)=>{const p=a.p||{},how=p.type==='pay'?(p.how||'دفعة'):'مرتجع';c.fillStyle=i%2?'#fafbfa':'#fff';c.fillRect(P,y,W-P*2,54);c.fillStyle='#e5e7eb';c.fillRect(P,y+53,W-P*2,1);
+      c.textAlign='right';c.fillStyle='#111827';c.font=F(28);c.fillText(p.ts?puDMY(p.ts):'—',W-P-14,y+37);
+      let hx=W-P-250;const im=p.type==='pay'?tgIm(payImg(p.how)):null;if(im&&im.complete&&im.naturalWidth){const ih=30,iw=Math.min(54,ih*im.naturalWidth/im.naturalHeight);c.drawImage(im,hx-iw,y+11,iw,ih);hx-=iw+8}
+      c.fillStyle='#111827';c.font=F(28,600);c.fillText(how,hx,y+37);
+      if(hasN){let nt=pn(a);c.fillStyle='#6b7280';c.font=F(25);const mx=W-P-560-(P+190);while(c.measureText(nt).width>mx&&nt.length>3)nt=nt.slice(0,-2);c.fillText(nt,W-P-560,y+36)}
+      c.textAlign='left';c.fillStyle='#15803d';c.font=F(30,700);c.fillText('− '+f(a.amt),P+14,y+37);y+=54})}
   if(puOpt.py){c.fillStyle=d.rem>.005?'#fdecec':'#e8f5ec';c.fillRect(P,y,W-P*2,66);c.textAlign='right';c.fillStyle=d.rem>.005?'#b42318':'#15803d';c.font=F(36,700);c.fillText(d.rem>.005?'الباقي من الفاتورة':'✅ الفاتورة اتدفعت كلها',W-P-16,y+44);if(d.rem>.005){c.textAlign='left';c.fillText(f(d.rem),P+16,y+44)}y+=80}
   if(noteL){c.fillStyle='#fffbeb';c.fillRect(P,y,W-P*2,90);c.fillStyle='#92400e';c.textAlign='right';c.font=F(28);let t='📝 '+noteL;while(c.measureText(t).width>W-P*2-30&&t.length>5)t=t.slice(0,-2);c.fillText(t,W-P-16,y+54);y+=110}
   c.fillStyle='#6b7280';c.textAlign='right';c.font=F(30,600);c.fillText((bal<0?'ليّا عندك: ':'إجمالي اللي عليّا ليك: ')+f(Math.abs(bal)),W-P,y+44);
@@ -192,7 +199,7 @@ async function puSelImgs(s){const L=puSelList(s);if(!L.length){toast('اختار
   for(const fl of files)await dl(fl,fl.name)}
 function puSelTx(s){const L=puSelList(s),shop=lsv('shop','');let t='*'+(shop||'فواتير')+'*\n👤 '+s.name+'\n';
   L.forEach(d=>{const x=d.x;t+='\n━━━━━━━━\n🧾 *'+puInvNm(x)+(x.ref?' #'+x.ref:'')+'* · '+puDMY(x.ts)+'\n';if(x.ln&&puOpt.it)t+=x.ln.map(l=>'▫️ '+puLnTx(l)).join('\n')+'\n';t+='الإجمالي: *'+f(d.tot)+'*\n';
-    if(puOpt.py)d.al.forEach(a=>{const p=a.p||{};t+='− '+f(a.amt)+' '+(p.type==='pay'?'دفعة '+(p.how||''):'مرتجع')+(p.ts?' '+puDMY(p.ts):'')+(a.cr?' (من رصيدي عندك)':a.sp?' (باقي دفعة)':'')+'\n'});
+    if(puOpt.py)d.al.forEach(a=>{const p=a.p||{};t+='− '+f(a.amt)+' '+(p.type==='pay'?'دفعة '+(p.how||''):'مرتجع')+(p.ts?' '+puDMY(p.ts):'')+(a.cr?' (من رصيدي عندك)':a.sp?' (باقي دفعة)':'')+(puOpt.nt&&p.note&&p.note!=='مع فاتورة الشراء'?' — '+p.note:'')+'\n'});
     if(puOpt.py)t+=d.rem>.005?'الباقي: *'+f(d.rem)+'*\n':'✅ اتدفعت كلها\n';if(x.note&&puOpt.nt)t+='📝 '+x.note+'\n'});
   const b=puBal(s.id);return t+'\n━━━━━━━━\n*'+(b<0?'ليّا عندك: ':'إجمالي اللي عليّا: ')+f(Math.abs(b))+'*'}
 
