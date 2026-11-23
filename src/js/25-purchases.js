@@ -52,8 +52,8 @@ function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof sp
   const rows=l.map(x=>{const v=+x.amt||0,pay=x.type==='pay';run=rd2(run+(pay?-v:v));return{x,v,pay,run}}).reverse();
   const ob=S.purchases.find(x=>x.sid===s.id&&x.ob);
   return`<div class="card pus"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b class="pun">${esc(s.name)}</b><button type="button" class="xd" data-pu="edsup" aria-label="تعديل المورد">✏️</button><span class="pub"><small>${b<0?'ليك عنده':'عليك'}</small><b class="num${b>0?' dn':b<0?' ok':''}">${f(Math.abs(b))}</b></span></div>
-  ${d!=null?`<div class="pudl${d>=7?' red':''}">⏰ ${l.some(x=>x.type==='pay')?'آخر دفعة':'ما دفعتش'} ${puDTx(d)}</div>`:''}<div class="purw puowe" id="puOwe" hidden><input id="puOA" inputmode="decimal" placeholder="المبلغ اللي عليك" autocomplete="off" aria-label="المبلغ اللي عليك"><input id="puON" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><button type="button" class="main" data-pu="owesave">✅</button></div>
-  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة</button><button type="button" class="alt" data-pu="owe">➕ عليّا</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="ret" aria-label="مرتجع للمورد">↩️</button>${tel?`<a class="alt" href="tel:${esc(tel)}">📞</a>`:''}${wa?`<a class="alt" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">💬</a>`:''}</div></div>
+  ${d!=null?`<div class="pudl${d>=7?' red':''}">⏰ ${l.some(x=>x.type==='pay')?'آخر دفعة':'ما دفعتش'} ${puDTx(d)}</div>`:''}<div class="pusend" id="puSend" hidden><div class="spc">${[['last','🧾 آخر فاتورة واللي بعدها'],['date','📅 من تاريخ'],['all','📋 الحساب كله']].map(([k,t])=>`<button type="button" data-pus="${k}"${puSM===k?' class="on"':''}>${t}</button>`).join('')}</div><input type="date" id="puSD"${puSM==='date'?'':' hidden'} aria-label="من تاريخ"><div class="purw"><button type="button" class="main" data-pu="sendwa">💬 واتساب${s.phone?'':' (مفيش رقم)'}</button><button type="button" class="alt" data-pu="sendimg">🖼 صورة</button></div></div><div class="purw puowe" id="puOwe" hidden><input id="puOA" inputmode="decimal" placeholder="المبلغ اللي عليك" autocomplete="off" aria-label="المبلغ اللي عليك"><input id="puON" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة"><button type="button" class="main" data-pu="owesave">✅</button></div>
+  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة</button><button type="button" class="alt" data-pu="owe">➕ عليّا</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="ret" aria-label="مرتجع للمورد">↩️</button><button type="button" class="alt" data-pu="send" aria-label="ابعت كشف حساب للمورد">📤</button>${tel?`<a class="alt" href="tel:${esc(tel)}">📞</a>`:''}${wa?`<a class="alt" href="https://wa.me/${esc(wa)}" target="_blank" rel="noopener">💬</a>`:''}</div></div>
   <div class="card pued" ${puEdS?'':'hidden'}><div class="purw"><input id="puEN" value="${esc(s.name)}" placeholder="الاسم" autocomplete="off" aria-label="اسم المورد"><input id="puEP" inputmode="tel" value="${esc(s.phone||'')}" placeholder="تليفون" autocomplete="off" aria-label="التليفون"></div>
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
@@ -73,7 +73,7 @@ function puInvH(){const e=puE,names=S.items.filter(i=>i.type==='mq').map(i=>i.na
   <div class="purw"><span>📄 إجمالي ورقة المورد</span><input id="puPaper" inputmode="decimal" value="${esc(e.paper)}" placeholder="اختياري" autocomplete="off" aria-label="إجمالي ورقة المورد"></div><div id="puChk">${puChkH()}</div>
   ${e.ret?'':`<div class="purw"><span>💵 دفعت دلوقتي</span><input id="puPd" inputmode="decimal" value="${esc(e.paid)}" placeholder="0" autocomplete="off" aria-label="المدفوع"><button type="button" class="alt" data-pu="paidall">كله</button></div><div class="spc puhow">${puHowChips(e.how)}</div>`}
   <input id="puNote" value="${esc(e.note)}" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة">
-  <div class="purw"><button type="button" class="main" data-pu="saveinv">✅ حفظ</button>${e.id?'<button type="button" class="alt b-red" data-pu="delinv">🗑️ حذف</button>':''}</div><div class="info" id="puMsg" aria-live="polite"></div></div>`}
+  <div class="purw"><button type="button" class="main" data-pu="saveinv">✅ حفظ</button>${e.id?'<button type="button" class="alt" data-pu="sendone">📤 ابعتها</button><button type="button" class="alt b-red" data-pu="delinv">🗑️ حذف</button>':''}</div><div class="info" id="puMsg" aria-live="polite"></div></div>`}
 const puLnH=(l,i)=>{const x=puLn(l);return`<div class="puln" data-i="${i}"><input class="pN" list="puNames" value="${esc(l.n)}" placeholder="4م مراية" autocomplete="off" aria-label="النوع"><input class="pW" inputmode="decimal" value="${esc(l.w)}" placeholder="321" autocomplete="off" aria-label="الطول"><input class="pH" inputmode="decimal" value="${esc(l.h)}" placeholder="225" autocomplete="off" aria-label="العرض"><input class="pQ" inputmode="decimal" value="${esc(l.q)}" placeholder="0" autocomplete="off" aria-label="عدد الألواح"><input class="pP" inputmode="decimal" value="${esc(l.p)}" placeholder="0" autocomplete="off" aria-label="سعر المتر"><b class="num pV">${x.tot?f(x.tot):''}</b><button type="button" class="xd" data-pux="${i}" aria-label="شيل السطر">×</button><small class="mute pS">${x.ar?'اللوح '+fq(x.ar)+' م²'+(x.sheet?' · '+f(x.sheet)+' ج':''):''}</small></div>`};
 function puChkH(){const e=puE,pp=nv(e.paper),t=puSum(e);if(!(pp>0)||!(t>0))return'';const d=rd2(pp-t);return Math.abs(d)<1?'<div class="puok">✅ مطابقة لورقة المورد</div>':`<div class="pubad">⚠️ فرق ${f(Math.abs(d))} ج — ${d>0?'الورقة أكتر':'الورقة أقل'}</div>`}
 function puLiveTot(){const e=puE,t=$('puT');if(t)t.textContent=f(puSum(e));const m=$('puM2');if(m){const v=rd2(e.ln.reduce((a,l)=>a+puLn(l).m2,0));m.textContent=v?fq(v)+' م²':''}const c=$('puChk');if(c)c.innerHTML=puChkH()}
@@ -97,19 +97,47 @@ function puPayH(){const p=puP,b=p.sid?puBal(p.sid):0;
   <div class="purw"><input id="puA" inputmode="decimal" value="${esc(p.amt)}" placeholder="المبلغ" autocomplete="off" aria-label="المبلغ">${!p.buy&&b>0?`<button type="button" class="alt" data-pu="payall">كله ${f(b)}</button>`:''}</div>
   ${p.buy?'':`<div class="spc puhow">${puHowChips(p.how)}</div>`}
   <input id="puNote" value="${esc(p.note)}" placeholder="ملاحظة (اختياري)" autocomplete="off" aria-label="ملاحظة">
-  <div class="purw"><button type="button" class="main" data-pu="savepay">✅ حفظ</button>${p.id?'<button type="button" class="alt b-red" data-pu="delpay">🗑️ حذف</button>':''}</div><div class="info" id="puMsg" aria-live="polite"></div></div>`}
+  <div class="purw"><button type="button" class="main" data-pu="savepay">✅ حفظ</button>${p.id?'<button type="button" class="alt" data-pu="sendone">📤 ابعتها</button><button type="button" class="alt b-red" data-pu="delpay">🗑️ حذف</button>':''}</div><div class="info" id="puMsg" aria-live="polite"></div></div>`}
 function puSavePay(){const p=puP,m=$('puMsg'),s=puSup(p.sid),a=rd2(nv(p.amt));if(!s){m.textContent='اختار المورد';return}if(!(a>0)){m.textContent='اكتب المبلغ';return}
   let x=p.id&&S.purchases.find(y=>y.id===p.id);if(!x){x={id:uid(),type:'pay'};S.purchases.push(x)}
   Object.assign(x,{sid:s.id,ts:puTs(p.date,p.ts),amt:a,note:p.note.trim()});if(x.type==='pay')x.how=p.how||'كاش';put('purchases',x);
   puSid=s.id;puP=null;{const tp=puStack[puStack.length-1];if(tp&&tp[0]==='sup')puStack.pop()}puV='sup';puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}toast('✅ اتسجّل · عليك '+f(puBal(s.id)))}
 
+
+/* ---- 📤 كشف حساب للمورد: الحساب القديم + الحركات + الرصيد، كرسالة واتساب على رقمه أو كصورة (v414) ---- */
+var puSM='last';
+const puLnTx=l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)+' × '+f(l.p)+' = '+f(rd2(rd2(l.w*l.h/1e4)*l.p*l.q));
+const puMvName=x=>x.type==='pay'?'💵 دفعة'+(x.how?' '+x.how:''):x.ob?'رصيد من قبل':x.owe?'➕ مبلغ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:'');
+const puDMY=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()};
+/* بيرجّع: الرصيد قبل، الحركات، الرصيد بعد. one=حركة واحدة بس */
+function puStmt(sid,mode,from,one){const l=puOf(sid);let a=0,i0=0,i1=l.length;
+  if(one){i0=l.findIndex(x=>x.id===one);if(i0<0)return null;i1=i0+1}
+  else if(mode==='last'){let k=-1;l.forEach((x,i)=>{if(x.type==='buy'&&!x.ob)k=i});i0=k<0?0:k}
+  else if(mode==='date'&&from){const j=l.findIndex(x=>x.ts>=from);i0=j<0?l.length:j}
+  l.slice(0,i0).forEach(x=>a=rd2(a+(x.type==='pay'?-1:1)*(+x.amt||0)));
+  const mv=l.slice(i0,i1);let b=a;mv.forEach(x=>b=rd2(b+(x.type==='pay'?-1:1)*(+x.amt||0)));return{prev:a,mv,bal:b}}
+function puStmtTx(s,st){const shop=lsv('shop','');let t='*كشف حساب'+(shop?' · '+shop:'')+'*\n👤 '+s.name+'\n📅 '+puDMY(Date.now())+'\n';
+  if(st.prev||st.mv.length>1)t+='\nرصيد سابق: *'+f(st.prev)+'*\n';
+  st.mv.forEach(x=>{const v=+x.amt||0;t+='\n'+puMvName(x)+' · '+puDMY(x.ts)+'\n'+(x.type==='pay'?'− ':'+ ')+f(Math.abs(v));if(x.ln)t+='\n'+x.ln.map(l=>'   ▫️ '+puLnTx(l)).join('\n');if(x.note&&!x.ln)t+='\n   ('+x.note+')';t+='\n'});
+  return t+'\n━━━━━━━━\n*'+(st.bal<0?'ليّا عندك: ':'الرصيد اللي عليّا: ')+f(Math.abs(st.bal))+'*'}
+function puStmtSpec(s,st){const rows=st.mv.map(x=>[puMvName(x)+' · '+puDMY(x.ts),(x.type==='pay'?'− ':'+ ')+f(Math.abs(+x.amt||0)),x.ln?x.ln.map(l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)).join('، '):(x.note||''),x.type==='pay'?'#15803d':'']);
+  return{title:'📋 كشف حساب',sub:s.name+' · '+puDMY(Date.now()),kpi:[['رصيد سابق',f(st.prev)],[st.bal<0?'ليّا عنده':'الرصيد اللي عليّا',f(Math.abs(st.bal)),'',st.bal>0?'#b42318':'#15803d']],sec:[{h:'الحركات',rows}],cap:'كشف حساب · '+s.name}}
+async function puSendOut(s,st,how){if(!st||!st.mv.length){toast('مفيش حركات تتبعت');return}
+  if(how==='img'){try{const b=await tgDraw(puStmtSpec(s,st)),file=new File([b],'كشف-'+s.name+'.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'كشف حساب'});return}await dl(b,file.name)}catch(e){if(e&&e.name==='AbortError')return;toast('الصورة ما اتبعتتش')}return}
+  const tx=puStmtTx(s,st),w=s.phone?waNum(s.phone):'';if(w){window.open('https://wa.me/'+w+'?text='+encodeURIComponent(tx),'_blank','noopener');return}
+  try{if(navigator.share){await navigator.share({text:tx});return}}catch(e){if(e&&e.name==='AbortError')return}try{await navigator.clipboard.writeText(tx);toast('اتنسخ الكشف، الزقه في الواتساب (المورد ملوش رقم)')}catch(e){toast('المورد ملوش رقم')}}
+
 /* ---- الأحداث ---- */
 $('pu').addEventListener('click',e=>{const t=e.target,r=t.closest('[data-pusup],[data-puinv],[data-pue]');
-  const b=t.closest('[data-pu],[data-pux],[data-puh]');
+  const b=t.closest('[data-pu],[data-pux],[data-puh],[data-pus]');
+  if(b&&b.dataset.pus){puSM=b.dataset.pus;b.parentNode.querySelectorAll('[data-pus]').forEach(x=>x.classList.toggle('on',x===b));const d=$('puSD');if(d)d.hidden=puSM!=='date';return}
   if(b&&b.dataset.puh){const h=b.dataset.puh;if(puE)puE.how=h;if(puP)puP.how=h;b.parentNode.querySelectorAll('[data-puh]').forEach(x=>x.classList.toggle('on',x===b));return}
   if(b&&b.dataset.pux!=null){puE.ln.splice(+b.dataset.pux,1);if(!puE.ln.length)puE.ln.push(puNewLn());$('puLns').innerHTML=puE.ln.map((l,i)=>puLnH(l,i)).join('');puLiveTot();return}
   if(b){const k=b.dataset.pu,s=puSup(puSid);
     if(k==='back')return puBack();
+    if(k==='send'){const o=$('puSend');o.hidden=!o.hidden;return}
+    if(k==='sendwa'||k==='sendimg'){if(!s)return;const fr=puSM==='date'&&$('puSD').value?new Date($('puSD').value+'T00:00:00').getTime():0;if(puSM==='date'&&!fr){$('puSD').focus();return}return puSendOut(s,puStmt(s.id,puSM,fr),k==='sendimg'?'img':'wa')}
+    if(k==='sendone'){const id=(puE||puP||{}).id,x=S.purchases.find(y=>y.id===id);if(!x)return;const sp=puSup(x.sid);if(sp)puSendOut(sp,puStmt(sp.id,'',0,id),'wa');return}
     if(k==='owe'){const o=$('puOwe');o.hidden=!o.hidden;if(!o.hidden)$('puOA').focus();return}
     if(k==='owesave'&&s){const a=rd2(nv($('puOA').value)),n=$('puON').value.trim();if(!(a>0)){$('puOA').focus();return}const o={id:uid(),sid:s.id,ts:Date.now(),type:'buy',amt:a,owe:1,note:n};S.purchases.push(o);put('purchases',o);$('puOA').value='';$('puON').value='';puDraw();toast('✅ اتسجّل عليك '+f(a)+' · الإجمالي '+f(puBal(s.id)));return}
     if(k==='owed')return puGo('owed');if(k==='month')return puGo('month');if(k==='new')return puNewInv(puV==='sup'?puSid:'',false);

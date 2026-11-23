@@ -2095,3 +2095,10 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #pu .puowe{margin-top:6px}
 #pu .puowe[hidden]{display:none}
 #pu .puowe input{flex:1.3}#pu .puowe #puON{flex:1.7}
+
+/* v414: ابعت كشف حساب للمورد */
+#pu .pusend{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line)}
+#pu .pusend[hidden]{display:none}
+#pu .pusend .spc{margin:0}
+#pu .pusend #puSD{height:32px;margin-top:5px}
+#pu .pusend #puSD[hidden]{display:none}
