@@ -2102,3 +2102,7 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #pu .pusend .spc{margin:0}
 #pu .pusend #puSD{height:32px;margin-top:5px}
 #pu .pusend #puSD[hidden]{display:none}
+
+/* v416: حوّلت على رقم */
+#pu #puTo{height:32px;min-height:32px;font-size:13px;margin-top:5px;text-align:center}
+#pu #puTo[hidden]{display:none}
