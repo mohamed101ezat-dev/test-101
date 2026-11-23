@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=423">
+<link rel="stylesheet" href="css/style.css?v=424">
 
 
 
@@ -483,13 +483,14 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="card"><b>🧰 أدوات</b><label class="opt"><input type="checkbox" id="calcOn"> زرار الآلة الحاسبة</label><label class="opt"><input type="checkbox" id="stkShow"> المخزن في الإعدادات (اقفله لو مش بتستخدمه)</label><label class="opt"><input type="checkbox" id="backFab"> زرار رجوع صغير تحت في صفحات الإعدادات (بيختفي وانت نازل في الصفحة)</label></div>
 </div>
 <div class="stp hide" data-sp="tg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>✈️ تيليجرام</b></div>
-  <div class="card" id="tgBox"><b>🔗 الربط</b> <span class="mute" id="tgSt"></span>
+  <details class="card spdt" id="tgBox"><summary>🔗 الربط <span class="mute" id="tgSt"></span></summary>
     <div class="mute" style="font-size:12px;margin:6px 0">بعد ما تربطه، النسخة والتقارير اللي تحت بتتبعتلك على تيليجرام لوحدها.<br>١) في تيليجرام افتح <b>@BotFather</b> واكتب <b>/newbot</b> واتبع الخطوات، هيدّيك <b>Token</b>.<br>٢) افتح البوت بتاعك وابعتله أي رسالة (مثلًا: أهلاً).<br>٣) الصق الـToken هنا ودوس «🔍 هات الـChat ID»، وبعدها «اختبار».</div>
     <input id="tgTok" type="password" dir="ltr" placeholder="Token (123456:ABC…)" autocomplete="off" aria-label="Token">
     <div class="ro" style="gap:6px;margin-top:6px"><input id="tgChat" dir="ltr" placeholder="Chat ID" autocomplete="off" aria-label="Chat ID" style="flex:1"><button type="button" class="alt" id="tgFind" style="flex:none">🔍 هات الـChat ID</button></div>
     <div class="ro" style="gap:6px;margin-top:6px"><button type="button" class="main" id="tgTest" style="flex:1">✉️ اختبار</button><button type="button" class="alt b-red" id="tgOff" style="flex:none">إيقاف</button></div>
 
-    <div class="info" id="tgMsg"></div></div>
+    <div class="info" id="tgMsg"></div></details>
+  <details class="card spdt" id="tgTop"><summary>🧩 كل نوع في موضوع لوحده <small class="mute">اختياري</small></summary><div class="mute" style="font-size:12px;margin:6px 0">بدل ما كله يوصل في شات واحد: اعمل <b>جروب</b> في تيليجرام وفعّل <b>Topics</b> من إعدادات الجروب، ضيف البوت <b>أدمن</b> (صلاحية إدارة المواضيع)، وحط الـChat ID بتاع الجروب (فوق). وبعدين دوس الزرار، وهيعمل موضوع لكل نوع: النسخ · المديونين · الإقفال · الأسبوع · الموردين · المخزن · الشهر · المشتريات · التنبيهات.</div><div class="ro" style="gap:6px"><button type="button" class="main" id="tgTopGo" style="flex:1">🧩 جهّز المواضيع</button><button type="button" class="alt" id="tgTopOff" style="flex:none">شات واحد</button></div><div class="info" id="tgTopMsg" aria-live="polite"></div></details>
   <div class="card" id="tgAuto"><b>📨 بيتبعت لوحده</b> <small class="mute">أول ما تفتح البرنامج</small>
     <div class="tgr"><label class="opt"><input type="checkbox" id="dsTg"> 💾 النسخة الاحتياطية <small class="mute">كل يوم</small></label><button type="button" class="alt" data-tgnow="bk">ابعت دلوقتي</button></div>
     <div class="tgr"><label class="opt"><input type="checkbox" id="dbTg"> 📒 صورة المديونين <small class="mute">كل يوم</small></label><button type="button" class="alt" id="dbTgNow">ابعت دلوقتي</button></div>
@@ -497,6 +498,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
     <div class="tgr"><label class="opt"><input type="checkbox" id="tgWk"> 📊 تقرير الأسبوع <small class="mute">كل أسبوع</small></label><button type="button" class="alt" data-tgnow="wk">ابعت دلوقتي</button></div>
     <div class="tgr"><label class="opt"><input type="checkbox" id="tgSp"> 🚚 الموردين اللي عليك ليهم <small class="mute">كل أسبوع</small></label><button type="button" class="alt" data-tgnow="sp">ابعت دلوقتي</button></div>
     <div class="tgr"><label class="opt"><input type="checkbox" id="tgSk"> <i class="ic-mkh" aria-hidden="true"></i> المخزن والجرد <small class="mute">كل أسبوع</small></label><button type="button" class="alt" data-tgnow="sk">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgBu"> 🛒 تقرير المشتريات <small class="mute">أول كل شهر</small></label><button type="button" class="alt" data-tgnow="bu">ابعت دلوقتي</button></div>
     <div class="tgr"><label class="opt"><input type="checkbox" id="tgMo"> 📈 تقرير الشهر <small class="mute">أول كل شهر</small></label><button type="button" class="alt" data-tgnow="mo">ابعت دلوقتي</button></div>
     <div class="tgr"><label class="opt"><input type="checkbox" id="tgDel"> 🗑️ تنبيه لو فاتورة أو دفعة اتمسحت أو اتعدّلت <small class="mute">ساعتها</small></label></div>
     <div class="info" id="tgAMsg" aria-live="polite"></div></div>
@@ -600,11 +602,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=423"></script>
-<script src="js/qr.js?v=423"></script>
+<script src="js/app.js?v=424"></script>
+<script src="js/qr.js?v=424"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=423"></script>
-<script src="js/features.js?v=423"></script>
+<script src="js/cutlist.js?v=424"></script>
+<script src="js/features.js?v=424"></script>
 </body>
 </html>
 

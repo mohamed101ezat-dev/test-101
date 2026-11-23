@@ -24,7 +24,7 @@ function dtgPage(L,pg,pages,tot,n){const W=1080,RH=66,HD=200,FT=pages>1?60:24,H=
 async function dtgImages(){const A=dtgList(),tot=rd2(A.reduce((a,o)=>a+o.b,0)),P=25,pages=Math.max(1,Math.ceil(A.length/P)),out=[];
   for(let p=0;p<pages;p++)out.push(await dtgPage(A.slice(p*P,(p+1)*P),p,pages,tot,A.length));return{n:A.length,tot,imgs:out}}
 async function dtgSend(){if(dtgBusy)return'busy';dtgBusy=true;try{const r=await dtgImages();if(!r.n)return'none';
-    for(let i=0;i<r.imgs.length;i++){const fd=new FormData();fd.append('chat_id',tgCfg().c);if(i===0)fd.append('caption','📒 المديونين '+dshort(Date.now())+' · '+plN(r.n,'عميل')+' · الإجمالي '+f(r.tot));fd.append('photo',r.imgs[i],'مديونين-'+(i+1)+'.png');await tgApi('sendPhoto',fd)}
+    for(let i=0;i<r.imgs.length;i++){const fd=new FormData();fd.append('chat_id',tgCfg().c);if(i===0)fd.append('caption','📒 المديونين '+dshort(Date.now())+' · '+plN(r.n,'عميل')+' · الإجمالي '+f(r.tot));fd.append('photo',r.imgs[i],'مديونين-'+(i+1)+'.png');await tgApi('sendPhoto',fd,'db')}
     return'ok'}finally{dtgBusy=false}}
 async function dtgAuto(){if(!pget('dbTg',false)||!tgCfg().t||!tgCfg().c||!dataReady||!S.customers.length)return;const k=dkey(Date.now());if(lsv('dbTgSent','')===k)return;
   try{const r=await dtgSend();if(r==='ok'||r==='none')svk('dbTgSent',k)}catch(e){}}

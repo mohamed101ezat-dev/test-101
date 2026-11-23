@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='423';
+const APP_VER='424';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3066,8 +3066,14 @@ $('snapRows').onclick=async e=>{const d=e.target.dataset;if(!d.sd&&!d.sr)return;
   if(d.sd){await dl(new Blob([x.json],{type:'application/json'}),'نسخة-فواتير-'+k+'.json');return}
   if(!ok2(e.target))return;try{$('snapMsg').textContent=await restoreData(JSON.parse(x.json))}catch(err){$('snapMsg').textContent='النسخة دي مش صالحة.'}};
 /* v346: إرسال النسخة لتيليجرام لوحده (Bot API مجاني). الـToken بيتخزن على الجهاز ده بس */
-const tgCfg=()=>({t:lsv('tgTok','').trim(),c:lsv('tgChat','').trim()}),tgApi=async(m,body)=>{const{t}=tgCfg();const r=await fetch('https://api.telegram.org/bot'+t+'/'+m,body?{method:'POST',body}:{});const d=await r.json().catch(()=>({}));if(!d.ok)throw new Error(d.description||('فشل الإرسال ('+r.status+')'));return d.result};
-const tgSend=(blob,name,cap)=>{const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',cap||name);fd.append('document',blob,name);return tgApi('sendDocument',fd)};
+const tgCfg=()=>({t:lsv('tgTok','').trim(),c:lsv('tgChat','').trim()}),tgApi=async(m,body,kind)=>{const{t}=tgCfg(),th=kind?tgTh(kind):'';let bd=body;if(th&&body&&m!=='createForumTopic')body.append('message_thread_id',th);
+  const go=async b=>{const r=await fetch('https://api.telegram.org/bot'+t+'/'+m,b?{method:'POST',body:b}:{});const d=await r.json().catch(()=>({}));return{r,d}};let x=await go(bd);
+  if(!x.d.ok&&th&&/thread|topic/i.test(x.d.description||'')){const fd=new FormData();for(const[k,v]of body.entries())if(k!=='message_thread_id')fd.append(k,v);x=await go(fd)}
+  if(!x.d.ok)throw new Error(x.d.description||('فشل الإرسال ('+x.r.status+')'));return x.d.result};
+/* كل نوع تقرير في موضوع لوحده جوه جروب تيليجرام (Topics). لو مفيش مواضيع بيروح الشات العادي */
+const TGK={bk:'💾 النسخ الاحتياطية',db:'📒 المديونين',cl:'🧾 إقفال اليوم',wk:'📊 الأسبوع',sp:'🚚 الموردين',sk:'🧱 المخزن',mo:'📈 الشهر',bu:'🛒 المشتريات',al:'🔔 التنبيهات'};
+const tgTopics=()=>{try{return JSON.parse(lsv('tgTop','{}'))||{}}catch(e){return{}}},tgTh=k=>{const v=tgTopics()[k];return v?String(v):''};
+const tgSend=(blob,name,cap)=>{const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',cap||name);fd.append('document',blob,name);return tgApi('sendDocument',fd,'bk')};
 (()=>{const t=$('tgTok'),c=$('tgChat'),m=$('tgMsg');if(!t)return;t.value=lsv('tgTok','');c.value=lsv('tgChat','');const sv=()=>{svk('tgTok',t.value.trim());svk('tgChat',c.value.trim())};t.onchange=sv;c.onchange=sv;
   $('tgFind').onclick=async()=>{sv();if(!t.value.trim()){m.textContent='الصق الـToken الأول';return}m.textContent='⏳ بدوّر…';try{const r=await tgApi('getUpdates'),ch=r.map(u=>(u.message||u.channel_post||{}).chat).filter(Boolean).pop();if(!ch){m.textContent='مفيش رسايل للبوت. ابعتله أي رسالة من تيليجرام وجرّب تاني';return}c.value=String(ch.id);sv();m.textContent='✅ لقيته: '+(ch.first_name||ch.title||ch.id)}catch(e){m.textContent='⚠ '+e.message}};
   $('tgTest').onclick=async()=>{sv();if(!tgCfg().t||!tgCfg().c){m.textContent='اكتب الـToken والـChat ID';return}m.textContent='⏳ بيتبعت…';try{const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('text','✅ فواتير: الربط شغّال، والنسخ الاحتياطية هتوصلك هنا');await tgApi('sendMessage',fd);m.textContent='✅ اتبعتت رسالة تجربة على تيليجرام'}catch(e){m.textContent='⚠ '+e.message}};
@@ -3185,7 +3191,7 @@ function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);t
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
 function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
 
-function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else if(puV==='owed')b.innerHTML=puOwedH();else if(puV==='month')b.innerHTML=puMonthH();else{puV='home';b.innerHTML=puHomeH()}}
+function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else if(puV==='rep')b.innerHTML=puRepH();else if(puV==='owed')b.innerHTML=puOwedH();else if(puV==='month')b.innerHTML=puMonthH();else{puV='home';b.innerHTML=puHomeH()}}
 
 /* ---- الصفحة الرئيسية: الموردين + آخر الفواتير ---- */
 function puHomeH(){const now=new Date(),m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
@@ -3193,7 +3199,7 @@ function puHomeH(){const now=new Date(),m0=new Date(now.getFullYear(),now.getMon
   const sups=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).sort((a,b)=>(b.b>0)-(a.b>0)||b.b-a.b||a.s.name.localeCompare(b.s.name,'ar'));
   const last=S.purchases.filter(x=>x.type==='buy'&&!x.ob&&puSup(x.sid)).sort((a,b)=>b.ts-a.ts).slice(0,8);
   return`<div class="puk"><button type="button" data-pu="owed"><small>🚚 عليك للموردين ›</small><b class="num${tot>0?' dn':''}">${f(tot)}</b></button><button type="button" data-pu="month"><small>🛒 اشتريت الشهر ده ›</small><b class="num">${f(mo)}</b></button></div>
-  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة شراء</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="addsup">➕ مورد</button></div>
+  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة شراء</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="addsup">➕ مورد</button><button type="button" class="alt" data-pu="rep" aria-label="تقرير المشتريات">📊</button></div>
   <div class="card puadd" id="puAdd" hidden><div class="purw"><input id="puNS" placeholder="اسم المورد" autocomplete="off" aria-label="اسم المورد"><input id="puNP" inputmode="tel" placeholder="تليفون" autocomplete="off" aria-label="التليفون"><button type="button" class="main" data-pu="savesup">✅</button></div><div class="info" id="puAM"></div></div>
   <div class="pusec">🚚 الموردين</div>
   ${sups.length?sups.map(({s,b,d})=>`<div class="purow" data-pusup="${esc(s.id)}" role="button" tabindex="0"><span class="pun">${esc(s.name)}</span>${d!=null?`<span class="pud${d>=7?' red':''}">⏰ ${puDTx(d)}</span>`:''}<b class="num${b>0?' dn':b<0?' ok':''}">${b?f(Math.abs(b)):'✓'}</b></div>`).join(''):'<div class="card mute">مفيش موردين لسه. دوس «➕ مورد».</div>'}
@@ -3226,7 +3232,7 @@ function puSupH(s){const AL=puAlloc(s.id),DM=new Map(AL.D.map(d=>[d.x.id,d]));co
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
   ${puSelOn?puSelBar():''}
-  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>puRowH(x,v,pay,run,pay?null:DM.get(x.id))).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
+  <div class="card pul">${puStmtH(rows,DM)}</div>`}
 
 
 /* ---- 🧾 توزيع الدفعات على الفواتير (v418): الحساب القديم الأول، بعدين أقدم فاتورة، والزيادة بتبقى «ليّا عنده» وبتتخصم من الفاتورة الجاية ----
@@ -3355,10 +3361,45 @@ function puSelTx(s){const L=puSelList(s),shop=lsv('shop','');let t='*'+(shop||'�
     if(puOpt.py)t+=d.rem>.005?'الباقي: *'+f(d.rem)+'*\n':'✅ اتدفعت كلها\n';if(x.note&&puOpt.nt)t+='📝 '+x.note+'\n'});
   const b=puBal(s.id);return t+'\n━━━━━━━━\n*'+(b<0?'ليّا عندك: ':'إجمالي اللي عليّا: ')+f(Math.abs(b))+'*'}
 
+/* ---- كشف الحساب: آخر فاتورة واللي بعدها، والأقدم في «المزيد» شهر شهر (v424) ---- */
+var puMore=false;
+const puMonKey=t=>{const d=new Date(t);return d.getFullYear()*100+d.getMonth()};
+function puStmtH(rows,DM){if(!rows.length)return'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>';
+  const bi=[];rows.forEach((r,i)=>{if(!r.pay&&DM.get(r.x.id))bi.push(i)});let k=rows.length;
+  if(bi.length){let cut=bi[0];if(DM.get(rows[bi[0]].x.id).rem<=.005&&bi[1]!=null)cut=bi[1];k=cut+1}
+  const head='<tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>',row=r=>puRowH(r.x,r.v,r.pay,r.run,r.pay?null:DM.get(r.x.id)),shown=rows.slice(0,k),older=rows.slice(k);
+  let h='<table class="xl">'+head+shown.map(row).join('')+(older.length?'<tr class="puprev"><td colspan="3">رصيد سابق</td><td class="num"><b>'+f(older[0].run)+'</b></td></tr>':'')+'</table>';
+  if(older.length){const n=older.filter(r=>!r.pay&&DM.get(r.x.id)).length;h+='<button type="button" class="alt pumore" data-pumore="1">'+(puMore?'⬆ إخفاء الأقدم':'⬇ المزيد: أقدم ('+plN(n,'فاتورة')+')')+'</button>';
+    if(puMore){const G=[];older.forEach(r=>{const key=puMonKey(r.x.ts);let g=G[G.length-1];if(!g||g.k!==key){g={k:key,t:r.x.ts,rows:[]};G.push(g)}g.rows.push(r)});
+      h+=G.map(g=>'<details class="pumo"><summary>'+esc(tgMon(g.t))+' · '+plN(g.rows.length,'حركة')+'</summary><table class="xl">'+g.rows.map(row).join('')+'</table></details>').join('')}}
+  return h}
+
+/* ---- 📊 تقرير المشتريات: شهر أو سنة، توتال الأصناف وتوتال الفواتير (v424) ---- */
+var puRM=Date.now(),puRY=false;
+function puRepRange(){const d=new Date(puRM);return puRY?[new Date(d.getFullYear(),0,1).getTime(),new Date(d.getFullYear()+1,0,1).getTime()]:[new Date(d.getFullYear(),d.getMonth(),1).getTime(),new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
+function puRepData(a,b){const inv=S.purchases.filter(x=>x.type==='buy'&&!x.ob&&x.ts>=a&&x.ts<b&&puSup(x.sid)).sort((x,y)=>x.ts-y.ts),it=new Map(),su=new Map();let tot=0,m2=0,plain=0,ql=0;
+  inv.forEach(x=>{const v=+x.amt||0,sg=x.ret?-1:1;tot=rd2(tot+v);const sp=su.get(x.sid)||{v:0,n:0};sp.v=rd2(sp.v+v);sp.n++;su.set(x.sid,sp);
+    if(x.ln&&x.ln.length)x.ln.forEach(l=>{const ar=s2A(l.w,l.h),mm=rd2(ar*l.q)*sg,vv=rd2(ar*l.p*l.q)*sg,k=nkey(l.n),o=it.get(k)||{n:l.n,q:0,m2:0,v:0};o.q=rd2(o.q+l.q*sg);o.m2=rd2(o.m2+mm);o.v=rd2(o.v+vv);it.set(k,o);m2=rd2(m2+mm);ql=rd2(ql+l.q*sg)});else plain=rd2(plain+v)});
+  const pay=rd2(S.purchases.filter(x=>x.type==='pay'&&x.ts>=a&&x.ts<b&&puSup(x.sid)).reduce((s,x)=>s+(+x.amt||0),0));
+  return{inv,tot,m2,ql,plain,pay,items:[...it.values()].sort((x,y)=>y.v-x.v),supp:[...su].map(([id,o])=>({s:puSup(id),...o})).sort((x,y)=>y.v-x.v)}}
+const puRepLbl=()=>puRY?String(new Date(puRM).getFullYear()):tgMon(puRM);
+function puRepH(){const[a,b]=puRepRange(),d=puRepData(a,b);
+  return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b>📊 تقرير المشتريات</b><button type="button" class="alt purtg" data-pu="repsend" aria-label="ابعته على تيليجرام"><i class="ic-tg"></i></button></div>
+  <div class="purw purp"><button type="button" class="alt" data-pu="repp" aria-label="السابق">›</button><b class="purl">${esc(puRepLbl())}</b><button type="button" class="alt" data-pu="repn" aria-label="التالي">‹</button><button type="button" class="alt${puRY?' on':''}" data-pu="repy">سنة</button></div></div>
+  <div class="puk"><div><small>🛒 إجمالي المشتريات</small><b class="num">${f(d.tot)}</b></div><div><small>🧾 عدد الفواتير</small><b class="num">${d.inv.length}</b></div><div><small>📐 الأمتار</small><b class="num">${fq(d.m2)} م²</b></div><div><small>💵 دفعت للموردين</small><b class="num ok">${f(d.pay)}</b></div></div>
+  ${d.items.length||d.plain?`<div class="card pul"><b class="pusec2">📦 توتال الأصناف</b><table class="xl"><tr><th>الصنف</th><th>لوح</th><th>م²</th><th>القيمة</th></tr>${d.items.map(o=>`<tr><td class="tn">${esc(o.n)}</td><td class="num">${fq(o.q)}</td><td class="num">${fq(o.m2)}</td><td class="num"><b>${f(o.v)}</b></td></tr>`).join('')}${d.plain?`<tr><td class="tn">فواتير من غير أصناف</td><td></td><td></td><td class="num"><b>${f(d.plain)}</b></td></tr>`:''}<tr class="puprev"><td>الإجمالي</td><td class="num">${fq(d.ql)}</td><td class="num">${fq(d.m2)}</td><td class="num"><b>${f(d.tot)}</b></td></tr></table></div>`:''}
+  ${d.supp.length?`<div class="card pul"><b class="pusec2">🚚 توتال الموردين</b><table class="xl"><tr><th>المورد</th><th>فواتير</th><th>القيمة</th></tr>${d.supp.map(o=>`<tr data-pusup="${esc(o.s.id)}" style="cursor:pointer"><td class="tn">${esc(o.s.name)}</td><td class="num">${o.n}</td><td class="num"><b>${f(o.v)}</b></td></tr>`).join('')}</table></div>`:''}
+  <div class="card pul"><b class="pusec2">🧾 توتال الفواتير</b>${d.inv.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th></tr>${d.inv.slice().reverse().map(x=>`<tr data-puinv="${esc(x.id)}" style="cursor:pointer"><td class="num">${puDM(x.ts)}</td><td class="tn">${esc(puSup(x.sid).name)}${x.ref?' #'+esc(x.ref):''}${x.ret?' ↩':''}<small class="mute">${x.ln&&x.ln.length?esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، ')):esc(x.note||'مبلغ بس')}</small></td><td class="num"><b>${f(Math.abs(+x.amt||0))}</b></td></tr>`).join('')}</table>`:'<div class="mute">مفيش مشتريات في الفترة دي.</div>'}</div>`}
+function puRepSpec(a,b,lbl){const d=puRepData(a,b);if(!d.inv.length)return null;
+  return{k:'bu',title:'🛒 مشتريات',sub:lbl,kpi:[['🛒 إجمالي المشتريات',f(d.tot),plN(d.inv.length,'فاتورة')],['📐 الأمتار',fq(d.m2)+' م²',fq(d.ql)+' لوح'],['💵 دفعت للموردين',f(d.pay),'',TGC.grn],['🧾 متوسط الفاتورة',f(Math.round(d.tot/d.inv.length))]],
+    sec:[{h:'📦 توتال الأصناف',rows:d.items.slice(0,15).map(o=>[o.n,f(o.v),fq(o.m2)+' م² · '+fq(o.q)+' لوح']).concat(d.plain?[['فواتير من غير أصناف',f(d.plain)]]:[])},{h:'🚚 توتال الموردين',rows:d.supp.slice(0,12).map(o=>[o.s.name,f(o.v),plN(o.n,'فاتورة')])}],foot:'إجمالي '+plN(d.inv.length,'فاتورة')+' · '+f(d.tot),cap:'🛒 مشتريات '+lbl}}
+const tgBuTx=()=>{const[b]=monRange(Date.now()),[a]=monRange(b-864e5);return puRepSpec(a,b,tgMon(a))};
+
 /* ---- الأحداث ---- */
 $('pu').addEventListener('click',e=>{const t=e.target;{const ex=t.closest('[data-puex]');if(ex){const tr=document.querySelector('#pu tr[data-px="'+ex.dataset.puex+'"]');if(tr){tr.hidden=!tr.hidden;ex.classList.toggle('open',!tr.hidden)}return}const po=t.closest('[data-puo]');if(po){puOpt[po.dataset.puo]=!puOpt[po.dataset.puo];puDraw();return}if(t.closest('.pusel'))return}const r=t.closest('[data-pusup],[data-puinv],[data-pue]');
   const b=t.closest('[data-pu],[data-pux],[data-puh],[data-pus]');
   if(b&&b.dataset.pus){puSM=b.dataset.pus;b.parentNode.querySelectorAll('[data-pus]').forEach(x=>x.classList.toggle('on',x===b));const d=$('puSD');if(d)d.hidden=puSM!=='date';return}
+  if(t.closest('[data-pumore]')){puMore=!puMore;puDraw();return}
   if(b&&b.dataset.puh){const h=b.dataset.puh,st=puE||puP;if(st)st.how=h;b.parentNode.querySelectorAll('[data-puh]').forEach(x=>x.classList.toggle('on',x===b));const ti=$('puTo');if(ti&&st){ti.hidden=puCash(h);if(!puCash(h)&&!ti.value){const lt=S.purchases.filter(y=>y.type==='pay'&&y.sid===st.sid&&y.how===h&&y.to).sort((a,c)=>c.ts-a.ts)[0];if(lt){ti.value=lt.to;st.to=lt.to}}}return}
   if(b&&b.dataset.pux!=null){puE.ln.splice(+b.dataset.pux,1);if(!puE.ln.length)puE.ln.push(puNewLn());$('puLns').innerHTML=puE.ln.map((l,i)=>puLnH(l,i)).join('');puLiveTot();return}
   if(b){const k=b.dataset.pu,s=puSup(puSid);
@@ -3371,6 +3412,10 @@ $('pu').addEventListener('click',e=>{const t=e.target;{const ex=t.closest('[data
     if(k==='sendone'){const id=(puE||puP||{}).id,x=S.purchases.find(y=>y.id===id);if(!x)return;const sp=puSup(x.sid);if(sp)puSendOut(sp,puStmt(sp.id,'',0,id),'wa');return}
     if(k==='owe'){const o=$('puOwe');o.hidden=!o.hidden;if(!o.hidden)$('puOA').focus();return}
     if(k==='owesave'&&s){const a=rd2(nv($('puOA').value)),n=$('puON').value.trim();if(!(a>0)){$('puOA').focus();return}const o={id:uid(),sid:s.id,ts:Date.now(),type:'buy',amt:a,owe:1,note:n};S.purchases.push(o);put('purchases',o);$('puOA').value='';$('puON').value='';puDraw();toast('✅ اتسجّل عليك '+f(a)+' · الإجمالي '+f(puBal(s.id)));return}
+    if(k==='rep'){puRM=Date.now();puRY=false;return puGo('rep')}
+    if(k==='repp'||k==='repn'){const d=new Date(puRM);puRY?d.setFullYear(d.getFullYear()+(k==='repn'?1:-1)):d.setMonth(d.getMonth()+(k==='repn'?1:-1));puRM=d.getTime();puDraw();return}
+    if(k==='repy'){puRY=!puRY;puDraw();return}
+    if(k==='repsend'){if(!tgOn()){toast('اربط تيليجرام الأول (الإعدادات ← تيليجرام)');return}const[a,b]=puRepRange(),sp=puRepSpec(a,b,puRepLbl());if(!sp){toast('مفيش مشتريات في الفترة دي');return}tgSendSpec(sp).then(()=>toast('✅ اتبعت على تيليجرام')).catch(e=>toast('⚠ '+e.message));return}
     if(k==='owed')return puGo('owed');if(k==='month')return puGo('month');if(k==='new')return puNewInv(puV==='sup'?puSid:'',false);
     if(k==='ret')return puNewInv(puSid,true);
     if(k==='pay')return puNewPay(puV==='sup'?puSid:'');
@@ -3389,7 +3434,7 @@ $('pu').addEventListener('click',e=>{const t=e.target;{const ex=t.closest('[data
     if(k==='savepay')return puSavePay();
     if(k==='delinv'||k==='delpay'){if(!ok2(b))return;const id=(puE||puP).id,pp=S.purchases.find(y=>y.pf===id&&y.type==='pay');del('purchases',id);if(pp)del('purchases',pp.id);puE=null;puP=null;puBack();toast('اتحذفت');return}
     return}
-  if(r){if(r.dataset.pusup){puSid=r.dataset.pusup;puEdS=false;puSelOn=false;return puGo('sup')}
+  if(r){if(r.dataset.pusup){puSid=r.dataset.pusup;puEdS=false;puSelOn=false;puMore=false;return puGo('sup')}
     const x=S.purchases.find(y=>y.id===(r.dataset.puinv||r.dataset.pue));if(!x)return;puSid=x.sid;
     if(x.type==='buy'&&!x.ob)return puEditInv(x);return puNewPay(x.sid,x)}});
 $('pu').addEventListener('input',e=>{const t=e.target;
@@ -3554,7 +3599,7 @@ function dtgPage(L,pg,pages,tot,n){const W=1080,RH=66,HD=200,FT=pages>1?60:24,H=
 async function dtgImages(){const A=dtgList(),tot=rd2(A.reduce((a,o)=>a+o.b,0)),P=25,pages=Math.max(1,Math.ceil(A.length/P)),out=[];
   for(let p=0;p<pages;p++)out.push(await dtgPage(A.slice(p*P,(p+1)*P),p,pages,tot,A.length));return{n:A.length,tot,imgs:out}}
 async function dtgSend(){if(dtgBusy)return'busy';dtgBusy=true;try{const r=await dtgImages();if(!r.n)return'none';
-    for(let i=0;i<r.imgs.length;i++){const fd=new FormData();fd.append('chat_id',tgCfg().c);if(i===0)fd.append('caption','📒 المديونين '+dshort(Date.now())+' · '+plN(r.n,'عميل')+' · الإجمالي '+f(r.tot));fd.append('photo',r.imgs[i],'مديونين-'+(i+1)+'.png');await tgApi('sendPhoto',fd)}
+    for(let i=0;i<r.imgs.length;i++){const fd=new FormData();fd.append('chat_id',tgCfg().c);if(i===0)fd.append('caption','📒 المديونين '+dshort(Date.now())+' · '+plN(r.n,'عميل')+' · الإجمالي '+f(r.tot));fd.append('photo',r.imgs[i],'مديونين-'+(i+1)+'.png');await tgApi('sendPhoto',fd,'db')}
     return'ok'}finally{dtgBusy=false}}
 async function dtgAuto(){if(!pget('dbTg',false)||!tgCfg().t||!tgCfg().c||!dataReady||!S.customers.length)return;const k=dkey(Date.now());if(lsv('dbTgSent','')===k)return;
   try{const r=await dtgSend();if(r==='ok'||r==='none')svk('dbTgSent',k)}catch(e){}}
@@ -3572,11 +3617,11 @@ const tgOn=()=>!!(tgCfg().t&&tgCfg().c);
 const tgE=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const tgDay=t=>{const d=new Date(t);return['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)};
 const tgMon=t=>['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'][new Date(t).getMonth()]+' '+new Date(t).getFullYear();
-async function tgText(txt){const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('text',txt);fd.append('parse_mode','HTML');fd.append('disable_web_page_preview','true');return tgApi('sendMessage',fd)}
+async function tgText(txt,kind){const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('text',txt);fd.append('parse_mode','HTML');fd.append('disable_web_page_preview','true');return tgApi('sendMessage',fd,kind)}
 /* رسايل التنبيه: لو النت فاصل بتستنى وتتبعت بعدين */
 const tgQget=()=>{try{const a=JSON.parse(lsv('tgQ','[]'));return Array.isArray(a)?a:[]}catch(e){return[]}};
-async function tgQueue(txt){if(!tgOn())return;try{await tgText(txt)}catch(e){const q=tgQget();q.push(txt);while(q.length>30)q.shift();svk('tgQ',JSON.stringify(q))}}
-async function tgFlush(){const q=tgQget();if(!q.length||!tgOn())return;const left=[];for(const t of q){try{await tgText(t)}catch(e){left.push(t)}}svk('tgQ',JSON.stringify(left))}
+async function tgQueue(txt){if(!tgOn())return;try{await tgText(txt,'al')}catch(e){const q=tgQget();q.push(txt);while(q.length>30)q.shift();svk('tgQ',JSON.stringify(q))}}
+async function tgFlush(){const q=tgQget();if(!q.length||!tgOn())return;const left=[];for(const t of q){try{await tgText(t,'al')}catch(e){left.push(t)}}svk('tgQ',JSON.stringify(left))}
 
 /* ---- أرقام فترة ---- */
 function tgSum(a,b){const R=S.invoices.filter(r=>r.ts>=a&&r.ts<b),inv=R.filter(r=>r.type==='inv'),sale=rd2(inv.reduce((s,r)=>s+val(r),0)),got=rd2(R.reduce((s,r)=>s+pd(r),0)),by=new Map();
@@ -3615,28 +3660,28 @@ function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Seg
       x.textAlign='left';x.fillStyle=r[3]||TGC.ink;x.font=F(36,700);x.fillText(String(r[1]),P+16,y+44);y+=h});y+=16});
   if(sp.foot){x.textAlign='right';x.fillStyle=sp.footC||TGC.mu;x.font=F(32,600);x.fillText(sp.foot,W-P,y+46);y+=70}
   return new Promise(r=>cv.toBlob(r,'image/png'))}
-async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',sp.cap||(sp.title+' · '+(sp.sub||'')));fd.append('photo',b,'report.png');return tgApi('sendPhoto',fd)}
+async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',sp.cap||(sp.title+' · '+(sp.sub||'')));fd.append('photo',b,'report.png');return tgApi('sendPhoto',fd,sp.k)}
 
 /* ---- التقارير (كل واحد بيرجع وصف الصورة، أو null لو مفيش حاجة) ---- */
 function tgClTx(){const a=dAgo(1),b=dAgo(0),s=tgSum(a,b);if(!s.n&&!s.got&&!s.ex&&!s.buy&&!s.spay)return null;let dr=null;try{dr=drwCalc(a)}catch(e){}
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')],['💵 اتحصّل',f(s.got),'',TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🗄 المتوقع في الدرج',dr?f(dr.exp):'—',dr&&dr.act!=null?(Math.abs(dr.act-dr.exp)<1?'✓ مظبوط':dr.act<dr.exp?'عجز '+f(rd2(dr.exp-dr.act)):'زيادة '+f(rd2(dr.act-dr.exp))):'']];
   const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
-  return{title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
+  return{k:'cl',title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
 function tgPerTx(ttl,sub,a,b,pa,pb){const s=tgSum(a,b),p=tgSum(pa,pb);
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')+(tgPct(s.sale,p.sale)?' · '+tgPct(s.sale,p.sale):'')],['💵 اتحصّل',f(s.got),tgPct(s.got,p.got),TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🛒 مشتريات',f(s.buy),s.spay?'دفعت للموردين '+f(s.spay):'']];
   const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
   return{title:ttl,sub,kpi,sec,foot:(s.nw?'🆕 '+plN(s.nw,'عميل')+' جديد · ':'')+'📒 المديونيات دلوقتي: '+f(tgDebt())}}
-function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a)}
-function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a)}
+function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return Object.assign(tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a),{k:'wk'})}
+function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return Object.assign(tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a),{k:'mo'})}
 function tgSpTx(){const l=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).filter(o=>o.b>0).sort((x,y)=>y.b-x.b),tot=rd2(l.reduce((s,o)=>s+o.b,0));
-  return{title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
+  return{k:'sp',title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
 function tgSkTx(){const R=[...s2Calc().values()],tr=R.filter(o=>o.tr);if(!R.length)return null;const v=tr.reduce((s,o)=>s+Math.max(0,o.bal)*s2Cpm(o.t),0),low=tr.filter(o=>s2Mn(o.t)>0&&o.bal<=s2Mn(o.t)),un=R.filter(o=>!o.tr),lj=s2Jds().pop(),jd=lj?Math.floor((Date.now()-lj.ts)/864e5):null;
-  return{title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
+  return{k:'sk',title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
     sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
     foot:'📋 '+(jd==null?'لسه ما عملتش جرد افتتاحي':'آخر جرد '+puDTx(jd)+(jd>=7?' — فاكر الجرد؟':'')),footC:jd==null||jd>=7?TGC.or:TGC.mu}}
 
 /* ---- الجدولة: كل تقرير مرة في فترته ---- */
-const TGJ=[{k:'tgCl',per:'d',tx:tgClTx},{k:'tgWk',per:'w',tx:tgWkTx},{k:'tgSp',per:'w',tx:tgSpTx},{k:'tgSk',per:'w',tx:tgSkTx},{k:'tgMo',per:'m',tx:tgMoTx}];
+const TGJ=[{k:'tgCl',per:'d',tx:tgClTx},{k:'tgWk',per:'w',tx:tgWkTx},{k:'tgSp',per:'w',tx:tgSpTx},{k:'tgSk',per:'w',tx:tgSkTx},{k:'tgMo',per:'m',tx:tgMoTx},{k:'tgBu',per:'m',tx:tgBuTx}];
 const tgPer=p=>{const n=Date.now();return p==='d'?dkey(n):p==='w'?'w'+dkey(wkOf(n)):'m'+dkey(monRange(n)[0])};
 async function tgRun(){if(tgBusy||!tgOn()||!dataReady)return;tgBusy=true;try{tgSnapInit();await tgFlush();
     for(const j of TGJ){if(!pget(j.k,true))continue;const per=tgPer(j.per);if(lsv('tgS_'+j.k,'')===per)continue;      try{const t=j.tx();if(t)await tgSendSpec(t);svk('tgS_'+j.k,per)}catch(e){}}}finally{tgBusy=false}}
@@ -3655,9 +3700,15 @@ del=function(k,id){let r0=null;try{if(k==='invoices')r0=S.invoices.find(x=>x.id=
 /* ---- صفحة الإعدادات ---- */
 function tgSumTx(){if(!tgOn())return'مش مربوط';const n=['dsTg','dbTg'].filter(k=>pget(k,false)).length+TGJ.filter(j=>pget(j.k,true)).length+(pget('tgDel',true)?1:0);return'مربوط · '+plN(n,'حاجة')+' بتتبعت'}
 (()=>{const st=$('tgSt');const up=()=>{if(st)st.textContent=tgOn()?'✅ مربوط':'⚠ مش مربوط';const s=$('ss_tg');if(s)s.textContent=tgSumTx()};up();
-  ['tgCl','tgWk','tgSp','tgSk','tgMo','tgDel'].forEach(k=>{const c=$(k);if(!c)return;c.checked=pget(k,true);c.onchange=()=>{svk(k,c.checked?'1':'0');up()}});
+  ['tgCl','tgWk','tgSp','tgSk','tgMo','tgBu','tgDel'].forEach(k=>{const c=$(k);if(!c)return;c.checked=pget(k,true);c.onchange=()=>{svk(k,c.checked?'1':'0');up()}});
   ['dsTg','dbTg'].forEach(k=>{const c=$(k);if(c)c.addEventListener('change',up)});['tgTok','tgChat'].forEach(k=>{const c=$(k);if(c)c.addEventListener('change',up)});
   const pg=document.querySelector('.stp[data-sp="tg"]');if(pg)pg.addEventListener('click',async e=>{const b=e.target.closest('[data-tgnow]');if(!b)return;const m=$('tgAMsg'),k=b.dataset.tgnow;
     if(!tgOn()){m.textContent='⚠ اربط تيليجرام الأول (Token و Chat ID)';return}m.textContent='⏳ بيتبعت…';
-    try{if(k==='bk'){$('bkShare').click();m.textContent='⏳ النسخة بتتبعت…';return}const t=({cl:tgClTx,wk:tgWkTx,sp:tgSpTx,sk:tgSkTx,mo:tgMoTx}[k]||(()=>null))();if(!t){m.textContent='مفيش حاجة تتبعت (مفيش حركة)';return}await tgSendSpec(t);m.textContent='✅ اتبعت على تيليجرام'}catch(err){m.textContent='⚠ '+err.message}});
+    try{if(k==='bk'){$('bkShare').click();m.textContent='⏳ النسخة بتتبعت…';return}const t=({cl:tgClTx,wk:tgWkTx,sp:tgSpTx,sk:tgSkTx,mo:tgMoTx,bu:()=>{const[a,b]=monRange(Date.now());return puRepSpec(a,b,tgMon(a))}}[k]||(()=>null))();if(!t){m.textContent='مفيش حاجة تتبعت (مفيش حركة)';return}await tgSendSpec(t);m.textContent='✅ اتبعت على تيليجرام'}catch(err){m.textContent='⚠ '+err.message}});
+  {const bx=$('tgBox');if(bx)bx.open=!tgOn()}
+  const tm=$('tgTopMsg');
+  if($('tgTopGo'))$('tgTopGo').onclick=async()=>{if(!tgOn()){tm.textContent='⚠ اربط تيليجرام الأول (Token و Chat ID بتاع الجروب)';return}tm.textContent='⏳ بجهّز المواضيع…';const mp=tgTopics();let n=0;
+    try{for(const k of Object.keys(TGK)){if(mp[k])continue;const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('name',TGK[k]);const r=await tgApi('createForumTopic',fd);mp[k]=r.message_thread_id;n++;svk('tgTop',JSON.stringify(mp))}
+      tm.textContent=n?'✅ اتعمل '+plN(n,'موضوع')+'. من دلوقتي كل نوع بيروح موضوعه':'✅ المواضيع جاهزة من قبل'}catch(e){svk('tgTop',JSON.stringify(mp));tm.textContent='⚠ '+e.message+(/chat not found|not a forum|TOPIC|rights|admin/i.test(e.message)?' — اتأكد إن الجروب فيه Topics وإن البوت أدمن بصلاحية إدارة المواضيع':'')}up()};
+  if($('tgTopOff'))$('tgTopOff').onclick=()=>{svk('tgTop','{}');tm.textContent='رجعت لشات واحد (المواضيع لسه موجودة في الجروب)';up()};
   document.addEventListener('click',e=>{if(e.target.closest('[data-sp="tg"]'))setTimeout(up,50)})})();

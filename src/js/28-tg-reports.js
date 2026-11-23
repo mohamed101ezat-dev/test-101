@@ -8,11 +8,11 @@ const tgOn=()=>!!(tgCfg().t&&tgCfg().c);
 const tgE=s=>String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const tgDay=t=>{const d=new Date(t);return['الأحد','الاتنين','التلات','الأربع','الخميس','الجمعة','السبت'][d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)};
 const tgMon=t=>['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'][new Date(t).getMonth()]+' '+new Date(t).getFullYear();
-async function tgText(txt){const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('text',txt);fd.append('parse_mode','HTML');fd.append('disable_web_page_preview','true');return tgApi('sendMessage',fd)}
+async function tgText(txt,kind){const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('text',txt);fd.append('parse_mode','HTML');fd.append('disable_web_page_preview','true');return tgApi('sendMessage',fd,kind)}
 /* رسايل التنبيه: لو النت فاصل بتستنى وتتبعت بعدين */
 const tgQget=()=>{try{const a=JSON.parse(lsv('tgQ','[]'));return Array.isArray(a)?a:[]}catch(e){return[]}};
-async function tgQueue(txt){if(!tgOn())return;try{await tgText(txt)}catch(e){const q=tgQget();q.push(txt);while(q.length>30)q.shift();svk('tgQ',JSON.stringify(q))}}
-async function tgFlush(){const q=tgQget();if(!q.length||!tgOn())return;const left=[];for(const t of q){try{await tgText(t)}catch(e){left.push(t)}}svk('tgQ',JSON.stringify(left))}
+async function tgQueue(txt){if(!tgOn())return;try{await tgText(txt,'al')}catch(e){const q=tgQget();q.push(txt);while(q.length>30)q.shift();svk('tgQ',JSON.stringify(q))}}
+async function tgFlush(){const q=tgQget();if(!q.length||!tgOn())return;const left=[];for(const t of q){try{await tgText(t,'al')}catch(e){left.push(t)}}svk('tgQ',JSON.stringify(left))}
 
 /* ---- أرقام فترة ---- */
 function tgSum(a,b){const R=S.invoices.filter(r=>r.ts>=a&&r.ts<b),inv=R.filter(r=>r.type==='inv'),sale=rd2(inv.reduce((s,r)=>s+val(r),0)),got=rd2(R.reduce((s,r)=>s+pd(r),0)),by=new Map();
@@ -51,28 +51,28 @@ function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Seg
       x.textAlign='left';x.fillStyle=r[3]||TGC.ink;x.font=F(36,700);x.fillText(String(r[1]),P+16,y+44);y+=h});y+=16});
   if(sp.foot){x.textAlign='right';x.fillStyle=sp.footC||TGC.mu;x.font=F(32,600);x.fillText(sp.foot,W-P,y+46);y+=70}
   return new Promise(r=>cv.toBlob(r,'image/png'))}
-async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',sp.cap||(sp.title+' · '+(sp.sub||'')));fd.append('photo',b,'report.png');return tgApi('sendPhoto',fd)}
+async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',sp.cap||(sp.title+' · '+(sp.sub||'')));fd.append('photo',b,'report.png');return tgApi('sendPhoto',fd,sp.k)}
 
 /* ---- التقارير (كل واحد بيرجع وصف الصورة، أو null لو مفيش حاجة) ---- */
 function tgClTx(){const a=dAgo(1),b=dAgo(0),s=tgSum(a,b);if(!s.n&&!s.got&&!s.ex&&!s.buy&&!s.spay)return null;let dr=null;try{dr=drwCalc(a)}catch(e){}
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')],['💵 اتحصّل',f(s.got),'',TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🗄 المتوقع في الدرج',dr?f(dr.exp):'—',dr&&dr.act!=null?(Math.abs(dr.act-dr.exp)<1?'✓ مظبوط':dr.act<dr.exp?'عجز '+f(rd2(dr.exp-dr.act)):'زيادة '+f(rd2(dr.act-dr.exp))):'']];
   const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
-  return{title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
+  return{k:'cl',title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
 function tgPerTx(ttl,sub,a,b,pa,pb){const s=tgSum(a,b),p=tgSum(pa,pb);
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')+(tgPct(s.sale,p.sale)?' · '+tgPct(s.sale,p.sale):'')],['💵 اتحصّل',f(s.got),tgPct(s.got,p.got),TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🛒 مشتريات',f(s.buy),s.spay?'دفعت للموردين '+f(s.spay):'']];
   const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
   return{title:ttl,sub,kpi,sec,foot:(s.nw?'🆕 '+plN(s.nw,'عميل')+' جديد · ':'')+'📒 المديونيات دلوقتي: '+f(tgDebt())}}
-function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a)}
-function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a)}
+function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return Object.assign(tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a),{k:'wk'})}
+function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return Object.assign(tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a),{k:'mo'})}
 function tgSpTx(){const l=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).filter(o=>o.b>0).sort((x,y)=>y.b-x.b),tot=rd2(l.reduce((s,o)=>s+o.b,0));
-  return{title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
+  return{k:'sp',title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
 function tgSkTx(){const R=[...s2Calc().values()],tr=R.filter(o=>o.tr);if(!R.length)return null;const v=tr.reduce((s,o)=>s+Math.max(0,o.bal)*s2Cpm(o.t),0),low=tr.filter(o=>s2Mn(o.t)>0&&o.bal<=s2Mn(o.t)),un=R.filter(o=>!o.tr),lj=s2Jds().pop(),jd=lj?Math.floor((Date.now()-lj.ts)/864e5):null;
-  return{title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
+  return{k:'sk',title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
     sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
     foot:'📋 '+(jd==null?'لسه ما عملتش جرد افتتاحي':'آخر جرد '+puDTx(jd)+(jd>=7?' — فاكر الجرد؟':'')),footC:jd==null||jd>=7?TGC.or:TGC.mu}}
 
 /* ---- الجدولة: كل تقرير مرة في فترته ---- */
-const TGJ=[{k:'tgCl',per:'d',tx:tgClTx},{k:'tgWk',per:'w',tx:tgWkTx},{k:'tgSp',per:'w',tx:tgSpTx},{k:'tgSk',per:'w',tx:tgSkTx},{k:'tgMo',per:'m',tx:tgMoTx}];
+const TGJ=[{k:'tgCl',per:'d',tx:tgClTx},{k:'tgWk',per:'w',tx:tgWkTx},{k:'tgSp',per:'w',tx:tgSpTx},{k:'tgSk',per:'w',tx:tgSkTx},{k:'tgMo',per:'m',tx:tgMoTx},{k:'tgBu',per:'m',tx:tgBuTx}];
 const tgPer=p=>{const n=Date.now();return p==='d'?dkey(n):p==='w'?'w'+dkey(wkOf(n)):'m'+dkey(monRange(n)[0])};
 async function tgRun(){if(tgBusy||!tgOn()||!dataReady)return;tgBusy=true;try{tgSnapInit();await tgFlush();
     for(const j of TGJ){if(!pget(j.k,true))continue;const per=tgPer(j.per);if(lsv('tgS_'+j.k,'')===per)continue;      try{const t=j.tx();if(t)await tgSendSpec(t);svk('tgS_'+j.k,per)}catch(e){}}}finally{tgBusy=false}}
@@ -91,9 +91,15 @@ del=function(k,id){let r0=null;try{if(k==='invoices')r0=S.invoices.find(x=>x.id=
 /* ---- صفحة الإعدادات ---- */
 function tgSumTx(){if(!tgOn())return'مش مربوط';const n=['dsTg','dbTg'].filter(k=>pget(k,false)).length+TGJ.filter(j=>pget(j.k,true)).length+(pget('tgDel',true)?1:0);return'مربوط · '+plN(n,'حاجة')+' بتتبعت'}
 (()=>{const st=$('tgSt');const up=()=>{if(st)st.textContent=tgOn()?'✅ مربوط':'⚠ مش مربوط';const s=$('ss_tg');if(s)s.textContent=tgSumTx()};up();
-  ['tgCl','tgWk','tgSp','tgSk','tgMo','tgDel'].forEach(k=>{const c=$(k);if(!c)return;c.checked=pget(k,true);c.onchange=()=>{svk(k,c.checked?'1':'0');up()}});
+  ['tgCl','tgWk','tgSp','tgSk','tgMo','tgBu','tgDel'].forEach(k=>{const c=$(k);if(!c)return;c.checked=pget(k,true);c.onchange=()=>{svk(k,c.checked?'1':'0');up()}});
   ['dsTg','dbTg'].forEach(k=>{const c=$(k);if(c)c.addEventListener('change',up)});['tgTok','tgChat'].forEach(k=>{const c=$(k);if(c)c.addEventListener('change',up)});
   const pg=document.querySelector('.stp[data-sp="tg"]');if(pg)pg.addEventListener('click',async e=>{const b=e.target.closest('[data-tgnow]');if(!b)return;const m=$('tgAMsg'),k=b.dataset.tgnow;
     if(!tgOn()){m.textContent='⚠ اربط تيليجرام الأول (Token و Chat ID)';return}m.textContent='⏳ بيتبعت…';
-    try{if(k==='bk'){$('bkShare').click();m.textContent='⏳ النسخة بتتبعت…';return}const t=({cl:tgClTx,wk:tgWkTx,sp:tgSpTx,sk:tgSkTx,mo:tgMoTx}[k]||(()=>null))();if(!t){m.textContent='مفيش حاجة تتبعت (مفيش حركة)';return}await tgSendSpec(t);m.textContent='✅ اتبعت على تيليجرام'}catch(err){m.textContent='⚠ '+err.message}});
+    try{if(k==='bk'){$('bkShare').click();m.textContent='⏳ النسخة بتتبعت…';return}const t=({cl:tgClTx,wk:tgWkTx,sp:tgSpTx,sk:tgSkTx,mo:tgMoTx,bu:()=>{const[a,b]=monRange(Date.now());return puRepSpec(a,b,tgMon(a))}}[k]||(()=>null))();if(!t){m.textContent='مفيش حاجة تتبعت (مفيش حركة)';return}await tgSendSpec(t);m.textContent='✅ اتبعت على تيليجرام'}catch(err){m.textContent='⚠ '+err.message}});
+  {const bx=$('tgBox');if(bx)bx.open=!tgOn()}
+  const tm=$('tgTopMsg');
+  if($('tgTopGo'))$('tgTopGo').onclick=async()=>{if(!tgOn()){tm.textContent='⚠ اربط تيليجرام الأول (Token و Chat ID بتاع الجروب)';return}tm.textContent='⏳ بجهّز المواضيع…';const mp=tgTopics();let n=0;
+    try{for(const k of Object.keys(TGK)){if(mp[k])continue;const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('name',TGK[k]);const r=await tgApi('createForumTopic',fd);mp[k]=r.message_thread_id;n++;svk('tgTop',JSON.stringify(mp))}
+      tm.textContent=n?'✅ اتعمل '+plN(n,'موضوع')+'. من دلوقتي كل نوع بيروح موضوعه':'✅ المواضيع جاهزة من قبل'}catch(e){svk('tgTop',JSON.stringify(mp));tm.textContent='⚠ '+e.message+(/chat not found|not a forum|TOPIC|rights|admin/i.test(e.message)?' — اتأكد إن الجروب فيه Topics وإن البوت أدمن بصلاحية إدارة المواضيع':'')}up()};
+  if($('tgTopOff'))$('tgTopOff').onclick=()=>{svk('tgTop','{}');tm.textContent='رجعت لشات واحد (المواضيع لسه موجودة في الجروب)';up()};
   document.addEventListener('click',e=>{if(e.target.closest('[data-sp="tg"]'))setTimeout(up,50)})})();

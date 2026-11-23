@@ -33,7 +33,7 @@ function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);t
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
 function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
 
-function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else if(puV==='owed')b.innerHTML=puOwedH();else if(puV==='month')b.innerHTML=puMonthH();else{puV='home';b.innerHTML=puHomeH()}}
+function puDraw(){const b=$('pu');if(!b)return;if(puV==='inv'&&puE)b.innerHTML=puInvH();else if(puV==='pay'&&puP)b.innerHTML=puPayH();else if(puV==='sup'&&puSup(puSid))b.innerHTML=puSupH(puSup(puSid));else if(puV==='rep')b.innerHTML=puRepH();else if(puV==='owed')b.innerHTML=puOwedH();else if(puV==='month')b.innerHTML=puMonthH();else{puV='home';b.innerHTML=puHomeH()}}
 
 /* ---- الصفحة الرئيسية: الموردين + آخر الفواتير ---- */
 function puHomeH(){const now=new Date(),m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
@@ -41,7 +41,7 @@ function puHomeH(){const now=new Date(),m0=new Date(now.getFullYear(),now.getMon
   const sups=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).sort((a,b)=>(b.b>0)-(a.b>0)||b.b-a.b||a.s.name.localeCompare(b.s.name,'ar'));
   const last=S.purchases.filter(x=>x.type==='buy'&&!x.ob&&puSup(x.sid)).sort((a,b)=>b.ts-a.ts).slice(0,8);
   return`<div class="puk"><button type="button" data-pu="owed"><small>🚚 عليك للموردين ›</small><b class="num${tot>0?' dn':''}">${f(tot)}</b></button><button type="button" data-pu="month"><small>🛒 اشتريت الشهر ده ›</small><b class="num">${f(mo)}</b></button></div>
-  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة شراء</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="addsup">➕ مورد</button></div>
+  <div class="puact"><button type="button" class="main" data-pu="new">📥 فاتورة شراء</button><button type="button" class="alt" data-pu="pay">💵 دفعة</button><button type="button" class="alt" data-pu="addsup">➕ مورد</button><button type="button" class="alt" data-pu="rep" aria-label="تقرير المشتريات">📊</button></div>
   <div class="card puadd" id="puAdd" hidden><div class="purw"><input id="puNS" placeholder="اسم المورد" autocomplete="off" aria-label="اسم المورد"><input id="puNP" inputmode="tel" placeholder="تليفون" autocomplete="off" aria-label="التليفون"><button type="button" class="main" data-pu="savesup">✅</button></div><div class="info" id="puAM"></div></div>
   <div class="pusec">🚚 الموردين</div>
   ${sups.length?sups.map(({s,b,d})=>`<div class="purow" data-pusup="${esc(s.id)}" role="button" tabindex="0"><span class="pun">${esc(s.name)}</span>${d!=null?`<span class="pud${d>=7?' red':''}">⏰ ${puDTx(d)}</span>`:''}<b class="num${b>0?' dn':b<0?' ok':''}">${b?f(Math.abs(b)):'✓'}</b></div>`).join(''):'<div class="card mute">مفيش موردين لسه. دوس «➕ مورد».</div>'}
@@ -74,7 +74,7 @@ function puSupH(s){const AL=puAlloc(s.id),DM=new Map(AL.D.map(d=>[d.x.id,d]));co
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
   ${puSelOn?puSelBar():''}
-  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>puRowH(x,v,pay,run,pay?null:DM.get(x.id))).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
+  <div class="card pul">${puStmtH(rows,DM)}</div>`}
 
 
 /* ---- 🧾 توزيع الدفعات على الفواتير (v418): الحساب القديم الأول، بعدين أقدم فاتورة، والزيادة بتبقى «ليّا عنده» وبتتخصم من الفاتورة الجاية ----
@@ -203,10 +203,45 @@ function puSelTx(s){const L=puSelList(s),shop=lsv('shop','');let t='*'+(shop||'�
     if(puOpt.py)t+=d.rem>.005?'الباقي: *'+f(d.rem)+'*\n':'✅ اتدفعت كلها\n';if(x.note&&puOpt.nt)t+='📝 '+x.note+'\n'});
   const b=puBal(s.id);return t+'\n━━━━━━━━\n*'+(b<0?'ليّا عندك: ':'إجمالي اللي عليّا: ')+f(Math.abs(b))+'*'}
 
+/* ---- كشف الحساب: آخر فاتورة واللي بعدها، والأقدم في «المزيد» شهر شهر (v424) ---- */
+var puMore=false;
+const puMonKey=t=>{const d=new Date(t);return d.getFullYear()*100+d.getMonth()};
+function puStmtH(rows,DM){if(!rows.length)return'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>';
+  const bi=[];rows.forEach((r,i)=>{if(!r.pay&&DM.get(r.x.id))bi.push(i)});let k=rows.length;
+  if(bi.length){let cut=bi[0];if(DM.get(rows[bi[0]].x.id).rem<=.005&&bi[1]!=null)cut=bi[1];k=cut+1}
+  const head='<tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>',row=r=>puRowH(r.x,r.v,r.pay,r.run,r.pay?null:DM.get(r.x.id)),shown=rows.slice(0,k),older=rows.slice(k);
+  let h='<table class="xl">'+head+shown.map(row).join('')+(older.length?'<tr class="puprev"><td colspan="3">رصيد سابق</td><td class="num"><b>'+f(older[0].run)+'</b></td></tr>':'')+'</table>';
+  if(older.length){const n=older.filter(r=>!r.pay&&DM.get(r.x.id)).length;h+='<button type="button" class="alt pumore" data-pumore="1">'+(puMore?'⬆ إخفاء الأقدم':'⬇ المزيد: أقدم ('+plN(n,'فاتورة')+')')+'</button>';
+    if(puMore){const G=[];older.forEach(r=>{const key=puMonKey(r.x.ts);let g=G[G.length-1];if(!g||g.k!==key){g={k:key,t:r.x.ts,rows:[]};G.push(g)}g.rows.push(r)});
+      h+=G.map(g=>'<details class="pumo"><summary>'+esc(tgMon(g.t))+' · '+plN(g.rows.length,'حركة')+'</summary><table class="xl">'+g.rows.map(row).join('')+'</table></details>').join('')}}
+  return h}
+
+/* ---- 📊 تقرير المشتريات: شهر أو سنة، توتال الأصناف وتوتال الفواتير (v424) ---- */
+var puRM=Date.now(),puRY=false;
+function puRepRange(){const d=new Date(puRM);return puRY?[new Date(d.getFullYear(),0,1).getTime(),new Date(d.getFullYear()+1,0,1).getTime()]:[new Date(d.getFullYear(),d.getMonth(),1).getTime(),new Date(d.getFullYear(),d.getMonth()+1,1).getTime()]}
+function puRepData(a,b){const inv=S.purchases.filter(x=>x.type==='buy'&&!x.ob&&x.ts>=a&&x.ts<b&&puSup(x.sid)).sort((x,y)=>x.ts-y.ts),it=new Map(),su=new Map();let tot=0,m2=0,plain=0,ql=0;
+  inv.forEach(x=>{const v=+x.amt||0,sg=x.ret?-1:1;tot=rd2(tot+v);const sp=su.get(x.sid)||{v:0,n:0};sp.v=rd2(sp.v+v);sp.n++;su.set(x.sid,sp);
+    if(x.ln&&x.ln.length)x.ln.forEach(l=>{const ar=s2A(l.w,l.h),mm=rd2(ar*l.q)*sg,vv=rd2(ar*l.p*l.q)*sg,k=nkey(l.n),o=it.get(k)||{n:l.n,q:0,m2:0,v:0};o.q=rd2(o.q+l.q*sg);o.m2=rd2(o.m2+mm);o.v=rd2(o.v+vv);it.set(k,o);m2=rd2(m2+mm);ql=rd2(ql+l.q*sg)});else plain=rd2(plain+v)});
+  const pay=rd2(S.purchases.filter(x=>x.type==='pay'&&x.ts>=a&&x.ts<b&&puSup(x.sid)).reduce((s,x)=>s+(+x.amt||0),0));
+  return{inv,tot,m2,ql,plain,pay,items:[...it.values()].sort((x,y)=>y.v-x.v),supp:[...su].map(([id,o])=>({s:puSup(id),...o})).sort((x,y)=>y.v-x.v)}}
+const puRepLbl=()=>puRY?String(new Date(puRM).getFullYear()):tgMon(puRM);
+function puRepH(){const[a,b]=puRepRange(),d=puRepData(a,b);
+  return`<div class="card puinv"><div class="puh"><button type="button" class="lnk" data-pu="back" aria-label="رجوع">→</button><b>📊 تقرير المشتريات</b><button type="button" class="alt purtg" data-pu="repsend" aria-label="ابعته على تيليجرام"><i class="ic-tg"></i></button></div>
+  <div class="purw purp"><button type="button" class="alt" data-pu="repp" aria-label="السابق">›</button><b class="purl">${esc(puRepLbl())}</b><button type="button" class="alt" data-pu="repn" aria-label="التالي">‹</button><button type="button" class="alt${puRY?' on':''}" data-pu="repy">سنة</button></div></div>
+  <div class="puk"><div><small>🛒 إجمالي المشتريات</small><b class="num">${f(d.tot)}</b></div><div><small>🧾 عدد الفواتير</small><b class="num">${d.inv.length}</b></div><div><small>📐 الأمتار</small><b class="num">${fq(d.m2)} م²</b></div><div><small>💵 دفعت للموردين</small><b class="num ok">${f(d.pay)}</b></div></div>
+  ${d.items.length||d.plain?`<div class="card pul"><b class="pusec2">📦 توتال الأصناف</b><table class="xl"><tr><th>الصنف</th><th>لوح</th><th>م²</th><th>القيمة</th></tr>${d.items.map(o=>`<tr><td class="tn">${esc(o.n)}</td><td class="num">${fq(o.q)}</td><td class="num">${fq(o.m2)}</td><td class="num"><b>${f(o.v)}</b></td></tr>`).join('')}${d.plain?`<tr><td class="tn">فواتير من غير أصناف</td><td></td><td></td><td class="num"><b>${f(d.plain)}</b></td></tr>`:''}<tr class="puprev"><td>الإجمالي</td><td class="num">${fq(d.ql)}</td><td class="num">${fq(d.m2)}</td><td class="num"><b>${f(d.tot)}</b></td></tr></table></div>`:''}
+  ${d.supp.length?`<div class="card pul"><b class="pusec2">🚚 توتال الموردين</b><table class="xl"><tr><th>المورد</th><th>فواتير</th><th>القيمة</th></tr>${d.supp.map(o=>`<tr data-pusup="${esc(o.s.id)}" style="cursor:pointer"><td class="tn">${esc(o.s.name)}</td><td class="num">${o.n}</td><td class="num"><b>${f(o.v)}</b></td></tr>`).join('')}</table></div>`:''}
+  <div class="card pul"><b class="pusec2">🧾 توتال الفواتير</b>${d.inv.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th></tr>${d.inv.slice().reverse().map(x=>`<tr data-puinv="${esc(x.id)}" style="cursor:pointer"><td class="num">${puDM(x.ts)}</td><td class="tn">${esc(puSup(x.sid).name)}${x.ref?' #'+esc(x.ref):''}${x.ret?' ↩':''}<small class="mute">${x.ln&&x.ln.length?esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، ')):esc(x.note||'مبلغ بس')}</small></td><td class="num"><b>${f(Math.abs(+x.amt||0))}</b></td></tr>`).join('')}</table>`:'<div class="mute">مفيش مشتريات في الفترة دي.</div>'}</div>`}
+function puRepSpec(a,b,lbl){const d=puRepData(a,b);if(!d.inv.length)return null;
+  return{k:'bu',title:'🛒 مشتريات',sub:lbl,kpi:[['🛒 إجمالي المشتريات',f(d.tot),plN(d.inv.length,'فاتورة')],['📐 الأمتار',fq(d.m2)+' م²',fq(d.ql)+' لوح'],['💵 دفعت للموردين',f(d.pay),'',TGC.grn],['🧾 متوسط الفاتورة',f(Math.round(d.tot/d.inv.length))]],
+    sec:[{h:'📦 توتال الأصناف',rows:d.items.slice(0,15).map(o=>[o.n,f(o.v),fq(o.m2)+' م² · '+fq(o.q)+' لوح']).concat(d.plain?[['فواتير من غير أصناف',f(d.plain)]]:[])},{h:'🚚 توتال الموردين',rows:d.supp.slice(0,12).map(o=>[o.s.name,f(o.v),plN(o.n,'فاتورة')])}],foot:'إجمالي '+plN(d.inv.length,'فاتورة')+' · '+f(d.tot),cap:'🛒 مشتريات '+lbl}}
+const tgBuTx=()=>{const[b]=monRange(Date.now()),[a]=monRange(b-864e5);return puRepSpec(a,b,tgMon(a))};
+
 /* ---- الأحداث ---- */
 $('pu').addEventListener('click',e=>{const t=e.target;{const ex=t.closest('[data-puex]');if(ex){const tr=document.querySelector('#pu tr[data-px="'+ex.dataset.puex+'"]');if(tr){tr.hidden=!tr.hidden;ex.classList.toggle('open',!tr.hidden)}return}const po=t.closest('[data-puo]');if(po){puOpt[po.dataset.puo]=!puOpt[po.dataset.puo];puDraw();return}if(t.closest('.pusel'))return}const r=t.closest('[data-pusup],[data-puinv],[data-pue]');
   const b=t.closest('[data-pu],[data-pux],[data-puh],[data-pus]');
   if(b&&b.dataset.pus){puSM=b.dataset.pus;b.parentNode.querySelectorAll('[data-pus]').forEach(x=>x.classList.toggle('on',x===b));const d=$('puSD');if(d)d.hidden=puSM!=='date';return}
+  if(t.closest('[data-pumore]')){puMore=!puMore;puDraw();return}
   if(b&&b.dataset.puh){const h=b.dataset.puh,st=puE||puP;if(st)st.how=h;b.parentNode.querySelectorAll('[data-puh]').forEach(x=>x.classList.toggle('on',x===b));const ti=$('puTo');if(ti&&st){ti.hidden=puCash(h);if(!puCash(h)&&!ti.value){const lt=S.purchases.filter(y=>y.type==='pay'&&y.sid===st.sid&&y.how===h&&y.to).sort((a,c)=>c.ts-a.ts)[0];if(lt){ti.value=lt.to;st.to=lt.to}}}return}
   if(b&&b.dataset.pux!=null){puE.ln.splice(+b.dataset.pux,1);if(!puE.ln.length)puE.ln.push(puNewLn());$('puLns').innerHTML=puE.ln.map((l,i)=>puLnH(l,i)).join('');puLiveTot();return}
   if(b){const k=b.dataset.pu,s=puSup(puSid);
@@ -219,6 +254,10 @@ $('pu').addEventListener('click',e=>{const t=e.target;{const ex=t.closest('[data
     if(k==='sendone'){const id=(puE||puP||{}).id,x=S.purchases.find(y=>y.id===id);if(!x)return;const sp=puSup(x.sid);if(sp)puSendOut(sp,puStmt(sp.id,'',0,id),'wa');return}
     if(k==='owe'){const o=$('puOwe');o.hidden=!o.hidden;if(!o.hidden)$('puOA').focus();return}
     if(k==='owesave'&&s){const a=rd2(nv($('puOA').value)),n=$('puON').value.trim();if(!(a>0)){$('puOA').focus();return}const o={id:uid(),sid:s.id,ts:Date.now(),type:'buy',amt:a,owe:1,note:n};S.purchases.push(o);put('purchases',o);$('puOA').value='';$('puON').value='';puDraw();toast('✅ اتسجّل عليك '+f(a)+' · الإجمالي '+f(puBal(s.id)));return}
+    if(k==='rep'){puRM=Date.now();puRY=false;return puGo('rep')}
+    if(k==='repp'||k==='repn'){const d=new Date(puRM);puRY?d.setFullYear(d.getFullYear()+(k==='repn'?1:-1)):d.setMonth(d.getMonth()+(k==='repn'?1:-1));puRM=d.getTime();puDraw();return}
+    if(k==='repy'){puRY=!puRY;puDraw();return}
+    if(k==='repsend'){if(!tgOn()){toast('اربط تيليجرام الأول (الإعدادات ← تيليجرام)');return}const[a,b]=puRepRange(),sp=puRepSpec(a,b,puRepLbl());if(!sp){toast('مفيش مشتريات في الفترة دي');return}tgSendSpec(sp).then(()=>toast('✅ اتبعت على تيليجرام')).catch(e=>toast('⚠ '+e.message));return}
     if(k==='owed')return puGo('owed');if(k==='month')return puGo('month');if(k==='new')return puNewInv(puV==='sup'?puSid:'',false);
     if(k==='ret')return puNewInv(puSid,true);
     if(k==='pay')return puNewPay(puV==='sup'?puSid:'');
@@ -237,7 +276,7 @@ $('pu').addEventListener('click',e=>{const t=e.target;{const ex=t.closest('[data
     if(k==='savepay')return puSavePay();
     if(k==='delinv'||k==='delpay'){if(!ok2(b))return;const id=(puE||puP).id,pp=S.purchases.find(y=>y.pf===id&&y.type==='pay');del('purchases',id);if(pp)del('purchases',pp.id);puE=null;puP=null;puBack();toast('اتحذفت');return}
     return}
-  if(r){if(r.dataset.pusup){puSid=r.dataset.pusup;puEdS=false;puSelOn=false;return puGo('sup')}
+  if(r){if(r.dataset.pusup){puSid=r.dataset.pusup;puEdS=false;puSelOn=false;puMore=false;return puGo('sup')}
     const x=S.purchases.find(y=>y.id===(r.dataset.puinv||r.dataset.pue));if(!x)return;puSid=x.sid;
     if(x.type==='buy'&&!x.ob)return puEditInv(x);return puNewPay(x.sid,x)}});
 $('pu').addEventListener('input',e=>{const t=e.target;

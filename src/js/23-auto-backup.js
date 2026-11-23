@@ -15,8 +15,14 @@ $('snapRows').onclick=async e=>{const d=e.target.dataset;if(!d.sd&&!d.sr)return;
   if(d.sd){await dl(new Blob([x.json],{type:'application/json'}),'نسخة-فواتير-'+k+'.json');return}
   if(!ok2(e.target))return;try{$('snapMsg').textContent=await restoreData(JSON.parse(x.json))}catch(err){$('snapMsg').textContent='النسخة دي مش صالحة.'}};
 /* v346: إرسال النسخة لتيليجرام لوحده (Bot API مجاني). الـToken بيتخزن على الجهاز ده بس */
-const tgCfg=()=>({t:lsv('tgTok','').trim(),c:lsv('tgChat','').trim()}),tgApi=async(m,body)=>{const{t}=tgCfg();const r=await fetch('https://api.telegram.org/bot'+t+'/'+m,body?{method:'POST',body}:{});const d=await r.json().catch(()=>({}));if(!d.ok)throw new Error(d.description||('فشل الإرسال ('+r.status+')'));return d.result};
-const tgSend=(blob,name,cap)=>{const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',cap||name);fd.append('document',blob,name);return tgApi('sendDocument',fd)};
+const tgCfg=()=>({t:lsv('tgTok','').trim(),c:lsv('tgChat','').trim()}),tgApi=async(m,body,kind)=>{const{t}=tgCfg(),th=kind?tgTh(kind):'';let bd=body;if(th&&body&&m!=='createForumTopic')body.append('message_thread_id',th);
+  const go=async b=>{const r=await fetch('https://api.telegram.org/bot'+t+'/'+m,b?{method:'POST',body:b}:{});const d=await r.json().catch(()=>({}));return{r,d}};let x=await go(bd);
+  if(!x.d.ok&&th&&/thread|topic/i.test(x.d.description||'')){const fd=new FormData();for(const[k,v]of body.entries())if(k!=='message_thread_id')fd.append(k,v);x=await go(fd)}
+  if(!x.d.ok)throw new Error(x.d.description||('فشل الإرسال ('+x.r.status+')'));return x.d.result};
+/* كل نوع تقرير في موضوع لوحده جوه جروب تيليجرام (Topics). لو مفيش مواضيع بيروح الشات العادي */
+const TGK={bk:'💾 النسخ الاحتياطية',db:'📒 المديونين',cl:'🧾 إقفال اليوم',wk:'📊 الأسبوع',sp:'🚚 الموردين',sk:'🧱 المخزن',mo:'📈 الشهر',bu:'🛒 المشتريات',al:'🔔 التنبيهات'};
+const tgTopics=()=>{try{return JSON.parse(lsv('tgTop','{}'))||{}}catch(e){return{}}},tgTh=k=>{const v=tgTopics()[k];return v?String(v):''};
+const tgSend=(blob,name,cap)=>{const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('caption',cap||name);fd.append('document',blob,name);return tgApi('sendDocument',fd,'bk')};
 (()=>{const t=$('tgTok'),c=$('tgChat'),m=$('tgMsg');if(!t)return;t.value=lsv('tgTok','');c.value=lsv('tgChat','');const sv=()=>{svk('tgTok',t.value.trim());svk('tgChat',c.value.trim())};t.onchange=sv;c.onchange=sv;
   $('tgFind').onclick=async()=>{sv();if(!t.value.trim()){m.textContent='الصق الـToken الأول';return}m.textContent='⏳ بدوّر…';try{const r=await tgApi('getUpdates'),ch=r.map(u=>(u.message||u.channel_post||{}).chat).filter(Boolean).pop();if(!ch){m.textContent='مفيش رسايل للبوت. ابعتله أي رسالة من تيليجرام وجرّب تاني';return}c.value=String(ch.id);sv();m.textContent='✅ لقيته: '+(ch.first_name||ch.title||ch.id)}catch(e){m.textContent='⚠ '+e.message}};
   $('tgTest').onclick=async()=>{sv();if(!tgCfg().t||!tgCfg().c){m.textContent='اكتب الـToken والـChat ID';return}m.textContent='⏳ بيتبعت…';try{const fd=new FormData();fd.append('chat_id',tgCfg().c);fd.append('text','✅ فواتير: الربط شغّال، والنسخ الاحتياطية هتوصلك هنا');await tgApi('sendMessage',fd);m.textContent='✅ اتبعتت رسالة تجربة على تيليجرام'}catch(e){m.textContent='⚠ '+e.message}};
