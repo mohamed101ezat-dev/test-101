@@ -27,6 +27,7 @@ const tgPct=(v,p)=>p>0?(v>=p?'↑ ':'↓ ')+Math.round(Math.abs(v-p)/p*100)+'% �
 /* ---- رسّام صورة التقرير: عنوان + مربعات أرقام كبيرة + جداول (كله بالعربي من اليمين) ----
    spec={title,sub,kpi:[[عنوان,رقم,ملاحظة?,لون?]],sec:[{h,rows:[[اسم,قيمة,ملاحظة?,لون?]]}],foot?} */
 const TG_MKH=new Image();TG_MKH.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%2082%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234f80e1%22%20stroke-width%3D%227.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%2078V38q0-4%204-7L46%207q4-3%208%200l34%2024q4%203%204%207v40%22%2F%3E%3Cpath%20d%3D%22M24%2078V46L50%2027l26%2019v32%22%2F%3E%3Cpath%20d%3D%22M40%2078V54l10-7%2010%207v24%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+const TGIMG={};const tgIm=u=>{if(!u)return null;if(!TGIMG[u]){const i=new Image();i.src=u;TGIMG[u]=i}return TGIMG[u]};setTimeout(()=>{try{[IMG_CASH,IMG_VODA,IMG_INSTA].forEach(tgIm)}catch(e){}},500);
 const TGC={g:'#1f5f3f',red:'#b42318',or:'#b45309',grn:'#15803d',ink:'#111827',mu:'#6b7280',ln:'#e5e7eb'};
 function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Segoe UI",Tahoma,Arial,sans-serif',KH=150,RH=62,SH=70;
   const kr=Math.ceil((sp.kpi||[]).length/2),secs=(sp.sec||[]).filter(s=>s&&s.rows&&s.rows.length);
@@ -44,8 +45,9 @@ function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Seg
   if(kr)y+=kr*(KH+16)+20;
   secs.forEach(s=>{x.fillStyle=TGC.ink;x.textAlign='right';x.font=F(36,700);x.fillText(s.h,W-P,y+48);y+=SH;
     s.rows.forEach((r,i)=>{const h=r[2]?RH+22:RH;x.fillStyle=i%2?'#ffffff':'#fbfcfb';x.fillRect(P,y,W-P*2,h);x.fillStyle=TGC.ln;x.fillRect(P,y+h-1,W-P*2,1);
-      x.textAlign='right';x.fillStyle=TGC.ink;x.font=F(34,500);let nm=String(r[0]);while(x.measureText(nm).width>W-P*2-330&&nm.length>3)nm=nm.slice(0,-2);if(nm!==String(r[0]))nm+='…';x.fillText(nm,W-P-16,y+42);
-      if(r[2]){x.fillStyle=r[3]||TGC.mu;x.font=F(26);x.fillText(r[2],W-P-16,y+76)}
+      let nx=W-P-16;const im=tgIm(r[4]);if(im&&im.complete&&im.naturalWidth){const ih=34,iw=Math.min(70,ih*im.naturalWidth/im.naturalHeight);x.drawImage(im,nx-iw,y+14,iw,ih);nx-=iw+10}
+      x.textAlign='right';x.fillStyle=TGC.ink;x.font=F(34,500);let nm=String(r[0]);while(x.measureText(nm).width>W-P*2-330&&nm.length>3)nm=nm.slice(0,-2);if(nm!==String(r[0]))nm+='…';x.fillText(nm,nx,y+42);
+      if(r[2]){x.fillStyle=r[3]||TGC.mu;x.font=F(26);x.fillText(r[2],nx,y+76)}
       x.textAlign='left';x.fillStyle=r[3]||TGC.ink;x.font=F(36,700);x.fillText(String(r[1]),P+16,y+44);y+=h});y+=16});
   if(sp.foot){x.textAlign='right';x.fillStyle=sp.footC||TGC.mu;x.font=F(32,600);x.fillText(sp.foot,W-P,y+46);y+=70}
   return new Promise(r=>cv.toBlob(r,'image/png'))}
@@ -54,11 +56,11 @@ async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.appe
 /* ---- التقارير (كل واحد بيرجع وصف الصورة، أو null لو مفيش حاجة) ---- */
 function tgClTx(){const a=dAgo(1),b=dAgo(0),s=tgSum(a,b);if(!s.n&&!s.got&&!s.ex&&!s.buy&&!s.spay)return null;let dr=null;try{dr=drwCalc(a)}catch(e){}
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')],['💵 اتحصّل',f(s.got),'',TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🗄 المتوقع في الدرج',dr?f(dr.exp):'—',dr&&dr.act!=null?(Math.abs(dr.act-dr.exp)<1?'✓ مظبوط':dr.act<dr.exp?'عجز '+f(rd2(dr.exp-dr.act)):'زيادة '+f(rd2(dr.act-dr.exp))):'']];
-  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payNm(k),f(v)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
+  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
   return{title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
 function tgPerTx(ttl,sub,a,b,pa,pb){const s=tgSum(a,b),p=tgSum(pa,pb);
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')+(tgPct(s.sale,p.sale)?' · '+tgPct(s.sale,p.sale):'')],['💵 اتحصّل',f(s.got),tgPct(s.got,p.got),TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🛒 مشتريات',f(s.buy),s.spay?'دفعت للموردين '+f(s.spay):'']];
-  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payNm(k),f(v)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
+  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
   return{title:ttl,sub,kpi,sec,foot:(s.nw?'🆕 '+plN(s.nw,'عميل')+' جديد · ':'')+'📒 المديونيات دلوقتي: '+f(tgDebt())}}
 function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a)}
 function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a)}

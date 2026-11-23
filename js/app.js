@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='416';
+const APP_VER='417';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3160,6 +3160,8 @@ const PUHOW=['كاش','فودافون كاش','انستا','تحويل بنكي'
 /* v415: كل طريقة دفع بالإيموجي بتاعها */
 const payEmo=n=>{n=String(n||'');return /شيك/.test(n)?'📝':/بنك/.test(n)?'🏦':/انستا|insta/i.test(n)?'⚡':/فودافون|محفظ|اتصالات|اورنج|أورنج|wallet/i.test(n)?'📱':/كاش|نقد/.test(n)?'💵':'💳'};
 const payNm=n=>payEmo(n)+' '+n;
+const payImg=n=>{n=String(n||'');return /فودافون|محفظ|اتصالات|اورنج|أورنج/.test(n)?IMG_VODA:/انستا|إنستا|insta/i.test(n)?IMG_INSTA:/كاش|نقد/.test(n)?IMG_CASH:''};
+const payIco=n=>{const u=payImg(n);return u?'<img class="pmi" src="'+u+'" alt="" draggable="false">':'<span class="pmi">'+payEmo(n)+'</span>'};
 const puCm=v=>{v=nv(v);return v>0?(v>20?v:v*100):0};
 const puLn=l=>{const w=puCm(l.w),h=puCm(l.h),ar=w>0&&h>0?rd2(w*h/1e4):0,q=nv(l.q),p=nv(l.p);return{ar,sheet:rd2(ar*p),tot:rd2(ar*p*q),m2:rd2(ar*q)}};
 const puSum=e=>rd2(e.ln.reduce((a,l)=>a+puLn(l).tot,0));
@@ -3174,7 +3176,7 @@ const puDate=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMont
 const puTs=(v,old)=>{if(!v)return old||Date.now();if(old&&puDate(old)===v)return old;if(v===puDate(Date.now()))return Date.now();return new Date(v+'T12:00:00').getTime()};
 const puDM=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)};
 const puSupOpts=sel=>'<option value="">اختار المورد</option>'+S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(s=>`<option value="${esc(s.id)}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
-const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${esc(payNm(h))}</button>`).join('');
+const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${payIco(h)} ${esc(h)}</button>`).join('');
 function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
 function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
@@ -3212,7 +3214,7 @@ function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof sp
   <div class="card pued" ${puEdS?'':'hidden'}><div class="purw"><input id="puEN" value="${esc(s.name)}" placeholder="الاسم" autocomplete="off" aria-label="اسم المورد"><input id="puEP" inputmode="tel" value="${esc(s.phone||'')}" placeholder="تليفون" autocomplete="off" aria-label="التليفون"></div>
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
-  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>`<tr data-pue="${esc(x.id)}"><td class="num">${puDM(x.ts)}</td><td class="tn">${esc(pay?(x.how?payEmo(x.how)+' دفعة · '+x.how+(x.to?' على '+x.to:''):'💵 دفعة'):x.ob?'رصيد من قبل':x.owe?'➕ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:''))}${x.note&&!x.ln?'<small class="mute">'+esc(x.note)+'</small>':''}${x.ln?'<small class="mute">'+esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، '))+'</small>':''}</td><td class="num ${pay?'ok':'dn'}">${pay?'−':'+'}${f(Math.abs(v))}</td><td class="num"><b>${f(run)}</b></td></tr>`).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
+  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>`<tr data-pue="${esc(x.id)}"><td class="num">${puDM(x.ts)}</td><td class="tn">${pay?(x.how?payIco(x.how)+' '+esc('دفعة · '+x.how+(x.to?' على '+x.to:'')):'💵 دفعة'):esc(x.ob?'رصيد من قبل':x.owe?'➕ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:''))}${x.note&&!x.ln?'<small class="mute">'+esc(x.note)+'</small>':''}${x.ln?'<small class="mute">'+esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، '))+'</small>':''}</td><td class="num ${pay?'ok':'dn'}">${pay?'−':'+'}${f(Math.abs(v))}</td><td class="num"><b>${f(run)}</b></td></tr>`).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
 
 /* ---- فاتورة شراء / مرتجع ---- */
 function puNewInv(sid,ret){puE={id:null,sid:sid||'',date:puDate(Date.now()),ref:'',ret:!!ret,ln:[puNewLn()],paper:'',paid:'',how:'كاش',note:'',ts:0};puGo('inv')}
@@ -3275,7 +3277,7 @@ function puStmtTx(s,st){const shop=lsv('shop','');let t='*كشف حساب'+(shop
   if(st.prev||st.mv.length>1)t+='\nرصيد سابق: *'+f(st.prev)+'*\n';
   st.mv.forEach(x=>{const v=+x.amt||0;t+='\n'+puMvName(x)+' · '+puDMY(x.ts)+'\n'+(x.type==='pay'?'− ':'+ ')+f(Math.abs(v));if(x.ln)t+='\n'+x.ln.map(l=>'   ▫️ '+puLnTx(l)).join('\n');if(x.note&&!x.ln)t+='\n   ('+x.note+')';t+='\n'});
   return t+'\n━━━━━━━━\n*'+(st.bal<0?'ليّا عندك: ':'الرصيد اللي عليّا: ')+f(Math.abs(st.bal))+'*'}
-function puStmtSpec(s,st){const rows=st.mv.map(x=>[puMvName(x)+' · '+puDMY(x.ts),(x.type==='pay'?'− ':'+ ')+f(Math.abs(+x.amt||0)),x.ln?x.ln.map(l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)).join('، '):(x.note||''),x.type==='pay'?'#15803d':'']);
+function puStmtSpec(s,st){const rows=st.mv.map(x=>[(x.type==='pay'&&payImg(x.how)?'دفعة '+x.how+(x.to?' على '+x.to:''):puMvName(x))+' · '+puDMY(x.ts),(x.type==='pay'?'− ':'+ ')+f(Math.abs(+x.amt||0)),x.ln?x.ln.map(l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)).join('، '):(x.note||''),x.type==='pay'?'#15803d':'',x.type==='pay'?payImg(x.how):'']);
   return{title:'📋 كشف حساب',sub:s.name+' · '+puDMY(Date.now()),kpi:[['رصيد سابق',f(st.prev)],[st.bal<0?'ليّا عنده':'الرصيد اللي عليّا',f(Math.abs(st.bal)),'',st.bal>0?'#b42318':'#15803d']],sec:[{h:'الحركات',rows}],cap:'كشف حساب · '+s.name}}
 async function puSendOut(s,st,how){if(!st||!st.mv.length){toast('مفيش حركات تتبعت');return}
   if(how==='img'){try{const b=await tgDraw(puStmtSpec(s,st)),file=new File([b],'كشف-'+s.name+'.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'كشف حساب'});return}await dl(b,file.name)}catch(e){if(e&&e.name==='AbortError')return;toast('الصورة ما اتبعتتش')}return}
@@ -3493,6 +3495,7 @@ const tgPct=(v,p)=>p>0?(v>=p?'↑ ':'↓ ')+Math.round(Math.abs(v-p)/p*100)+'% �
 /* ---- رسّام صورة التقرير: عنوان + مربعات أرقام كبيرة + جداول (كله بالعربي من اليمين) ----
    spec={title,sub,kpi:[[عنوان,رقم,ملاحظة?,لون?]],sec:[{h,rows:[[اسم,قيمة,ملاحظة?,لون?]]}],foot?} */
 const TG_MKH=new Image();TG_MKH.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%2082%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234f80e1%22%20stroke-width%3D%227.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%2078V38q0-4%204-7L46%207q4-3%208%200l34%2024q4%203%204%207v40%22%2F%3E%3Cpath%20d%3D%22M24%2078V46L50%2027l26%2019v32%22%2F%3E%3Cpath%20d%3D%22M40%2078V54l10-7%2010%207v24%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E';
+const TGIMG={};const tgIm=u=>{if(!u)return null;if(!TGIMG[u]){const i=new Image();i.src=u;TGIMG[u]=i}return TGIMG[u]};setTimeout(()=>{try{[IMG_CASH,IMG_VODA,IMG_INSTA].forEach(tgIm)}catch(e){}},500);
 const TGC={g:'#1f5f3f',red:'#b42318',or:'#b45309',grn:'#15803d',ink:'#111827',mu:'#6b7280',ln:'#e5e7eb'};
 function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Segoe UI",Tahoma,Arial,sans-serif',KH=150,RH=62,SH=70;
   const kr=Math.ceil((sp.kpi||[]).length/2),secs=(sp.sec||[]).filter(s=>s&&s.rows&&s.rows.length);
@@ -3510,8 +3513,9 @@ function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Seg
   if(kr)y+=kr*(KH+16)+20;
   secs.forEach(s=>{x.fillStyle=TGC.ink;x.textAlign='right';x.font=F(36,700);x.fillText(s.h,W-P,y+48);y+=SH;
     s.rows.forEach((r,i)=>{const h=r[2]?RH+22:RH;x.fillStyle=i%2?'#ffffff':'#fbfcfb';x.fillRect(P,y,W-P*2,h);x.fillStyle=TGC.ln;x.fillRect(P,y+h-1,W-P*2,1);
-      x.textAlign='right';x.fillStyle=TGC.ink;x.font=F(34,500);let nm=String(r[0]);while(x.measureText(nm).width>W-P*2-330&&nm.length>3)nm=nm.slice(0,-2);if(nm!==String(r[0]))nm+='…';x.fillText(nm,W-P-16,y+42);
-      if(r[2]){x.fillStyle=r[3]||TGC.mu;x.font=F(26);x.fillText(r[2],W-P-16,y+76)}
+      let nx=W-P-16;const im=tgIm(r[4]);if(im&&im.complete&&im.naturalWidth){const ih=34,iw=Math.min(70,ih*im.naturalWidth/im.naturalHeight);x.drawImage(im,nx-iw,y+14,iw,ih);nx-=iw+10}
+      x.textAlign='right';x.fillStyle=TGC.ink;x.font=F(34,500);let nm=String(r[0]);while(x.measureText(nm).width>W-P*2-330&&nm.length>3)nm=nm.slice(0,-2);if(nm!==String(r[0]))nm+='…';x.fillText(nm,nx,y+42);
+      if(r[2]){x.fillStyle=r[3]||TGC.mu;x.font=F(26);x.fillText(r[2],nx,y+76)}
       x.textAlign='left';x.fillStyle=r[3]||TGC.ink;x.font=F(36,700);x.fillText(String(r[1]),P+16,y+44);y+=h});y+=16});
   if(sp.foot){x.textAlign='right';x.fillStyle=sp.footC||TGC.mu;x.font=F(32,600);x.fillText(sp.foot,W-P,y+46);y+=70}
   return new Promise(r=>cv.toBlob(r,'image/png'))}
@@ -3520,11 +3524,11 @@ async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.appe
 /* ---- التقارير (كل واحد بيرجع وصف الصورة، أو null لو مفيش حاجة) ---- */
 function tgClTx(){const a=dAgo(1),b=dAgo(0),s=tgSum(a,b);if(!s.n&&!s.got&&!s.ex&&!s.buy&&!s.spay)return null;let dr=null;try{dr=drwCalc(a)}catch(e){}
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')],['💵 اتحصّل',f(s.got),'',TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🗄 المتوقع في الدرج',dr?f(dr.exp):'—',dr&&dr.act!=null?(Math.abs(dr.act-dr.exp)<1?'✓ مظبوط':dr.act<dr.exp?'عجز '+f(rd2(dr.exp-dr.act)):'زيادة '+f(rd2(dr.act-dr.exp))):'']];
-  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payNm(k),f(v)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
+  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
   return{title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
 function tgPerTx(ttl,sub,a,b,pa,pb){const s=tgSum(a,b),p=tgSum(pa,pb);
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')+(tgPct(s.sale,p.sale)?' · '+tgPct(s.sale,p.sale):'')],['💵 اتحصّل',f(s.got),tgPct(s.got,p.got),TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🛒 مشتريات',f(s.buy),s.spay?'دفعت للموردين '+f(s.spay):'']];
-  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payNm(k),f(v)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
+  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payImg(k)?k:payNm(k),f(v),'','',payImg(k)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
   return{title:ttl,sub,kpi,sec,foot:(s.nw?'🆕 '+plN(s.nw,'عميل')+' جديد · ':'')+'📒 المديونيات دلوقتي: '+f(tgDebt())}}
 function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a)}
 function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a)}

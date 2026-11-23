@@ -2106,3 +2106,8 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 /* v416: حوّلت على رقم */
 #pu #puTo{height:32px;min-height:32px;font-size:13px;margin-top:5px;text-align:center}
 #pu #puTo[hidden]{display:none}
+
+/* v417: لوجوهات طرق الدفع الحقيقية في المورد */
+#pu img.pmi{height:16px;width:auto;max-width:30px;vertical-align:-3px;border-radius:3px}
+#pu span.pmi{font-size:14px}
+#pu [data-puh] img.pmi{height:18px;margin-inline-end:2px}

@@ -8,6 +8,8 @@ const PUHOW=['كاش','فودافون كاش','انستا','تحويل بنكي'
 /* v415: كل طريقة دفع بالإيموجي بتاعها */
 const payEmo=n=>{n=String(n||'');return /شيك/.test(n)?'📝':/بنك/.test(n)?'🏦':/انستا|insta/i.test(n)?'⚡':/فودافون|محفظ|اتصالات|اورنج|أورنج|wallet/i.test(n)?'📱':/كاش|نقد/.test(n)?'💵':'💳'};
 const payNm=n=>payEmo(n)+' '+n;
+const payImg=n=>{n=String(n||'');return /فودافون|محفظ|اتصالات|اورنج|أورنج/.test(n)?IMG_VODA:/انستا|إنستا|insta/i.test(n)?IMG_INSTA:/كاش|نقد/.test(n)?IMG_CASH:''};
+const payIco=n=>{const u=payImg(n);return u?'<img class="pmi" src="'+u+'" alt="" draggable="false">':'<span class="pmi">'+payEmo(n)+'</span>'};
 const puCm=v=>{v=nv(v);return v>0?(v>20?v:v*100):0};
 const puLn=l=>{const w=puCm(l.w),h=puCm(l.h),ar=w>0&&h>0?rd2(w*h/1e4):0,q=nv(l.q),p=nv(l.p);return{ar,sheet:rd2(ar*p),tot:rd2(ar*p*q),m2:rd2(ar*q)}};
 const puSum=e=>rd2(e.ln.reduce((a,l)=>a+puLn(l).tot,0));
@@ -22,7 +24,7 @@ const puDate=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMont
 const puTs=(v,old)=>{if(!v)return old||Date.now();if(old&&puDate(old)===v)return old;if(v===puDate(Date.now()))return Date.now();return new Date(v+'T12:00:00').getTime()};
 const puDM=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)};
 const puSupOpts=sel=>'<option value="">اختار المورد</option>'+S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(s=>`<option value="${esc(s.id)}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
-const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${esc(payNm(h))}</button>`).join('');
+const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${payIco(h)} ${esc(h)}</button>`).join('');
 function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
 function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
@@ -60,7 +62,7 @@ function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof sp
   <div class="card pued" ${puEdS?'':'hidden'}><div class="purw"><input id="puEN" value="${esc(s.name)}" placeholder="الاسم" autocomplete="off" aria-label="اسم المورد"><input id="puEP" inputmode="tel" value="${esc(s.phone||'')}" placeholder="تليفون" autocomplete="off" aria-label="التليفون"></div>
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
-  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>`<tr data-pue="${esc(x.id)}"><td class="num">${puDM(x.ts)}</td><td class="tn">${esc(pay?(x.how?payEmo(x.how)+' دفعة · '+x.how+(x.to?' على '+x.to:''):'💵 دفعة'):x.ob?'رصيد من قبل':x.owe?'➕ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:''))}${x.note&&!x.ln?'<small class="mute">'+esc(x.note)+'</small>':''}${x.ln?'<small class="mute">'+esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، '))+'</small>':''}</td><td class="num ${pay?'ok':'dn'}">${pay?'−':'+'}${f(Math.abs(v))}</td><td class="num"><b>${f(run)}</b></td></tr>`).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
+  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>`<tr data-pue="${esc(x.id)}"><td class="num">${puDM(x.ts)}</td><td class="tn">${pay?(x.how?payIco(x.how)+' '+esc('دفعة · '+x.how+(x.to?' على '+x.to:'')):'💵 دفعة'):esc(x.ob?'رصيد من قبل':x.owe?'➕ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:''))}${x.note&&!x.ln?'<small class="mute">'+esc(x.note)+'</small>':''}${x.ln?'<small class="mute">'+esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، '))+'</small>':''}</td><td class="num ${pay?'ok':'dn'}">${pay?'−':'+'}${f(Math.abs(v))}</td><td class="num"><b>${f(run)}</b></td></tr>`).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
 
 /* ---- فاتورة شراء / مرتجع ---- */
 function puNewInv(sid,ret){puE={id:null,sid:sid||'',date:puDate(Date.now()),ref:'',ret:!!ret,ln:[puNewLn()],paper:'',paid:'',how:'كاش',note:'',ts:0};puGo('inv')}
@@ -123,7 +125,7 @@ function puStmtTx(s,st){const shop=lsv('shop','');let t='*كشف حساب'+(shop
   if(st.prev||st.mv.length>1)t+='\nرصيد سابق: *'+f(st.prev)+'*\n';
   st.mv.forEach(x=>{const v=+x.amt||0;t+='\n'+puMvName(x)+' · '+puDMY(x.ts)+'\n'+(x.type==='pay'?'− ':'+ ')+f(Math.abs(v));if(x.ln)t+='\n'+x.ln.map(l=>'   ▫️ '+puLnTx(l)).join('\n');if(x.note&&!x.ln)t+='\n   ('+x.note+')';t+='\n'});
   return t+'\n━━━━━━━━\n*'+(st.bal<0?'ليّا عندك: ':'الرصيد اللي عليّا: ')+f(Math.abs(st.bal))+'*'}
-function puStmtSpec(s,st){const rows=st.mv.map(x=>[puMvName(x)+' · '+puDMY(x.ts),(x.type==='pay'?'− ':'+ ')+f(Math.abs(+x.amt||0)),x.ln?x.ln.map(l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)).join('، '):(x.note||''),x.type==='pay'?'#15803d':'']);
+function puStmtSpec(s,st){const rows=st.mv.map(x=>[(x.type==='pay'&&payImg(x.how)?'دفعة '+x.how+(x.to?' على '+x.to:''):puMvName(x))+' · '+puDMY(x.ts),(x.type==='pay'?'− ':'+ ')+f(Math.abs(+x.amt||0)),x.ln?x.ln.map(l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)).join('، '):(x.note||''),x.type==='pay'?'#15803d':'',x.type==='pay'?payImg(x.how):'']);
   return{title:'📋 كشف حساب',sub:s.name+' · '+puDMY(Date.now()),kpi:[['رصيد سابق',f(st.prev)],[st.bal<0?'ليّا عنده':'الرصيد اللي عليّا',f(Math.abs(st.bal)),'',st.bal>0?'#b42318':'#15803d']],sec:[{h:'الحركات',rows}],cap:'كشف حساب · '+s.name}}
 async function puSendOut(s,st,how){if(!st||!st.mv.length){toast('مفيش حركات تتبعت');return}
   if(how==='img'){try{const b=await tgDraw(puStmtSpec(s,st)),file=new File([b],'كشف-'+s.name+'.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'كشف حساب'});return}await dl(b,file.name)}catch(e){if(e&&e.name==='AbortError')return;toast('الصورة ما اتبعتتش')}return}
