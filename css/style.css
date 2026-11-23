@@ -2086,3 +2086,7 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 .stp[data-sp="tg"] .tgr label.opt small{font-size:11px}
 .stp[data-sp="tg"] .tgr>button{flex:none;height:30px;min-height:30px;padding:0 10px;font-size:12px;margin:0;white-space:nowrap}
 .stp[data-sp="tg"] #tgSt{font-size:12px}
+
+/* v411: لوجو المخزن (3 بيوت زرق) بدل 🧱 */
+.ic-mkh{display:inline-block;width:1.2em;height:1em;vertical-align:-.12em;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%2082%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234f80e1%22%20stroke-width%3D%227.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%2078V38q0-4%204-7L46%207q4-3%208%200l34%2024q4%203%204%207v40%22%2F%3E%3Cpath%20d%3D%22M24%2078V46L50%2027l26%2019v32%22%2F%3E%3Cpath%20d%3D%22M40%2078V54l10-7%2010%207v24%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E") center/contain no-repeat}
+.nav-icon .ic-mkh{width:1.35em;height:1.15em}

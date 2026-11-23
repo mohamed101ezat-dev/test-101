@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='410';
+const APP_VER='411';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3459,13 +3459,14 @@ const tgPct=(v,p)=>p>0?(v>=p?'↑ ':'↓ ')+Math.round(Math.abs(v-p)/p*100)+'% �
 
 /* ---- رسّام صورة التقرير: عنوان + مربعات أرقام كبيرة + جداول (كله بالعربي من اليمين) ----
    spec={title,sub,kpi:[[عنوان,رقم,ملاحظة?,لون?]],sec:[{h,rows:[[اسم,قيمة,ملاحظة?,لون?]]}],foot?} */
+const TG_MKH=new Image();TG_MKH.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%2082%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%234f80e1%22%20stroke-width%3D%227.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%2078V38q0-4%204-7L46%207q4-3%208%200l34%2024q4%203%204%207v40%22%2F%3E%3Cpath%20d%3D%22M24%2078V46L50%2027l26%2019v32%22%2F%3E%3Cpath%20d%3D%22M40%2078V54l10-7%2010%207v24%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E';
 const TGC={g:'#1f5f3f',red:'#b42318',or:'#b45309',grn:'#15803d',ink:'#111827',mu:'#6b7280',ln:'#e5e7eb'};
 function tgDraw(sp){const W=1080,P=40,F=(s,w)=>(w||400)+' '+s+'px system-ui,"Segoe UI",Tahoma,Arial,sans-serif',KH=150,RH=62,SH=70;
   const kr=Math.ceil((sp.kpi||[]).length/2),secs=(sp.sec||[]).filter(s=>s&&s.rows&&s.rows.length);
   let H=170+(kr?kr*(KH+16)+20:0);secs.forEach(s=>{H+=SH+s.rows.reduce((a,r)=>a+(r[2]?RH+22:RH),0)+16});if(sp.foot)H+=70;H+=20;
   const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');x.direction='rtl';
   x.fillStyle='#f6f8f7';x.fillRect(0,0,W,H);x.fillStyle=TGC.g;x.fillRect(0,0,W,150);
-  x.fillStyle='#fff';x.textAlign='right';x.font=F(48,700);x.fillText(sp.title,W-P,70);x.font=F(32);x.fillStyle='#d9e8df';x.fillText(sp.sub||'',W-P,122);
+  x.fillStyle='#fff';x.textAlign='right';x.font=F(48,700);if(sp.logo&&TG_MKH.complete&&TG_MKH.naturalWidth){x.fillStyle='#fff';x.beginPath();if(x.roundRect)x.roundRect(W-P-78,18,78,70,14);else x.rect(W-P-78,18,78,70);x.fill();x.drawImage(TG_MKH,W-P-70,26,62,52);x.fillStyle='#fff';x.fillText(sp.title,W-P-96,70)}else x.fillText(sp.title,W-P,70);x.font=F(32);x.fillStyle='#d9e8df';x.fillText(sp.sub||'',W-P,122);
   const shop=lsv('shop','');if(shop){x.textAlign='left';x.font=F(30,600);x.fillStyle='#d9e8df';x.fillText(shop,P,70)}
   let y=170;const cw=(W-P*2-20)/2;
   (sp.kpi||[]).forEach((k,i)=>{const col=i%2,row=Math.floor(i/2),cx=W-P-cw-col*(cw+20),cy=y+row*(KH+16);
@@ -3497,7 +3498,7 @@ function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRa
 function tgSpTx(){const l=S.suppliers.map(s=>({s,b:puBal(s.id),d:puDays(s.id)})).filter(o=>o.b>0).sort((x,y)=>y.b-x.b),tot=rd2(l.reduce((s,o)=>s+o.b,0));
   return{title:'🚚 الموردين',sub:tgDay(Date.now()),kpi:[['عليك للموردين',f(tot),plN(l.length,'مورد'),tot?TGC.red:TGC.grn]],sec:[{h:'مين ليه عندك',rows:l.map(o=>[o.s.name,f(o.b),o.d!=null?'آخر دفعة '+puDTx(o.d):'',o.d!=null&&o.d>=30?TGC.red:o.d!=null&&o.d>=7?TGC.or:''])}],foot:l.length?'':'✅ مفيش عليك فلوس لأي مورد',footC:TGC.grn}}
 function tgSkTx(){const R=[...s2Calc().values()],tr=R.filter(o=>o.tr);if(!R.length)return null;const v=tr.reduce((s,o)=>s+Math.max(0,o.bal)*s2Cpm(o.t),0),low=tr.filter(o=>s2Mn(o.t)>0&&o.bal<=s2Mn(o.t)),un=R.filter(o=>!o.tr),lj=s2Jds().pop(),jd=lj?Math.floor((Date.now()-lj.ts)/864e5):null;
-  return{title:'🧱 المخزن',sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
+  return{title:'المخزن',logo:1,sub:tgDay(Date.now()),kpi:[['📐 الأمتار',fq(rd2(tr.reduce((s,o)=>s+Math.max(0,o.bal),0)))+' م²'],['💰 قيمته',v?f(Math.round(v)):'—']],
     sec:[{h:'⚠️ قرب يخلص',rows:low.map(o=>[o.t.name,fq(o.bal)+' م²','الحد '+fq(s2Mn(o.t))+' م²',TGC.or])},{h:'📦 الأنواع',rows:tr.sort((a,b)=>a.t.name.localeCompare(b.t.name,'ar')).map(o=>[o.t.name,fq(o.bal)+' م²','≈ '+fq(s2Sh(Math.max(0,o.bal),o.ref))+' لوح',o.bal<0?TGC.red:''])},{h:'➖ لسه ما اتعدّش',rows:un.map(o=>[o.t.name,'—'])}],
     foot:'📋 '+(jd==null?'لسه ما عملتش جرد افتتاحي':'آخر جرد '+puDTx(jd)+(jd>=7?' — فاكر الجرد؟':'')),footC:jd==null||jd>=7?TGC.or:TGC.mu}}
 
