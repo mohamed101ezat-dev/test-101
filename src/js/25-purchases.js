@@ -5,6 +5,9 @@
    ret=مرتجع للمورد (مبلغه بالسالب) · ob=رصيد أول المدة · pf=دفعة اتعملت مع فاتورة الشراء */
 var puV='home',puSid=null,puE=null,puP=null,puStack=[],puEdS=false;
 const PUHOW=['كاش','فودافون كاش','انستا','تحويل بنكي','شيك'],PUD=864e5;
+/* v415: كل طريقة دفع بالإيموجي بتاعها */
+const payEmo=n=>{n=String(n||'');return /شيك/.test(n)?'📝':/بنك/.test(n)?'🏦':/انستا|insta/i.test(n)?'⚡':/فودافون|محفظ|اتصالات|اورنج|أورنج|wallet/i.test(n)?'📱':/كاش|نقد/.test(n)?'💵':'💳'};
+const payNm=n=>payEmo(n)+' '+n;
 const puCm=v=>{v=nv(v);return v>0?(v>20?v:v*100):0};
 const puLn=l=>{const w=puCm(l.w),h=puCm(l.h),ar=w>0&&h>0?rd2(w*h/1e4):0,q=nv(l.q),p=nv(l.p);return{ar,sheet:rd2(ar*p),tot:rd2(ar*p*q),m2:rd2(ar*q)}};
 const puSum=e=>rd2(e.ln.reduce((a,l)=>a+puLn(l).tot,0));
@@ -19,7 +22,7 @@ const puDate=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMont
 const puTs=(v,old)=>{if(!v)return old||Date.now();if(old&&puDate(old)===v)return old;if(v===puDate(Date.now()))return Date.now();return new Date(v+'T12:00:00').getTime()};
 const puDM=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)};
 const puSupOpts=sel=>'<option value="">اختار المورد</option>'+S.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name,'ar')).map(s=>`<option value="${esc(s.id)}"${s.id===sel?' selected':''}>${esc(s.name)}</option>`).join('');
-const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${esc(h)}</button>`).join('');
+const puHowChips=on=>PUHOW.map(h=>`<button type="button" data-puh="${esc(h)}"${h===on?' class="on"':''}>${esc(payNm(h))}</button>`).join('');
 function puGo(v){puStack.push([puV,puSid]);puV=v;puDraw();window.scrollTo(0,0);try{syncNav()}catch(e){}}
 function puPop(){const p=puStack.pop();if(p){puV=p[0];puSid=p[1]}else{puV='home';puSid=null}puE=null;puP=null;puDraw()}
 function puBack(){if(puStack.length)puPop();else{puV='home';puSid=null;puDraw()}try{syncNav()}catch(e){}}
@@ -57,7 +60,7 @@ function puSupH(s){const b=puBal(s.id),d=puDays(s.id),l=puOf(s.id),tel=typeof sp
   <div class="card pued" ${puEdS?'':'hidden'}><div class="purw"><input id="puEN" value="${esc(s.name)}" placeholder="الاسم" autocomplete="off" aria-label="اسم المورد"><input id="puEP" inputmode="tel" value="${esc(s.phone||'')}" placeholder="تليفون" autocomplete="off" aria-label="التليفون"></div>
     <div class="purw"><span class="mute">عليّا له من قبل</span><input id="puOB" inputmode="decimal" value="${ob?esc(ob.amt):''}" placeholder="0" autocomplete="off" aria-label="رصيد أول المدة"></div>
     <div class="purw"><button type="button" class="main" data-pu="savedsup">✅ حفظ</button><button type="button" class="alt b-red" data-pu="delsup">🗑️ حذف المورد</button></div><div class="info" id="puEM"></div></div>
-  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>`<tr data-pue="${esc(x.id)}"><td class="num">${puDM(x.ts)}</td><td class="tn">${esc(pay?'💵 دفعة'+(x.how?' · '+x.how:''):x.ob?'رصيد من قبل':x.owe?'➕ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:''))}${x.note&&!x.ln?'<small class="mute">'+esc(x.note)+'</small>':''}${x.ln?'<small class="mute">'+esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، '))+'</small>':''}</td><td class="num ${pay?'ok':'dn'}">${pay?'−':'+'}${f(Math.abs(v))}</td><td class="num"><b>${f(run)}</b></td></tr>`).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
+  <div class="card pul">${rows.length?`<table class="xl"><tr><th>اليوم</th><th>البيان</th><th>المبلغ</th><th>الرصيد</th></tr>${rows.map(({x,v,pay,run})=>`<tr data-pue="${esc(x.id)}"><td class="num">${puDM(x.ts)}</td><td class="tn">${esc(pay?(x.how?payEmo(x.how)+' دفعة · '+x.how:'💵 دفعة'):x.ob?'رصيد من قبل':x.owe?'➕ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:''))}${x.note&&!x.ln?'<small class="mute">'+esc(x.note)+'</small>':''}${x.ln?'<small class="mute">'+esc(x.ln.map(q=>q.n+' ×'+fq(q.q)).join('، '))+'</small>':''}</td><td class="num ${pay?'ok':'dn'}">${pay?'−':'+'}${f(Math.abs(v))}</td><td class="num"><b>${f(run)}</b></td></tr>`).join('')}</table>`:'<div class="mute">لسه مفيش حاجة. سجّل أول فاتورة.</div>'}</div>`}
 
 /* ---- فاتورة شراء / مرتجع ---- */
 function puNewInv(sid,ret){puE={id:null,sid:sid||'',date:puDate(Date.now()),ref:'',ret:!!ret,ln:[puNewLn()],paper:'',paid:'',how:'كاش',note:'',ts:0};puGo('inv')}
@@ -107,7 +110,7 @@ function puSavePay(){const p=puP,m=$('puMsg'),s=puSup(p.sid),a=rd2(nv(p.amt));if
 /* ---- 📤 كشف حساب للمورد: الحساب القديم + الحركات + الرصيد، كرسالة واتساب على رقمه أو كصورة (v414) ---- */
 var puSM='last';
 const puLnTx=l=>fq(l.q)+' لوح '+l.n+' '+fq(l.w)+'×'+fq(l.h)+' × '+f(l.p)+' = '+f(rd2(rd2(l.w*l.h/1e4)*l.p*l.q));
-const puMvName=x=>x.type==='pay'?'💵 دفعة'+(x.how?' '+x.how:''):x.ob?'رصيد من قبل':x.owe?'➕ مبلغ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:'');
+const puMvName=x=>x.type==='pay'?(x.how?payEmo(x.how)+' دفعة '+x.how:'💵 دفعة'):x.ob?'رصيد من قبل':x.owe?'➕ مبلغ عليّا':x.ret?'↩️ مرتجع':'🧾 فاتورة'+(x.ref?' #'+x.ref:'');
 const puDMY=t=>{const d=new Date(t);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()};
 /* بيرجّع: الرصيد قبل، الحركات، الرصيد بعد. one=حركة واحدة بس */
 function puStmt(sid,mode,from,one){const l=puOf(sid);let a=0,i0=0,i1=l.length;

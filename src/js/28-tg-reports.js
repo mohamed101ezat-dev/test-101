@@ -54,11 +54,11 @@ async function tgSendSpec(sp){const b=await tgDraw(sp),fd=new FormData();fd.appe
 /* ---- التقارير (كل واحد بيرجع وصف الصورة، أو null لو مفيش حاجة) ---- */
 function tgClTx(){const a=dAgo(1),b=dAgo(0),s=tgSum(a,b);if(!s.n&&!s.got&&!s.ex&&!s.buy&&!s.spay)return null;let dr=null;try{dr=drwCalc(a)}catch(e){}
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')],['💵 اتحصّل',f(s.got),'',TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🗄 المتوقع في الدرج',dr?f(dr.exp):'—',dr&&dr.act!=null?(Math.abs(dr.act-dr.exp)<1?'✓ مظبوط':dr.act<dr.exp?'عجز '+f(rd2(dr.exp-dr.act)):'زيادة '+f(rd2(dr.act-dr.exp))):'']];
-  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[k,f(v)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
+  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payNm(k),f(v)])}];if(s.buy||s.spay)sec.push({h:'🚚 الموردين',rows:[s.buy?['🛒 مشتريات',f(s.buy)]:null,s.spay?['💵 دفعت للموردين',f(s.spay)]:null].filter(Boolean)});
   return{title:'🧾 إقفال اليوم',sub:tgDay(a),kpi,sec,foot:'📒 إجمالي المديونيات دلوقتي: '+f(tgDebt()),footC:TGC.red}}
 function tgPerTx(ttl,sub,a,b,pa,pb){const s=tgSum(a,b),p=tgSum(pa,pb);
   const kpi=[['💰 المبيعات',f(s.sale),plN(s.n,'فاتورة')+(tgPct(s.sale,p.sale)?' · '+tgPct(s.sale,p.sale):'')],['💵 اتحصّل',f(s.got),tgPct(s.got,p.got),TGC.grn],['💸 المصروفات',f(s.ex),'',s.ex?TGC.red:''],['🛒 مشتريات',f(s.buy),s.spay?'دفعت للموردين '+f(s.spay):'']];
-  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[k,f(v)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
+  const sec=[{h:'💵 اتحصّل بإيه',rows:s.by.map(([k,v])=>[payNm(k),f(v)])},{h:'🏆 أكتر الأصناف',rows:s.top.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])},{h:'👥 أكتر العملاء',rows:s.tc.map(([k,v],i)=>[(i+1)+'. '+k,f(v)])}];
   return{title:ttl,sub,kpi,sec,foot:(s.nw?'🆕 '+plN(s.nw,'عميل')+' جديد · ':'')+'📒 المديونيات دلوقتي: '+f(tgDebt())}}
 function tgWkTx(){const b=wkOf(Date.now()),a=b-7*864e5;return tgPerTx('📊 تقرير الأسبوع',tgDay(a)+' ← '+tgDay(b-864e5),a,b,a-7*864e5,a)}
 function tgMoTx(){const[b]=monRange(Date.now()),[a]=monRange(b-864e5),[pa]=monRange(a-864e5);return tgPerTx('📈 تقرير الشهر',tgMon(a),a,b,pa,a)}
