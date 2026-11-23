@@ -130,7 +130,7 @@ function stSum(){const W_=(k,t)=>{const e=$('ss_'+k);if(e)e.textContent=t};$('ss
   W_('nf',nfState()==='on'?'شغالة':'مقفولة');
   W_('look',(document.documentElement.getAttribute('data-theme')==='dark'?'ليلي':'نهاري')+' · خط '+({x:'أصغر',s:'صغير',m:'وسط',l:'كبير',xl:'أكبر'}[lsv('fz','m')||'m']||'وسط'));
   W_('lock',lsv('lkOn','')==='1'?'مقفول برقم سري':'من غير قفل');
-  W_('data',$('stor').textContent.replace(/^الحفظ:\s*/,'').replace(/\.$/,''))}
+  try{W_('tg',tgSumTx())}catch(_){};W_('data',$('stor').textContent.replace(/^الحفظ:\s*/,'').replace(/\.$/,''))}
 $('t-st').addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){document.querySelector('#bnav button[data-t="'+g.dataset.go+'"]').click();window.scrollTo(0,0);return}const b=e.target.closest('.sti[data-sp],.stile[data-sp]');if(b){stGo(b.dataset.sp);return}if(e.target.closest('[data-stback]')){if(stkFromIt&&stCur==='stk'){stkFromIt=false;stGo('');document.querySelector('#bnav button[data-t="it"]').click();window.scrollTo(0,0)}else{stkFromIt=false;stGo('')}}});
 /* ===== الربح ووضع العامل ===== */
 const byTag=()=>{try{const n=localStorage.getItem('wkName');return n?{by:n}:{}}catch(e){return{}}};

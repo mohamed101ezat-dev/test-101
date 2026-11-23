@@ -45,7 +45,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <link rel="apple-touch-startup-image" href="splash/14_15pro.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/12_13_14promax.png" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)">
 <link rel="apple-touch-startup-image" href="splash/14_15promax.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)">
-<link rel="stylesheet" href="css/style.css?v=406">
+<link rel="stylesheet" href="css/style.css?v=407">
 
 
 
@@ -288,7 +288,7 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <div class="sgl"><button type="button" class="sti" data-sp="msg"><span class="si"><i class="wai"></i></span><span class="stt"><b>رسائل الواتساب</b><small id="ss_msg"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="rem"><span class="si">🔔</span><span class="stt"><b>تذكير المديونين</b><small id="ss_rem"></small></span><span class="sa">‹</span></button></div>
   <div class="sgl" style="margin-bottom:8px"><button type="button" class="sti" data-sp="chk"><span class="si">✅</span><span class="stt"><b>فحص سريع</b><small id="ss_chk"></small></span><span class="sa">‹</span></button></div>
   <div class="sgh">البرنامج</div>
-  <div class="sgl"><button type="button" class="sti" data-sp="look"><span class="si">📱</span><span class="stt"><b>شكل البرنامج</b><small id="ss_look"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="nf"><span class="si">🔔</span><span class="stt"><b>الإشعارات</b><small id="ss_nf"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="lock"><span class="si">🔒</span><span class="stt"><b>القفل والأمان</b><small id="ss_lock"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="data"><span class="si">💾</span><span class="stt"><b>الحفظ والنسخ</b><small id="ss_data"></small></span><span class="sa">‹</span></button></div>
+  <div class="sgl"><button type="button" class="sti" data-sp="look"><span class="si">📱</span><span class="stt"><b>شكل البرنامج</b><small id="ss_look"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="nf"><span class="si">🔔</span><span class="stt"><b>الإشعارات</b><small id="ss_nf"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="lock"><span class="si">🔒</span><span class="stt"><b>القفل والأمان</b><small id="ss_lock"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="data"><span class="si">💾</span><span class="stt"><b>الحفظ والنسخ</b><small id="ss_data"></small></span><span class="sa">‹</span></button><button type="button" class="sti" data-sp="tg"><span class="si">✈️</span><span class="stt"><b>تيليجرام</b><small id="ss_tg"></small></span><span class="sa">‹</span></button></div>
   </div>
   <div class="mute" id="appVer" style="text-align:center;margin:12px 0 4px"></div><div style="text-align:center;margin-bottom:6px"><button type="button" class="alt" id="appUpd" style="font-size:12px;padding:4px 12px;min-height:30px">🔄 حدّث البرنامج دلوقتي</button></div>
 </div>
@@ -482,6 +482,25 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
   <select id="fzSel" class="hide"><option value="x">x</option><option value="s">s</option><option value="m">m</option><option value="l">l</option><option value="xl">xl</option></select></div>
 <div class="card"><b>🧰 أدوات</b><label class="opt"><input type="checkbox" id="calcOn"> زرار الآلة الحاسبة</label><label class="opt"><input type="checkbox" id="stkShow"> المخزن في الإعدادات (اقفله لو مش بتستخدمه)</label><label class="opt"><input type="checkbox" id="backFab"> زرار رجوع صغير تحت في صفحات الإعدادات (بيختفي وانت نازل في الصفحة)</label></div>
 </div>
+<div class="stp hide" data-sp="tg"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>✈️ تيليجرام</b></div>
+  <div class="card" id="tgBox"><b>🔗 الربط</b> <span class="mute" id="tgSt"></span>
+    <div class="mute" style="font-size:12px;margin:6px 0">بعد ما تربطه، النسخة والتقارير اللي تحت بتتبعتلك على تيليجرام لوحدها.<br>١) في تيليجرام افتح <b>@BotFather</b> واكتب <b>/newbot</b> واتبع الخطوات، هيدّيك <b>Token</b>.<br>٢) افتح البوت بتاعك وابعتله أي رسالة (مثلًا: أهلاً).<br>٣) الصق الـToken هنا ودوس «🔍 هات الـChat ID»، وبعدها «اختبار».</div>
+    <input id="tgTok" type="password" dir="ltr" placeholder="Token (123456:ABC…)" autocomplete="off" aria-label="Token">
+    <div class="ro" style="gap:6px;margin-top:6px"><input id="tgChat" dir="ltr" placeholder="Chat ID" autocomplete="off" aria-label="Chat ID" style="flex:1"><button type="button" class="alt" id="tgFind" style="flex:none">🔍 هات الـChat ID</button></div>
+    <div class="ro" style="gap:6px;margin-top:6px"><button type="button" class="main" id="tgTest" style="flex:1">✉️ اختبار</button><button type="button" class="alt b-red" id="tgOff" style="flex:none">إيقاف</button></div>
+
+    <div class="info" id="tgMsg"></div></div>
+  <div class="card" id="tgAuto"><b>📨 بيتبعت لوحده</b> <small class="mute">أول ما تفتح البرنامج</small>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="dsTg"> 💾 النسخة الاحتياطية <small class="mute">كل يوم</small></label><button type="button" class="alt" data-tgnow="bk">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="dbTg"> 📒 صورة المديونين <small class="mute">كل يوم</small></label><button type="button" class="alt" id="dbTgNow">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgCl"> 🧾 إقفال اليوم اللي فات <small class="mute">كل يوم</small></label><button type="button" class="alt" data-tgnow="cl">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgWk"> 📊 تقرير الأسبوع <small class="mute">كل أسبوع</small></label><button type="button" class="alt" data-tgnow="wk">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgSp"> 🚚 الموردين اللي عليك ليهم <small class="mute">كل أسبوع</small></label><button type="button" class="alt" data-tgnow="sp">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgSk"> 🧱 المخزن والجرد <small class="mute">كل أسبوع</small></label><button type="button" class="alt" data-tgnow="sk">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgMo"> 📈 تقرير الشهر <small class="mute">أول كل شهر</small></label><button type="button" class="alt" data-tgnow="mo">ابعت دلوقتي</button></div>
+    <div class="tgr"><label class="opt"><input type="checkbox" id="tgDel"> 🗑️ تنبيه لو فاتورة أو دفعة اتمسحت أو اتعدّلت <small class="mute">ساعتها</small></label></div>
+    <div class="info" id="tgAMsg" aria-live="polite"></div></div>
+</div>
 <div class="stp hide" data-sp="lock"><div class="sth"><button type="button" class="lnk" data-stback="1" aria-label="رجوع للإعدادات">→</button><b>🔒 القفل والأمان</b></div>
 <div class="card"><b>👷 وضع العامل</b><div class="mute">بيخبّي عن الجهاز ده: الربح وسعر الشراء، والمديونيات وأرصدة العملاء، والإعدادات، وحذف وتعديل الفواتير. للرجوع لازم الرقم السري.</div>
   <button type="button" class="main" id="wkGo" style="width:100%;margin-top:6px">👷 شغّل وضع العامل على الجهاز ده</button><div class="ro" style="gap:6px;margin-top:8px"><input id="wkNew" placeholder="اسم عامل (اختياري)" style="flex:1"><button type="button" class="alt" id="wkAdd" style="flex:none">➕</button></div><div id="wkL" style="margin-top:6px"></div><div class="mute" style="margin-top:4px">دوس على اسم عشان تختاره، وكل فاتورة تتسجل بالجهاز ده هتتكتب باسمه (👷) في السجل.</div><div class="info" id="wkMsg"></div></div>
@@ -509,17 +528,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 <div class="card"><b>💾 نسخة احتياطية</b><div class="mute" id="bkInfo" style="margin-top:4px"></div>
   <div class="btns"><button class="main" id="bkSave">💾 حفظ نسخة</button><button class="alt" id="bkLoad">♻️ استرجاع نسخة</button><input type="file" id="bkFile" accept=".json,.txt,application/json,text/plain" class="hide"></div>
   <div class="btns"><button class="alt b-out" id="bkShare">📤 ابعت نسخة على تيليجرام</button></div><div class="info" id="bkMsg"></div>
-  <div class="ro" style="display:none"><label class="opt" style="flex:none;margin:0"><input type="checkbox" id="bkWaOn"> 📲 واتساب</label><input id="bkWa" type="tel" inputmode="tel" dir="ltr" placeholder="رقم الواتساب (ثابت)" autocomplete="off" aria-label="رقم الواتساب" style="flex:1;display:none"></div><div class="mute" style="font-size:12px">بتتبعت على بوت تيليجرام بتاعك على طول. ولو تيليجرام مش مربوط بتفتح قايمة المشاركة.</div>
+  <div class="ro" style="display:none"><label class="opt" style="flex:none;margin:0"><input type="checkbox" id="bkWaOn"> 📲 واتساب</label><input id="bkWa" type="tel" inputmode="tel" dir="ltr" placeholder="رقم الواتساب (ثابت)" autocomplete="off" aria-label="رقم الواتساب" style="flex:1;display:none"></div><div class="mute" style="font-size:12px">بتتبعت على بوت تيليجرام بتاعك على طول (تظبطه من الإعدادات ← ✈️ تيليجرام). ولو مش مربوط بتفتح قايمة المشاركة.</div>
   <div class="card" id="dsBox" style="margin-top:8px"><b>📤 تذكير النسخة اليومية</b><div class="mute" style="font-size:12px">كل يوم لسه ما بعتّش نسخة، بيظهر فوق شريط صغير فيه زرار واحد يبعت ملف النسخة الاحتياطية (الداتا نفسها) على تيليجرام.</div>
   <label class="opt"><input type="checkbox" id="dsOn"> شريط تذكير النسخة فوق</label>
-  <label class="opt"><input type="checkbox" id="dsTg"> ابعت النسخة لتيليجرام لوحدها كل يوم (لو مفعّل تحت)</label><div class="info" id="dsMsg"></div></div>
-  <details class="card spdt" id="tgBox" style="margin-top:8px"><summary>✈️ إرسال النسخة لتيليجرام أوتوماتيك (مجاني)</summary>
-    <div class="mute" style="font-size:12px;margin:6px 0">بعد ما تظبطه، «📤 مشاركة نسخة» بتبعت الملف على تيليجرام بتاعك لوحدها من غير أي خطوة تانية.<br>١) في تيليجرام افتح <b>@BotFather</b> واكتب <b>/newbot</b> واتبع الخطوات، هيدّيك <b>Token</b>.<br>٢) افتح البوت بتاعك وابعتله أي رسالة (مثلًا: أهلاً).<br>٣) الصق الـToken هنا ودوس «🔍 هات الـChat ID»، وبعدها «اختبار».</div>
-    <input id="tgTok" type="password" dir="ltr" placeholder="Token (123456:ABC…)" autocomplete="off" aria-label="Token">
-    <div class="ro" style="gap:6px;margin-top:6px"><input id="tgChat" dir="ltr" placeholder="Chat ID" autocomplete="off" aria-label="Chat ID" style="flex:1"><button type="button" class="alt" id="tgFind" style="flex:none">🔍 هات الـChat ID</button></div>
-    <div class="ro" style="gap:6px;margin-top:6px"><button type="button" class="main" id="tgTest" style="flex:1">✉️ اختبار</button><button type="button" class="alt b-red" id="tgOff" style="flex:none">إيقاف</button></div>
-    <div class="ro" style="gap:6px;margin-top:8px;align-items:center"><label class="opt" style="flex:1;margin:0"><input type="checkbox" id="dbTg"> 📒 ابعت صورة المديونين كل يوم</label><button type="button" class="alt" id="dbTgNow" style="flex:none">ابعتها دلوقتي</button></div>
-    <div class="info" id="tgMsg"></div></details>
+<div class="info" id="dsMsg"></div></div>
+
   <label class="opt"><input type="checkbox" id="bkAl"> تنبيه لو عدّى أسبوع من غير نسخة</label></div>
 <details class="card"><summary>🗄 نسخ تلقائية (على الجهاز والسحابة)</summary>
   <label class="opt"><input type="checkbox" id="snapOn"> نسخة على الجهاز كل يوم (آخر 14 يوم)</label>
@@ -587,11 +600,11 @@ setTimeout(function(){if(!window.__bootOK)show('timeout')},15000)})();
 
 <div id="dd"></div>
 
-<script src="js/app.js?v=406"></script>
-<script src="js/qr.js?v=406"></script>
+<script src="js/app.js?v=407"></script>
+<script src="js/qr.js?v=407"></script>
 <!-- ===== CutList: مخطط التقطيع ===== -->
-<script src="js/cutlist.js?v=406"></script>
-<script src="js/features.js?v=406"></script>
+<script src="js/cutlist.js?v=407"></script>
+<script src="js/features.js?v=407"></script>
 </body>
 </html>
 

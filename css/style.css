@@ -2079,3 +2079,10 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #sk2 .s2g .main{height:32px;min-height:32px;width:100%;padding:0;margin:0;font-size:15px}
 #sk2 .s2sub{font-size:12px;margin-top:3px}
 #sk2 .pul td.tn{white-space:normal;max-width:none;overflow:visible}
+/* v407: صفحة تيليجرام */
+.stp[data-sp="tg"] .tgr{display:flex;align-items:center;gap:6px;border-bottom:1px solid color-mix(in srgb,var(--line) 50%,transparent)}
+.stp[data-sp="tg"] .tgr:last-of-type{border-bottom:0}
+.stp[data-sp="tg"] .tgr label.opt{flex:1;min-width:0;border:0;margin:0}
+.stp[data-sp="tg"] .tgr label.opt small{font-size:11px}
+.stp[data-sp="tg"] .tgr>button{flex:none;height:30px;min-height:30px;padding:0 10px;font-size:12px;margin:0;white-space:nowrap}
+.stp[data-sp="tg"] #tgSt{font-size:12px}
