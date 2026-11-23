@@ -1,6 +1,6 @@
 /* فواتير · التطبيق الأساسي (فواتير، عملاء، سجل، مديونين، إعدادات) */
 /* رقم النسخة: غيّر الرقم ده مع كل تحديث، والـ service worker بياخده لوحده */
-const APP_VER='408';
+const APP_VER='409';
 /* صفحة قديمة وصلت مع ملف أحدث منها (نت بطيء وقت التحديث): نعيد الفتح مرة بدل ما البرنامج يقع */
 (function(){const s=document.querySelector('script[src*="js/app.js"]'),m=s&&/[?&]v=(\d+)/.exec(s.src);if(!m||m[1]===APP_VER)return;let seen=APP_VER;try{seen=sessionStorage.getItem('verFix');sessionStorage.setItem('verFix',APP_VER)}catch(e){}if(seen===APP_VER)return;window.__bootOK=true;location.reload();throw new Error('stale-page')})();
 const $=id=>document.getElementById(id);
@@ -3449,8 +3449,8 @@ function tgSum(a,b){const R=S.invoices.filter(r=>r.ts>=a&&r.ts<b),inv=R.filter(r
   const it=new Map();inv.forEach(r=>(r.rows||[]).forEach(x=>{if(x.rt||!x.n)return;const k=String(x.n).trim();it.set(k,rd2((it.get(k)||0)+(+x.v||0)))}));
   const cu=new Map();inv.forEach(r=>cu.set(r.cname||'—',rd2((cu.get(r.cname||'—')||0)+val(r))));
   const nw=new Set();inv.forEach(r=>{if(r.cid&&!S.invoices.some(y=>y.cid===r.cid&&y.ts<a))nw.add(r.cid)});
-  return{n:inv.length,sale,got,by:[...by].sort((x,y)=>y[1]-x[1]),ex,buy,spay,top:[...it].sort((x,y)=>y[1]-x[1]).slice(0,5),tc:[...cu].sort((x,y)=>y[1]-x[1]).slice(0,3),nw:nw.size}}
-const tgDebt=()=>rd2(S.customers.reduce((s,c)=>{const b=balOf(c);return s+(b>0?b:0)},0));
+  const M=v=>Math.round(+v||0),MM=l=>l.map(([k,v])=>[k,M(v)]);return{n:inv.length,sale:M(sale),got:M(got),by:MM([...by].sort((x,y)=>y[1]-x[1])),ex:M(ex),buy:M(buy),spay:M(spay),top:MM([...it].sort((x,y)=>y[1]-x[1]).slice(0,5)),tc:MM([...cu].sort((x,y)=>y[1]-x[1]).slice(0,3)),nw:nw.size}}
+const tgDebt=()=>Math.round(S.customers.reduce((s,c)=>{const b=balOf(c);return s+(b>0?b:0)},0));
 const tgPct=(v,p)=>p>0?(v>=p?'↑ ':'↓ ')+Math.round(Math.abs(v-p)/p*100)+'% عن اللي قبله':'';
 
 /* ---- رسّام صورة التقرير: عنوان + مربعات أرقام كبيرة + جداول (كله بالعربي من اليمين) ----
