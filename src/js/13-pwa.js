@@ -18,7 +18,7 @@ $('idReset2').onclick=()=>{const b=$('idReset');if(b)b.click()};
 /* v336: الخزنة: الكاش المتوقع في الدرج والعجز أو الزيادة */
 let drwTs=dAgo(0);const drwAll=()=>{try{const o=JSON.parse(lsv('drawer','{}'));return o&&typeof o==='object'?o:{}}catch(_){return{}}};
 function drwCalc(a){const b=dEnd(a),K=dayKey(a),D=drwAll(),cur=D[K]||{};let cin=0;S.invoices.forEach(r=>{if(r.ts<a||r.ts>=b)return;pdBy(r).forEach(([n,v])=>{if(/^(كاش|نقدي)$/.test(String(n).trim()))cin+=+v||0})});
-  const ex=S.expenses.filter(x=>x.ts>=a&&x.ts<b).reduce((s,x)=>s+(+x.amt||0),0),sp=S.purchases.filter(x=>x.type==='pay'&&x.ts>=a&&x.ts<b&&(!x.how||x.how==='كاش')).reduce((s,x)=>s+(+x.amt||0),0);
+  const ex=S.expenses.filter(x=>x.ts>=a&&x.ts<b).reduce((s,x)=>s+(+x.amt||0),0),sp=S.purchases.filter(x=>x.type==='pay'&&x.ts>=a&&x.ts<b&&(!x.how||/^(كاش|نقدي)$/.test(x.how))).reduce((s,x)=>s+(+x.amt||0),0);
   const prevK=dayKey(dAgo(Math.round((dAgo(0)-a)/864e5)+1)),pv=D[prevK],open=cur.open!=null?+cur.open:(pv&&pv.act!=null?+pv.act:0);
   return{K,open,cin:rd2(cin),ex:rd2(ex),sp:rd2(sp),exp:rd2(open+cin-ex-sp),act:cur.act!=null?+cur.act:null}}
 function drwDraw(){const r=drwCalc(drwTs),ln=(n,v,cl)=>'<div class="ro" style="color:var(--ink)"><span>'+n+'</span><b class="num'+(cl?' '+cl:'')+'">'+f(v)+'</b></div>';

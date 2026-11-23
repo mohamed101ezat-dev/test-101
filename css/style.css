@@ -2111,3 +2111,24 @@ html[data-theme="dark"] :is(#sk2,#jd) .dn{color:#f87171!important}html[data-them
 #pu img.pmi{height:16px;width:auto;max-width:30px;vertical-align:-3px;border-radius:3px}
 #pu span.pmi{font-size:14px}
 #pu [data-puh] img.pmi{height:18px;margin-inline-end:2px}
+
+/* v418: فواتير المورد بسهم + توزيع الدفعات */
+#pu .puinvs{padding:6px 8px}
+#pu .puinvs .puh{margin-bottom:4px}#pu .puinvs .puh small{font-size:11.5px}
+#pu .puiv{border:1px solid var(--line);border-radius:10px;margin-top:5px;background:var(--card);overflow:hidden}
+#pu .puiv>summary{display:flex;align-items:center;gap:6px;padding:7px 8px;cursor:pointer;list-style:none;font-size:13px}
+#pu .puiv>summary::-webkit-details-marker{display:none}
+#pu .puiv>summary::before{content:'◂';color:var(--mute);font-size:12px;transition:transform .15s}
+#pu .puiv[open]>summary::before{transform:rotate(-90deg)}
+#pu .puiv .pin2{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
+#pu .puiv summary b{flex:none;font-size:14px}
+#pu .puok2,#pu .pubad2{flex:none;font-size:11px;padding:1px 7px;border-radius:99px}
+#pu .puok2{background:rgba(22,163,74,.12);color:#15803d}#pu .pubad2{background:rgba(220,38,38,.1);color:#b42318}
+#pu .puiv.paid{opacity:.7}#pu .puiv.paid[open]{opacity:1}
+#pu .puivl,#pu .puival,#pu .puivt{padding:3px 10px;font-size:12.5px}
+#pu .puivl>div,#pu .puival>div{display:flex;justify-content:space-between;gap:8px;padding:2px 0;border-top:1px dashed color-mix(in srgb,var(--line) 70%,transparent)}
+#pu .puival img.pmi{height:14px}
+#pu .punote{font-size:10.5px;color:var(--mute);font-style:italic}
+#pu .puivt{display:flex;justify-content:space-between;padding:5px 10px 7px;font-size:13px;border-top:1px solid var(--line)}
+#pu .pusum{cursor:pointer;font-size:13px;color:var(--ink);padding:2px 0 4px}
+html[data-theme="dark"] #pu .puok2{color:#4ade80}html[data-theme="dark"] #pu .pubad2{color:#f87171}
